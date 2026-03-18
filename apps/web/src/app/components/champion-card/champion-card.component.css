@@ -1,0 +1,60 @@
+.champion-card {
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 0.8rem;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.head img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.summary h3 {
+  margin: 0 0 0.3rem;
+}
+
+.chips {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.difficulty {
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.kpis small {
+  display: block;
+  color: var(--ink-1);
+}
+
+.kpis strong {
+  font-size: 1rem;
+}
+
+.advanced-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.advanced-grid p {
+  margin: 0;
+}

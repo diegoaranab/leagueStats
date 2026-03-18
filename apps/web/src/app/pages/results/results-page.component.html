@@ -1,0 +1,40 @@
+<section class="results-layout">
+  <header class="headline">
+    <div>
+      <h2>Picks recomendados</h2>
+      <p>Solo se muestran stats esenciales. Expande cada card para ver detalles avanzados.</p>
+    </div>
+    <app-info-tooltip></app-info-tooltip>
+  </header>
+
+  <app-filter-bar
+    [region]="query.region"
+    [tier]="query.tier"
+    [window]="query.window"
+    [sort]="query.sort"
+    [difficultyFilter]="difficultyFilter"
+    (sortChange)="onSortChange($event)"
+    (difficultyChange)="onDifficultyChange($event)"
+  ></app-filter-bar>
+
+  <app-lane-tabs
+    [lanes]="availableLanes"
+    [selectedLane]="query.lane"
+    (laneChange)="onLaneChange($event)"
+  ></app-lane-tabs>
+
+  <div class="state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="state error" *ngIf="!isLoading && errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <section class="grid" *ngIf="!isLoading && !errorMessage">
+    <app-champion-card
+      *ngFor="let champion of champions; trackBy: trackByChampion"
+      [champion]="champion"
+    ></app-champion-card>
+  </section>
+</section>

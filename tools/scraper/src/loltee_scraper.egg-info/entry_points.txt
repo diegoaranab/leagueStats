@@ -1,0 +1,3 @@
+[console_scripts]
+loltee-scrape = loltee_scraper.cli:main
+loltee-scrape-matrix = loltee_scraper.run_matrix:main

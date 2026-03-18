@@ -1,0 +1,14 @@
+# Node / Angular
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.angular/
+
+# Python
+**/__pycache__/
+*.pyc
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

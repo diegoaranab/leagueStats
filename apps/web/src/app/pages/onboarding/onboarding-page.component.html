@@ -1,0 +1,33 @@
+<section class="hero">
+  <mat-card class="panel">
+    <header>
+      <h1>Encuentra picks fuertes para tu contexto real</h1>
+      <p>Selecciona tu elo, servidor y ventana para ver campeones recomendados.</p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Tu rango actual</mat-label>
+        <mat-select formControlName="tier">
+          <mat-option *ngFor="let tier of tierOptions" [value]="tier">{{ tier }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tu servidor</mat-label>
+        <mat-select formControlName="region">
+          <mat-option *ngFor="let region of regionOptions" [value]="region">{{ region | uppercase }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ventana del meta</mat-label>
+        <mat-select formControlName="window">
+          <mat-option *ngFor="let window of windowOptions" [value]="window">{{ window }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit">Ver mis picks</button>
+    </form>
+  </mat-card>
+</section>

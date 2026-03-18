@@ -1,0 +1,31 @@
+<mat-card class="bar">
+  <div class="context">
+    <mat-chip-set>
+      <mat-chip>Región: {{ region | uppercase }}</mat-chip>
+      <mat-chip>Tier: {{ tier }}</mat-chip>
+      <mat-chip>Ventana: {{ window }}</mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <div class="controls">
+    <mat-form-field appearance="outline">
+      <mat-label>Ordenar por</mat-label>
+      <mat-select [value]="sort" (valueChange)="sortChange.emit($event)">
+        <mat-option value="tier">Tier / ranking</mat-option>
+        <mat-option value="win_rate">Win rate</mat-option>
+        <mat-option value="pick_rate">Pick rate</mat-option>
+        <mat-option value="difficulty">Dificultad</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Dificultad</mat-label>
+      <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
+        <mat-option value="all">Todas</mat-option>
+        <mat-option value="easy">Fácil</mat-option>
+        <mat-option value="medium">Media</mat-option>
+        <mat-option value="hard">Difícil</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</mat-card>

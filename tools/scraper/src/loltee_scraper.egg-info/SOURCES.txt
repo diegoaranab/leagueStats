@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/loltee_scraper/__init__.py
+src/loltee_scraper/__main__.py
+src/loltee_scraper/cli.py
+src/loltee_scraper/config.py
+src/loltee_scraper/run_matrix.py
+src/loltee_scraper/scraper.py
+src/loltee_scraper.egg-info/PKG-INFO
+src/loltee_scraper.egg-info/SOURCES.txt
+src/loltee_scraper.egg-info/dependency_links.txt
+src/loltee_scraper.egg-info/entry_points.txt
+src/loltee_scraper.egg-info/requires.txt
+src/loltee_scraper.egg-info/top_level.txt

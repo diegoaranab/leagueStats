@@ -1,0 +1,56 @@
+<mat-card class="champion-card">
+  <div class="head">
+    <img [src]="champion.icon_url || fallbackIcon" [alt]="champion.name" loading="lazy">
+
+    <div class="summary">
+      <h3>{{ champion.name }}</h3>
+      <div class="chips">
+        <mat-chip>{{ champion.tier }}</mat-chip>
+        <mat-chip>Rank {{ champion.filtered_rank || champion.rank || '-' }}</mat-chip>
+      </div>
+    </div>
+
+    <span
+      class="difficulty"
+      [ngStyle]="{ 'background-color': champion.difficulty_color || '#e2e8f0' }"
+    >
+      {{ champion.difficulty || 'n/a' }}
+    </span>
+  </div>
+
+  <div class="kpis">
+    <div>
+      <small>Win rate</small>
+      <strong>{{ champion.win_rate | number: '1.1-2' }}%</strong>
+    </div>
+    <div>
+      <small>Pick rate</small>
+      <strong>{{ champion.pick_rate | number: '1.1-2' }}%</strong>
+    </div>
+  </div>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Ver stats avanzadas</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="advanced-grid">
+      <p>Ban rate: <strong>{{ champion.ban_rate | number: '1.1-2' }}%</strong></p>
+      <p>Delta: <strong>{{ champion.delta | number: '1.1-2' }}</strong></p>
+      <p>Mastery gap: <strong>{{ champion.mastery_gap_pct | number: '1.1-2' }}%</strong></p>
+      <p *ngIf="champion.best_win_est !== undefined">
+        Best win est.: <strong>{{ champion.best_win_est | number: '1.1-2' }}%</strong>
+      </p>
+      <a
+        *ngIf="champion.champion_url"
+        mat-stroked-button
+        color="primary"
+        [href]="champion.champion_url"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Ver build fuente
+      </a>
+    </div>
+  </mat-expansion-panel>
+</mat-card>

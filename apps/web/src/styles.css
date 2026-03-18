@@ -1,0 +1,35 @@
+:root {
+  --bg-0: #f3f8ff;
+  --bg-1: #ffffff;
+  --ink-0: #13293d;
+  --ink-1: #45627b;
+  --accent-0: #00a676;
+  --accent-1: #ff9f1c;
+  --border: #d4e3f3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  color: var(--ink-0);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(0, 166, 118, 0.18), transparent 40%),
+    radial-gradient(circle at 82% 30%, rgba(255, 159, 28, 0.16), transparent 35%),
+    linear-gradient(180deg, #ffffff 0%, var(--bg-0) 100%);
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Archivo Black', 'Space Grotesk', sans-serif;
+  letter-spacing: 0.02em;
+}

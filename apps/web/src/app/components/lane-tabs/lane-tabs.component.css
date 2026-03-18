@@ -1,0 +1,17 @@
+.lane-group {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lane-group mat-button-toggle {
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .lane-group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+}

@@ -1,0 +1,413 @@
+{
+    "meta":  {
+                 "source":  "loltee_scraper",
+                 "generated_at_utc":  "2026-03-07T13:32:06.9289529Z"
+             },
+    "supported":  {
+                      "regions":  [
+                                      "na",
+                                      "lan",
+                                      "las"
+                                  ],
+                      "tiers":  [
+                                    "gold_plus",
+                                    "platinum_plus",
+                                    "emerald_plus",
+                                    "diamond_plus",
+                                    "d2_plus",
+                                    "master_plus"
+                                ],
+                      "windows":  [
+                                      "current",
+                                      "7d",
+                                      "14d"
+                                  ],
+                      "lanes":  [
+                                    "top",
+                                    "jungle",
+                                    "middle",
+                                    "bottom",
+                                    "support"
+                                ]
+                  },
+    "datasets":  [
+                     {
+                         "region":  "na",
+                         "tier":  "gold_plus",
+                         "window":  "current",
+                         "path":  "/data/na/gold_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "gold_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/gold_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "gold_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/gold_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "platinum_plus",
+                         "window":  "current",
+                         "path":  "/data/na/platinum_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "platinum_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/platinum_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "platinum_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/platinum_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "emerald_plus",
+                         "window":  "current",
+                         "path":  "/data/na/emerald_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "emerald_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/emerald_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "emerald_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/emerald_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "diamond_plus",
+                         "window":  "current",
+                         "path":  "/data/na/diamond_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "diamond_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/diamond_plus/7d.json",
+                         "status":  "ready"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "diamond_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/diamond_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "d2_plus",
+                         "window":  "current",
+                         "path":  "/data/na/d2_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "d2_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/d2_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "d2_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/d2_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "master_plus",
+                         "window":  "current",
+                         "path":  "/data/na/master_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "master_plus",
+                         "window":  "7d",
+                         "path":  "/data/na/master_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "na",
+                         "tier":  "master_plus",
+                         "window":  "14d",
+                         "path":  "/data/na/master_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "gold_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/gold_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "gold_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/gold_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "gold_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/gold_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "platinum_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/platinum_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "platinum_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/platinum_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "platinum_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/platinum_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "emerald_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/emerald_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "emerald_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/emerald_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "emerald_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/emerald_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "diamond_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/diamond_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "diamond_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/diamond_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "diamond_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/diamond_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "d2_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/d2_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "d2_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/d2_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "d2_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/d2_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "master_plus",
+                         "window":  "current",
+                         "path":  "/data/lan/master_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "master_plus",
+                         "window":  "7d",
+                         "path":  "/data/lan/master_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "lan",
+                         "tier":  "master_plus",
+                         "window":  "14d",
+                         "path":  "/data/lan/master_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "gold_plus",
+                         "window":  "current",
+                         "path":  "/data/las/gold_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "gold_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/gold_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "gold_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/gold_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "platinum_plus",
+                         "window":  "current",
+                         "path":  "/data/las/platinum_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "platinum_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/platinum_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "platinum_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/platinum_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "emerald_plus",
+                         "window":  "current",
+                         "path":  "/data/las/emerald_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "emerald_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/emerald_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "emerald_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/emerald_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "diamond_plus",
+                         "window":  "current",
+                         "path":  "/data/las/diamond_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "diamond_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/diamond_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "diamond_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/diamond_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "d2_plus",
+                         "window":  "current",
+                         "path":  "/data/las/d2_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "d2_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/d2_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "d2_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/d2_plus/14d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "master_plus",
+                         "window":  "current",
+                         "path":  "/data/las/master_plus/current.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "master_plus",
+                         "window":  "7d",
+                         "path":  "/data/las/master_plus/7d.json",
+                         "status":  "pending"
+                     },
+                     {
+                         "region":  "las",
+                         "tier":  "master_plus",
+                         "window":  "14d",
+                         "path":  "/data/las/master_plus/14d.json",
+                         "status":  "pending"
+                     }
+                 ]
+}
