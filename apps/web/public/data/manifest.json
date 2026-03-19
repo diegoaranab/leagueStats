@@ -1,17 +1,26 @@
 {
   "meta": {
     "source": "loltee_scraper",
-    "generated_at_utc": "2026-03-19T09:42:18.169093+00:00"
+    "generated_at_utc": "2026-03-19T14:21:49.786516+00:00"
   },
   "supported": {
     "regions": [
-      "lan"
+      "na",
+      "lan",
+      "las"
     ],
     "tiers": [
+      "gold_plus",
+      "platinum_plus",
+      "emerald_plus",
+      "diamond_plus",
+      "d2_plus",
       "master_plus"
     ],
     "windows": [
-      "current"
+      "current",
+      "7d",
+      "14d"
     ],
     "lanes": [
       "top",
@@ -23,12 +32,408 @@
   },
   "datasets": [
     {
+      "region": "na",
+      "tier": "gold_plus",
+      "window": "current",
+      "path": "/data/na/gold_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:49:36.896793+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 109
+    },
+    {
+      "region": "na",
+      "tier": "gold_plus",
+      "window": "7d",
+      "path": "/data/na/gold_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:50:18.397073+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 132
+    },
+    {
+      "region": "na",
+      "tier": "gold_plus",
+      "window": "14d",
+      "path": "/data/na/gold_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:51:00.576486+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 129
+    },
+    {
+      "region": "na",
+      "tier": "platinum_plus",
+      "window": "current",
+      "path": "/data/na/platinum_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:51:36.221772+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 104
+    },
+    {
+      "region": "na",
+      "tier": "platinum_plus",
+      "window": "7d",
+      "path": "/data/na/platinum_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:52:18.043856+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 127
+    },
+    {
+      "region": "na",
+      "tier": "platinum_plus",
+      "window": "14d",
+      "path": "/data/na/platinum_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:52:59.748668+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 138
+    },
+    {
+      "region": "na",
+      "tier": "emerald_plus",
+      "window": "current",
+      "path": "/data/na/emerald_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:53:31.769767+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 100
+    },
+    {
+      "region": "na",
+      "tier": "emerald_plus",
+      "window": "7d",
+      "path": "/data/na/emerald_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:54:11.739993+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 129
+    },
+    {
+      "region": "na",
+      "tier": "emerald_plus",
+      "window": "14d",
+      "path": "/data/na/emerald_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:54:53.235597+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 134
+    },
+    {
+      "region": "na",
+      "tier": "diamond_plus",
+      "window": "current",
+      "path": "/data/na/diamond_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:55:22.471371+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 82
+    },
+    {
+      "region": "na",
+      "tier": "diamond_plus",
+      "window": "7d",
+      "path": "/data/na/diamond_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:55:59.113080+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 117
+    },
+    {
+      "region": "na",
+      "tier": "diamond_plus",
+      "window": "14d",
+      "path": "/data/na/diamond_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:56:38.704393+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 128
+    },
+    {
+      "region": "na",
+      "tier": "d2_plus",
+      "window": "current",
+      "path": "/data/na/d2_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:57:06.961741+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 75
+    },
+    {
+      "region": "na",
+      "tier": "d2_plus",
+      "window": "7d",
+      "path": "/data/na/d2_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:57:42.904750+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 114
+    },
+    {
+      "region": "na",
+      "tier": "d2_plus",
+      "window": "14d",
+      "path": "/data/na/d2_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:58:21.498717+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 122
+    },
+    {
+      "region": "na",
+      "tier": "master_plus",
+      "window": "current",
+      "path": "/data/na/master_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:58:44.817659+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 44
+    },
+    {
+      "region": "na",
+      "tier": "master_plus",
+      "window": "7d",
+      "path": "/data/na/master_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:59:17.600624+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 104
+    },
+    {
+      "region": "na",
+      "tier": "master_plus",
+      "window": "14d",
+      "path": "/data/na/master_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T13:59:53.994007+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 119
+    },
+    {
+      "region": "lan",
+      "tier": "gold_plus",
+      "window": "current",
+      "path": "/data/lan/gold_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:00:27.443187+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 96
+    },
+    {
+      "region": "lan",
+      "tier": "gold_plus",
+      "window": "7d",
+      "path": "/data/lan/gold_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:01:06.782780+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 108
+    },
+    {
+      "region": "lan",
+      "tier": "gold_plus",
+      "window": "14d",
+      "path": "/data/lan/gold_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:01:47.108942+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 109
+    },
+    {
+      "region": "lan",
+      "tier": "platinum_plus",
+      "window": "current",
+      "path": "/data/lan/platinum_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:02:19.132613+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 90
+    },
+    {
+      "region": "lan",
+      "tier": "platinum_plus",
+      "window": "7d",
+      "path": "/data/lan/platinum_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:02:56.212242+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 112
+    },
+    {
+      "region": "lan",
+      "tier": "platinum_plus",
+      "window": "14d",
+      "path": "/data/lan/platinum_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:03:36.053129+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 116
+    },
+    {
+      "region": "lan",
+      "tier": "emerald_plus",
+      "window": "current",
+      "path": "/data/lan/emerald_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:04:05.479363+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 85
+    },
+    {
+      "region": "lan",
+      "tier": "emerald_plus",
+      "window": "7d",
+      "path": "/data/lan/emerald_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:04:41.175096+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 111
+    },
+    {
+      "region": "lan",
+      "tier": "emerald_plus",
+      "window": "14d",
+      "path": "/data/lan/emerald_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:05:19.798087+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 116
+    },
+    {
+      "region": "lan",
+      "tier": "diamond_plus",
+      "window": "current",
+      "path": "/data/lan/diamond_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:05:45.254359+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 56
+    },
+    {
+      "region": "lan",
+      "tier": "diamond_plus",
+      "window": "7d",
+      "path": "/data/lan/diamond_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:06:17.331987+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 101
+    },
+    {
+      "region": "lan",
+      "tier": "diamond_plus",
+      "window": "14d",
+      "path": "/data/lan/diamond_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:06:53.527646+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 116
+    },
+    {
+      "region": "lan",
+      "tier": "d2_plus",
+      "window": "current",
+      "path": "/data/lan/d2_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:07:17.063142+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 45
+    },
+    {
+      "region": "lan",
+      "tier": "d2_plus",
+      "window": "7d",
+      "path": "/data/lan/d2_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:07:49.361611+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 98
+    },
+    {
+      "region": "lan",
+      "tier": "d2_plus",
+      "window": "14d",
+      "path": "/data/lan/d2_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:08:24.246639+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 106
+    },
+    {
       "region": "lan",
       "tier": "master_plus",
       "window": "current",
       "path": "/data/lan/master_plus/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-03-19T09:42:18.153860+00:00",
+      "generated_at_utc": "2026-03-19T14:09:50.174538+00:00",
       "is_partial": true,
       "failed_lanes": [
         "top"
@@ -36,7 +441,251 @@
       "warnings": [
         "Lane top failed after 3 attempts: Page.wait_for_function: Timeout 20000ms exceeded."
       ],
-      "champion_count": 19
+      "champion_count": 20
+    },
+    {
+      "region": "lan",
+      "tier": "master_plus",
+      "window": "7d",
+      "path": "/data/lan/master_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:10:19.354201+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 83
+    },
+    {
+      "region": "lan",
+      "tier": "master_plus",
+      "window": "14d",
+      "path": "/data/lan/master_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:10:51.402098+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 97
+    },
+    {
+      "region": "las",
+      "tier": "gold_plus",
+      "window": "current",
+      "path": "/data/las/gold_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:11:24.108919+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 90
+    },
+    {
+      "region": "las",
+      "tier": "gold_plus",
+      "window": "7d",
+      "path": "/data/las/gold_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:12:02.651438+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 113
+    },
+    {
+      "region": "las",
+      "tier": "gold_plus",
+      "window": "14d",
+      "path": "/data/las/gold_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:12:41.867338+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 110
+    },
+    {
+      "region": "las",
+      "tier": "platinum_plus",
+      "window": "current",
+      "path": "/data/las/platinum_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:13:14.544038+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 94
+    },
+    {
+      "region": "las",
+      "tier": "platinum_plus",
+      "window": "7d",
+      "path": "/data/las/platinum_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:13:52.359462+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 113
+    },
+    {
+      "region": "las",
+      "tier": "platinum_plus",
+      "window": "14d",
+      "path": "/data/las/platinum_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:14:30.974867+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 116
+    },
+    {
+      "region": "las",
+      "tier": "emerald_plus",
+      "window": "current",
+      "path": "/data/las/emerald_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:15:00.046355+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 85
+    },
+    {
+      "region": "las",
+      "tier": "emerald_plus",
+      "window": "7d",
+      "path": "/data/las/emerald_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:15:37.290957+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 108
+    },
+    {
+      "region": "las",
+      "tier": "emerald_plus",
+      "window": "14d",
+      "path": "/data/las/emerald_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:16:16.551586+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 122
+    },
+    {
+      "region": "las",
+      "tier": "diamond_plus",
+      "window": "current",
+      "path": "/data/las/diamond_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:16:42.284099+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 53
+    },
+    {
+      "region": "las",
+      "tier": "diamond_plus",
+      "window": "7d",
+      "path": "/data/las/diamond_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:17:15.231341+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 97
+    },
+    {
+      "region": "las",
+      "tier": "diamond_plus",
+      "window": "14d",
+      "path": "/data/las/diamond_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:17:51.637239+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 108
+    },
+    {
+      "region": "las",
+      "tier": "d2_plus",
+      "window": "current",
+      "path": "/data/las/d2_plus/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:18:16.069929+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 45
+    },
+    {
+      "region": "las",
+      "tier": "d2_plus",
+      "window": "7d",
+      "path": "/data/las/d2_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:18:47.636554+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 92
+    },
+    {
+      "region": "las",
+      "tier": "d2_plus",
+      "window": "14d",
+      "path": "/data/las/d2_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:19:22.606903+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 106
+    },
+    {
+      "region": "las",
+      "tier": "master_plus",
+      "window": "current",
+      "path": "/data/las/master_plus/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-03-19T14:20:48.516298+00:00",
+      "is_partial": true,
+      "failed_lanes": [
+        "top"
+      ],
+      "warnings": [
+        "Lane top failed after 3 attempts: Page.wait_for_function: Timeout 20000ms exceeded."
+      ],
+      "champion_count": 20
+    },
+    {
+      "region": "las",
+      "tier": "master_plus",
+      "window": "7d",
+      "path": "/data/las/master_plus/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:21:17.769244+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 83
+    },
+    {
+      "region": "las",
+      "tier": "master_plus",
+      "window": "14d",
+      "path": "/data/las/master_plus/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-03-19T14:21:49.780675+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 99
     }
   ]
 }
