@@ -3,22 +3,27 @@ from __future__ import annotations
 import json
 import math
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup, Tag
+from playwright.sync_api import BrowserContext
+from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
 
-from .config import DEFAULT_LANES, WINDOW_TO_PATCH, normalize_lanes
+from .config import DEFAULT_LANES, SUPPORTED_WINDOWS, WINDOW_PATCH_QUERY_VALUES, normalize_lanes
 
 BASE_URL = "https://lolalytics.com/lol/tierlist/"
 ALLOWED_TIERS = {"S+", "S", "S-", "A+", "A", "A-", "B+"}
 DIFFICULTY_COLORS = {"easy": "#5BC0FF", "medium": "#FFD54F", "hard": "#FF5A5F"}
 DIFFICULTY_ORDER = {"easy": 1, "medium": 2, "hard": 3}
 DIFFICULTY_METHOD = "lane_relative_mastery_gap_pct_tertiles_v1"
+LANE_RETRY_BACKOFF_SECONDS = (0, 2, 5)
 
 
 @dataclass(slots=True)
@@ -75,16 +80,124 @@ def safe_round(value: Any, digits: int = 2) -> Optional[float]:
     return round(number, digits)
 
 
+def ensure_parent_dir(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def load_existing_dataset(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+
+    try:
+        with path.open(encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"[WARN] Failed to load existing dataset {path}: {exc}")
+        return None
+
+    return payload if isinstance(payload, dict) else None
+
+
+def write_json(path: Path, payload: Dict[str, Any]) -> None:
+    ensure_parent_dir(path)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, ensure_ascii=False)
+
+
+def build_last_success_path(path: Path) -> Path:
+    return path.with_name(f"{path.stem}.last_success{path.suffix}")
+
+
+def update_last_success_backup(path: Path, payload: Dict[str, Any]) -> None:
+    backup_path = build_last_success_path(path)
+    write_json(backup_path, payload)
+    print(f"[INFO] Updated last-success backup: {backup_path}")
+
+
+def is_partial_dataset(payload: Optional[Dict[str, Any]]) -> bool:
+    if not isinstance(payload, dict):
+        return False
+
+    meta = payload.get("meta")
+    if not isinstance(meta, dict):
+        return False
+
+    return bool(meta.get("is_partial"))
+
+
+def count_champions(data: Any) -> int:
+    if not isinstance(data, dict):
+        return 0
+
+    return sum(len(champions) for champions in data.values() if isinstance(champions, list))
+
+
+def build_dataset_meta(
+    *,
+    config: ScrapeConfig,
+    generated_at_utc: str,
+    failed_lanes: List[str],
+    warnings: List[str],
+) -> Dict[str, Any]:
+    return {
+        "source": "LoLalytics",
+        "region": config.region,
+        "tier": config.tier,
+        "window": config.window,
+        "min_pick_rate": 1.0,
+        "allowed_tiers": sorted(ALLOWED_TIERS),
+        "generated_at_utc": generated_at_utc,
+        "is_partial": bool(failed_lanes),
+        "failed_lanes": failed_lanes,
+        "warnings": warnings,
+    }
+
+
 def get_direct_child_divs(tag: Tag) -> List[Tag]:
     return [child for child in tag.children if isinstance(child, Tag) and child.name == "div"]
 
 
+def build_tierlist_url(*, lane: str, tier: str, region: str, window: str) -> str:
+    patch = WINDOW_PATCH_QUERY_VALUES.get(window, WINDOW_PATCH_QUERY_VALUES["7d"])
+    params = {
+        "lane": lane,
+        "tier": tier,
+        "region": region,
+    }
+    if patch is not None:
+        params["patch"] = patch
+    return f"{BASE_URL}?{urlencode(params)}"
+
+
 def build_lane_url(lane: str, config: ScrapeConfig) -> str:
-    patch = WINDOW_TO_PATCH.get(config.window, WINDOW_TO_PATCH["7d"])
-    return (
-        f"{BASE_URL}?lane={lane}&tier={config.tier}"
-        f"&region={config.region}&patch={patch}"
+    return build_tierlist_url(
+        lane=lane,
+        tier=config.tier,
+        region=config.region,
+        window=config.window,
     )
+
+
+def build_window_url_smoke_samples(
+    lane: str = "middle",
+    tier: str = "diamond_plus",
+    region: str = "na",
+) -> Dict[str, str]:
+    return {
+        window: build_tierlist_url(lane=lane, tier=tier, region=region, window=window)
+        for window in SUPPORTED_WINDOWS
+    }
+
+
+def validate_window_url_builder() -> None:
+    expected = {
+        "current": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na",
+        "7d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na&patch=7",
+        "14d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na&patch=14",
+    }
+    actual = build_window_url_smoke_samples()
+    if actual != expected:
+        raise AssertionError(f"Unexpected tierlist URL mapping: {actual}")
 
 
 def scroll_until_stable(
@@ -230,6 +343,13 @@ def parse_lane_html(html: str, lane: str) -> List[Dict[str, Any]]:
     return results
 
 
+def format_scrape_error(exc: Exception) -> str:
+    message = clean_text(str(exc))
+    if message:
+        return message
+    return exc.__class__.__name__
+
+
 def scrape_lane(page, lane: str, config: ScrapeConfig) -> List[Dict[str, Any]]:
     url = build_lane_url(lane, config)
     print(f"[INFO] Scraping {lane}: {url}")
@@ -253,9 +373,59 @@ def scrape_lane(page, lane: str, config: ScrapeConfig) -> List[Dict[str, Any]]:
     return rows
 
 
+def scrape_lane_with_retry(
+    context: BrowserContext,
+    lane: str,
+    config: ScrapeConfig,
+    max_attempts: int = 3,
+) -> tuple[List[Dict[str, Any]], List[str], bool]:
+    warnings: List[str] = []
+    attempts = min(max_attempts, len(LANE_RETRY_BACKOFF_SECONDS))
+    last_error: Optional[str] = None
+
+    for attempt in range(1, attempts + 1):
+        backoff_seconds = LANE_RETRY_BACKOFF_SECONDS[attempt - 1]
+        if backoff_seconds > 0:
+            print(
+                f"[WARN] Retrying lane={lane} "
+                f"region={config.region} tier={config.tier} window={config.window} "
+                f"attempt={attempt}/{attempts} after {backoff_seconds}s"
+            )
+            time.sleep(backoff_seconds)
+
+        print(
+            f"[INFO] Lane attempt {attempt}/{attempts} "
+            f"region={config.region} tier={config.tier} window={config.window} lane={lane}"
+        )
+
+        page = None
+        try:
+            page = context.new_page()
+            rows = scrape_lane(page, lane, config)
+            if attempt > 1:
+                warnings.append(f"Lane {lane} succeeded on retry attempt {attempt}/{attempts}.")
+            return rows, warnings, True
+        except (PlaywrightTimeoutError, PlaywrightError) as exc:
+            last_error = format_scrape_error(exc)
+            print(
+                f"[WARN] Lane scrape failed "
+                f"region={config.region} tier={config.tier} window={config.window} "
+                f"lane={lane} attempt={attempt}/{attempts}: {last_error}"
+            )
+        finally:
+            if page is not None and not page.is_closed():
+                page.close()
+
+    failure_reason = last_error or "unknown Playwright error"
+    warnings.append(f"Lane {lane} failed after {attempts} attempts: {failure_reason}")
+    return [], warnings, False
+
+
 def scrape_all_lanes(config: ScrapeConfig, headless: bool = True) -> Dict[str, Any]:
     config = config.validated()
     data: Dict[str, List[Dict[str, Any]]] = {}
+    failed_lanes: List[str] = []
+    warnings: List[str] = []
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
@@ -268,28 +438,38 @@ def scrape_all_lanes(config: ScrapeConfig, headless: bool = True) -> Dict[str, A
             ),
             locale="en-US",
         )
-        page = context.new_page()
 
         for lane in config.lanes:
             try:
-                data[lane] = scrape_lane(page, lane, config)
-            except PlaywrightTimeoutError:
-                print(f"[WARN] Timeout scraping lane={lane}")
+                lane_data, lane_warnings, succeeded = scrape_lane_with_retry(context, lane, config)
+                data[lane] = lane_data
+                warnings.extend(lane_warnings)
+                if not succeeded:
+                    failed_lanes.append(lane)
+            except Exception as exc:  # noqa: BLE001
+                error_message = format_scrape_error(exc)
+                print(
+                    f"[ERROR] Unexpected lane failure "
+                    f"region={config.region} tier={config.tier} window={config.window} "
+                    f"lane={lane}: {error_message}"
+                )
                 data[lane] = []
+                failed_lanes.append(lane)
+                warnings.append(f"Lane {lane} failed due to unexpected scraper error: {error_message}")
+
+        warnings = list(dict.fromkeys(warnings))
 
         context.close()
         browser.close()
 
+    generated_at_utc = datetime.now(timezone.utc).isoformat()
     return {
-        "meta": {
-            "source": "LoLalytics",
-            "region": config.region,
-            "tier": config.tier,
-            "window": config.window,
-            "min_pick_rate": 1.0,
-            "allowed_tiers": sorted(ALLOWED_TIERS),
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        },
+        "meta": build_dataset_meta(
+            config=config,
+            generated_at_utc=generated_at_utc,
+            failed_lanes=failed_lanes,
+            warnings=warnings,
+        ),
         "data": data,
     }
 
@@ -398,11 +578,17 @@ def scrape_to_file(config: ScrapeConfig, headless: bool = True) -> Dict[str, Any
 
     result = scrape_all_lanes(config=config, headless=headless)
     result = post_process_data(result)
+    existing_dataset = load_existing_dataset(output)
+    is_partial = is_partial_dataset(result)
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8") as handle:
-        json.dump(result, handle, indent=2, ensure_ascii=False)
+    if is_partial and existing_dataset and not is_partial_dataset(existing_dataset):
+        update_last_success_backup(output, existing_dataset)
 
-    total = sum(len(v) for v in result.get("data", {}).values())
+    write_json(output, result)
+
+    if not is_partial:
+        update_last_success_backup(output, result)
+
+    total = count_champions(result.get("data", {}))
     print(f"[DONE] Wrote {total} champions to {output}")
     return result

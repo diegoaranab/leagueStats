@@ -5,6 +5,8 @@ from typing import Iterable, List
 DEFAULT_LANES = ["top", "jungle", "middle", "bottom", "support"]
 SUPPORTED_REGIONS = ["na", "lan", "las"]
 SUPPORTED_TIERS = [
+    "bronze",
+    "silver",
     "gold_plus",
     "platinum_plus",
     "emerald_plus",
@@ -14,9 +16,9 @@ SUPPORTED_TIERS = [
 ]
 SUPPORTED_WINDOWS = ["current", "7d", "14d"]
 
-# `patch` values match LoLalytics query behavior used by the current scraper.
-WINDOW_TO_PATCH = {
-    "current": "30",
+# `current` uses the default tierlist page with no explicit patch query param.
+WINDOW_PATCH_QUERY_VALUES = {
+    "current": None,
     "7d": "7",
     "14d": "14",
 }

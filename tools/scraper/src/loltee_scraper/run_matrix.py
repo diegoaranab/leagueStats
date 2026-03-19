@@ -1,25 +1,30 @@
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List
 
 from .config import DEFAULT_LANES, SUPPORTED_REGIONS, SUPPORTED_TIERS, SUPPORTED_WINDOWS
-from .scraper import ScrapeConfig, scrape_to_file
+from .scraper import ScrapeConfig, count_champions, scrape_to_file, write_json
 
 
-def build_manifest(datasets: List[Dict[str, object]], lanes: List[str]) -> Dict[str, object]:
+def build_manifest(
+    datasets: List[Dict[str, object]],
+    regions: List[str],
+    tiers: List[str],
+    windows: List[str],
+    lanes: List[str],
+) -> Dict[str, object]:
     return {
         "meta": {
             "source": "loltee_scraper",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         },
         "supported": {
-            "regions": SUPPORTED_REGIONS,
-            "tiers": SUPPORTED_TIERS,
-            "windows": SUPPORTED_WINDOWS,
+            "regions": regions,
+            "tiers": tiers,
+            "windows": windows,
             "lanes": lanes,
         },
         "datasets": datasets,
@@ -55,6 +60,10 @@ def main() -> None:
                     "window": window,
                     "path": f"/data/{rel_path}",
                     "status": "ok",
+                    "generated_at_utc": None,
+                    "is_partial": False,
+                    "failed_lanes": [],
+                    "warnings": [],
                     "champion_count": 0,
                 }
 
@@ -69,13 +78,20 @@ def main() -> None:
                         ),
                         headless=not args.headed,
                     )
-                    entry["champion_count"] = sum(
-                        len(champions)
-                        for champions in result.get("data", {}).values()
-                        if isinstance(champions, list)
-                    )
+                    meta = result.get("meta", {})
+                    entry["generated_at_utc"] = meta.get("generated_at_utc")
+                    entry["is_partial"] = bool(meta.get("is_partial"))
+                    entry["failed_lanes"] = list(meta.get("failed_lanes", []))
+                    entry["warnings"] = list(meta.get("warnings", []))
+                    entry["champion_count"] = count_champions(result.get("data", {}))
+                    if entry["is_partial"]:
+                        entry["status"] = "partial"
                 except Exception as exc:  # noqa: BLE001
                     entry["status"] = "error"
+                    entry["generated_at_utc"] = datetime.now(timezone.utc).isoformat()
+                    entry["is_partial"] = True
+                    entry["failed_lanes"] = list(args.lanes)
+                    entry["warnings"] = [f"Dataset generation failed: {exc}"]
                     entry["error"] = str(exc)
                     print(f"[ERROR] Failed region={region} tier={tier} window={window}: {exc}")
                     if args.fail_fast:
@@ -84,8 +100,14 @@ def main() -> None:
                 datasets.append(entry)
 
     manifest_path = output_root / "manifest.json"
-    manifest = build_manifest(datasets=datasets, lanes=list(args.lanes))
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest = build_manifest(
+        datasets=datasets,
+        regions=list(args.regions),
+        tiers=list(args.tiers),
+        windows=list(args.windows),
+        lanes=list(args.lanes),
+    )
+    write_json(manifest_path, manifest)
     print(f"[DONE] Wrote manifest to {manifest_path}")
 
 

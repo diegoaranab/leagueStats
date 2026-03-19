@@ -1,5 +1,7 @@
 export const REGION_OPTIONS = ['na', 'lan', 'las'] as const;
 export const TIER_OPTIONS = [
+  'bronze',
+  'silver',
   'gold_plus',
   'platinum_plus',
   'emerald_plus',
@@ -27,6 +29,9 @@ export interface TierlistMeta {
   min_pick_rate: number;
   allowed_tiers: string[];
   generated_at_utc: string;
+  is_partial: boolean;
+  failed_lanes: Lane[];
+  warnings: string[];
   difficulty_method?: string;
   rank_mode?: string;
   difficulty_colors?: Record<string, string>;
@@ -76,6 +81,11 @@ export interface DataManifest {
     window: WindowKey;
     path: string;
     status: string;
-    champion_count?: number;
+    generated_at_utc: string | null;
+    is_partial: boolean;
+    failed_lanes: Lane[];
+    warnings: string[];
+    champion_count: number;
+    error?: string;
   }>;
 }

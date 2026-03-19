@@ -32,6 +32,9 @@ Top-level shape:
 - `min_pick_rate`: number
 - `allowed_tiers`: string[]
 - `generated_at_utc`: ISO timestamp
+- `is_partial`: boolean
+- `failed_lanes`: string[]
+- `warnings`: string[]
 - `difficulty_method`: string
 - `rank_mode`: string
 - `difficulty_colors`: object
@@ -69,4 +72,15 @@ apps/web/public/data/manifest.json
 Contains:
 
 - supported dimensions (`regions`, `tiers`, `windows`, `lanes`)
-- dataset entries with file path and status
+- top-level manifest `meta.generated_at_utc`
+- dataset entries with:
+  - `path`
+  - `region`
+  - `tier`
+  - `window`
+  - `generated_at_utc`
+  - `status`
+  - `is_partial`
+  - `failed_lanes`
+  - `warnings`
+  - `champion_count`
