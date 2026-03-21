@@ -3,10 +3,21 @@ name: Deploy Web to GitHub Pages
 on:
   push:
     branches: [main]
-    paths:
-      - 'apps/web/**'
-      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '17 */12 * * *'
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '22'
+  ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
+  ORACLE_CSV_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
+  SOLO_OUTPUT_ROOT: apps/web/public/data
+  TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
+  DATA_REGIONS: 'na lan las'
+  DATA_TIERS: 'bronze silver gold_plus platinum_plus emerald_plus diamond_plus d2_plus master_plus'
+  DATA_WINDOWS: 'current 7d 14d'
+  DATA_LANES: 'top jungle middle bottom support'
 
 permissions:
   contents: read
@@ -25,35 +36,94 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            tools/scraper/pyproject.toml
+            tools/scraper/requirements.txt
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
 
-      - name: Install Dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e tools/scraper gdown
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Download Oracle's Elixir CSV
+        run: |
+          mkdir -p "$(dirname "$ORACLE_CSV_PATH")"
+          gdown --fuzzy "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" --output "$ORACLE_CSV_PATH"
+          test -s "$ORACLE_CSV_PATH"
+
+      - name: Generate Solo Queue datasets
+        run: |
+          python -m loltee_scraper.run_matrix \
+            --output-root "$SOLO_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --lanes $DATA_LANES \
+            --fail-fast
+
+      - name: Generate Teamplay datasets
+        run: |
+          python -m loltee_scraper.build_teamplay \
+            --oe-csv "$ORACLE_CSV_PATH" \
+            --solo-root "$SOLO_OUTPUT_ROOT" \
+            --output-root "$TEAMPLAY_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --fail-fast
+
+      - name: Install frontend dependencies
         working-directory: apps/web
         run: npm ci
 
-      - name: Build Angular App
-        working-directory: apps/web
-        run: npm run build -- --configuration production --base-href "/${{ github.event.repository.name }}/"
+      - name: Resolve Pages base href
+        id: base_href
+        run: |
+          if [[ "${{ github.event.repository.name }}" == "${{ github.repository_owner }}.github.io" ]]; then
+            echo "value=/" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Resolve Build Output
+      - name: Build Angular app
+        working-directory: apps/web
+        run: npm run build -- --configuration production --base-href "${{ steps.base_href.outputs.value }}"
+
+      - name: Resolve build output
         id: output
         working-directory: apps/web
         run: |
-          if [ -d "dist/web/browser" ]; then
-            echo "path=dist/web/browser" >> "$GITHUB_OUTPUT"
-          else
-            echo "path=dist/web" >> "$GITHUB_OUTPUT"
+          output_path="$(find dist -type f -path '*/browser/index.html' -print | head -n 1)"
+          if [[ -z "$output_path" ]]; then
+            output_path="$(find dist -type f -name index.html -print | head -n 1)"
           fi
+
+          if [[ -z "$output_path" ]]; then
+            echo "Unable to locate Angular build output under apps/web/dist" >&2
+            exit 1
+          fi
+
+          echo "path=$(dirname "$output_path")" >> "$GITHUB_OUTPUT"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/${{ steps.output.outputs.path }}
@@ -66,6 +136,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy Pages artifact
         id: deployment
         uses: actions/deploy-pages@v4

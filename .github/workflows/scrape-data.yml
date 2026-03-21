@@ -1,15 +1,26 @@
-name: Scrape Data
+name: Validate Data Generation
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 6 * * *'
+    - cron: '47 3 * * *'
+
+env:
+  PYTHON_VERSION: '3.12'
+  ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
+  ORACLE_CSV_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
+  SOLO_OUTPUT_ROOT: apps/web/public/data
+  TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
+  DATA_REGIONS: 'na lan las'
+  DATA_TIERS: 'bronze silver gold_plus platinum_plus emerald_plus diamond_plus d2_plus master_plus'
+  DATA_WINDOWS: 'current 7d 14d'
+  DATA_LANES: 'top jungle middle bottom support'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  scrape:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,31 +30,50 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            tools/scraper/pyproject.toml
+            tools/scraper/requirements.txt
 
-      - name: Install Scraper
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e tools/scraper
-          python -m playwright install --with-deps chromium
+          pip install -e tools/scraper gdown
 
-      - name: Run Matrix Scrape
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Download Oracle's Elixir CSV
+        run: |
+          mkdir -p "$(dirname "$ORACLE_CSV_PATH")"
+          gdown --fuzzy "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" --output "$ORACLE_CSV_PATH"
+          test -s "$ORACLE_CSV_PATH"
+
+      - name: Generate Solo Queue datasets
         run: |
           python -m loltee_scraper.run_matrix \
-            --output-root apps/web/public/data \
-            --regions na lan las \
-            --tiers gold_plus platinum_plus emerald_plus diamond_plus d2_plus master_plus \
-            --windows current 7d 14d \
-            --lanes top jungle middle bottom support
+            --output-root "$SOLO_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --lanes $DATA_LANES \
+            --fail-fast
 
-      - name: Commit Updated Data
+      - name: Generate Teamplay datasets
         run: |
-          if [[ -n "$(git status --porcelain apps/web/public/data)" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add apps/web/public/data
-            git commit -m "chore(data): refresh static tierlist datasets"
-            git push
-          else
-            echo "No data changes to commit"
-          fi
+          python -m loltee_scraper.build_teamplay \
+            --oe-csv "$ORACLE_CSV_PATH" \
+            --solo-root "$SOLO_OUTPUT_ROOT" \
+            --output-root "$TEAMPLAY_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --fail-fast
+
+      - name: Upload generated data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-data-preview
+          path: apps/web/public/data
+          retention-days: 7
