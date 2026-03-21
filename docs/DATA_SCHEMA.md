@@ -38,6 +38,16 @@ Top-level shape:
 - `difficulty_method`: string
 - `rank_mode`: string
 - `difficulty_colors`: object
+- `leagues_used`: string[]
+- `patches_used`: string[]
+- `total_games_filtered`: number
+- `inclusion_mode`: string
+- `excluded_zero_pro_count`: number
+- `excluded_low_evidence_count`: number
+- `score_formula`: string
+- `pro_score_formula`: string
+- `ban_credit_mode`: string
+- `eligibility_rule`: string
 
 ## Champion Object
 
@@ -60,6 +70,20 @@ Top-level shape:
 - `difficulty`: `easy | medium | hard | null`
 - `difficulty_color`: hex string | null
 - `difficulty_order`: number | null
+- `teamplay_rank`: number | null
+- `solo_strength_score`: number | null
+- `pro_pick_count`: number
+- `pro_role_pick_rate`: number | null
+- `pro_ban_count`: number
+- `pro_ban_rate`: number | null
+- `champion_total_role_picks`: number
+- `role_pick_share`: number | null
+- `role_adjusted_ban_rate`: number | null
+- `pro_win_rate`: number | null
+- `pro_score`: number | null
+- `flex_clash_score`: number | null
+- `pro_flex_roles`: number
+- `badges`: string[]
 
 ## Manifest File
 

@@ -6,29 +6,9 @@ from pathlib import Path
 from typing import Dict, List
 
 from .config import DEFAULT_LANES, SUPPORTED_REGIONS, SUPPORTED_TIERS, SUPPORTED_WINDOWS
-from .scraper import ScrapeConfig, count_champions, scrape_to_file, write_json
-
-
-def build_manifest(
-    datasets: List[Dict[str, object]],
-    regions: List[str],
-    tiers: List[str],
-    windows: List[str],
-    lanes: List[str],
-) -> Dict[str, object]:
-    return {
-        "meta": {
-            "source": "loltee_scraper",
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        },
-        "supported": {
-            "regions": regions,
-            "tiers": tiers,
-            "windows": windows,
-            "lanes": lanes,
-        },
-        "datasets": datasets,
-    }
+from .data_io import count_champions
+from .manifest import load_manifest, merge_manifest, write_manifest
+from .scraper import ScrapeConfig, scrape_to_file
 
 
 def main() -> None:
@@ -55,6 +35,7 @@ def main() -> None:
 
                 print(f"[INFO] Running scrape for region={region} tier={tier} window={window}")
                 entry: Dict[str, object] = {
+                    "mode": "solo",
                     "region": region,
                     "tier": tier,
                     "window": window,
@@ -100,14 +81,17 @@ def main() -> None:
                 datasets.append(entry)
 
     manifest_path = output_root / "manifest.json"
-    manifest = build_manifest(
-        datasets=datasets,
+    existing_manifest = load_manifest(manifest_path)
+    manifest = merge_manifest(
+        existing_manifest=existing_manifest,
+        new_entries=datasets,
         regions=list(args.regions),
         tiers=list(args.tiers),
         windows=list(args.windows),
         lanes=list(args.lanes),
+        modes=["solo"],
     )
-    write_json(manifest_path, manifest)
+    write_manifest(manifest_path, manifest)
     print(f"[DONE] Wrote manifest to {manifest_path}")
 
 
