@@ -12,3 +12,14 @@ apps/web/.angular/
 Thumbs.db
 .vscode/
 .idea/
+
+# Generated frontend data
+apps/web/public/data/
+
+# Raw Oracle source files
+tools/scraper/data/raw/
+
+# Local Python environment
+tools/scraper/.venv/
+__pycache__/
+*.pyc
