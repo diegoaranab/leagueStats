@@ -47,7 +47,7 @@ jobs:
       - name: Download Oracle's Elixir CSV
         run: |
           mkdir -p "$(dirname "$ORACLE_CSV_PATH")"
-          gdown --fuzzy "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" --output "$ORACLE_CSV_PATH"
+          gdown "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" -O "$ORACLE_CSV_PATH"
           test -s "$ORACLE_CSV_PATH"
 
       - name: Generate Solo Queue datasets
