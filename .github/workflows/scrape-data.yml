@@ -46,7 +46,7 @@ jobs:
         run: python -m playwright install --with-deps chromium
 
       - name: Restore Oracle's Elixir CSV cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: tools/scraper/data/raw/oracles_elixir/2026
           key: oracle-elixir-2026-${{ github.run_id }}
@@ -54,33 +54,94 @@ jobs:
             oracle-elixir-2026-
 
       - name: Download Oracle's Elixir CSV
+        id: oracle_download
         run: |
           set -uo pipefail
 
           mkdir -p "$(dirname "$ORACLE_CSV_PATH")"
           tmp_path="${ORACLE_CSV_PATH}.download"
           fetched_at_path="${ORACLE_CSV_PATH}.fetched_at"
-          rm -f "$tmp_path"
-          download_ok=false
+          cookie_jar="${RUNNER_TEMP}/oracle-gdrive-cookies.txt"
+          browser_user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36'
+          fresh_download=false
+          rm -f "$tmp_path" "$cookie_jar"
 
-          if gdown "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" -O "$tmp_path"; then
-            if [[ -s "$tmp_path" ]] \
-              && head -n 1 "$tmp_path" | grep -q 'gameid' \
-              && head -n 1 "$tmp_path" | grep -q 'league'; then
+          valid_csv() {
+            [[ -s "$1" ]] \
+              && head -n 1 "$1" | grep -q 'gameid' \
+              && head -n 1 "$1" | grep -q 'league'
+          }
+
+          accept_fresh_download() {
+            if valid_csv "$tmp_path"; then
               mv "$tmp_path" "$ORACLE_CSV_PATH"
               date -u +%s > "$fetched_at_path"
-              download_ok=true
-              echo "Downloaded a fresh Oracle's Elixir CSV."
+              fresh_download=true
+              return 0
+            fi
+
+            rm -f "$tmp_path"
+            return 1
+          }
+
+          echo "Trying the direct Google Drive download URL that browsers use."
+          if curl --fail --location --silent --show-error \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            --connect-timeout 20 --max-time 180 \
+            --user-agent "$browser_user_agent" \
+            --cookie "$cookie_jar" --cookie-jar "$cookie_jar" \
+            "https://drive.google.com/uc?id=${ORACLE_FILE_ID}&export=download&confirm=t" \
+            --output "$tmp_path"; then
+            if accept_fresh_download; then
+              echo "Downloaded a fresh Oracle's Elixir CSV through the direct browser URL."
             else
-              echo "::warning::Fresh Oracle CSV download did not pass the dataset sanity check."
-              rm -f "$tmp_path"
+              echo "::warning::The direct browser URL returned a response, but it was not the Oracle CSV."
             fi
           else
-            echo "::warning::Fresh Oracle CSV download failed; checking the most recent GitHub Actions cache."
             rm -f "$tmp_path"
+            echo "::warning::The direct browser URL download failed."
           fi
 
-          if [[ "$download_ok" != "true" ]]; then
+          if [[ "$fresh_download" != "true" ]]; then
+            echo "Trying the Google Drive user-content download endpoint."
+            if curl --fail --location --silent --show-error \
+              --retry 3 --retry-delay 2 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent "$browser_user_agent" \
+              --cookie "$cookie_jar" --cookie-jar "$cookie_jar" \
+              "https://drive.usercontent.google.com/download?id=${ORACLE_FILE_ID}&export=download&confirm=t" \
+              --output "$tmp_path"; then
+              if accept_fresh_download; then
+                echo "Downloaded a fresh Oracle's Elixir CSV through drive.usercontent.google.com."
+              else
+                echo "::warning::The user-content endpoint returned a response, but it was not the Oracle CSV."
+              fi
+            else
+              rm -f "$tmp_path"
+              echo "::warning::The user-content endpoint download failed."
+            fi
+          fi
+
+          if [[ "$fresh_download" != "true" ]]; then
+            echo "Trying gdown as a final fresh-download method."
+            if gdown \
+              "https://drive.google.com/uc?id=${ORACLE_FILE_ID}" \
+              --user-agent "$browser_user_agent" \
+              -O "$tmp_path"; then
+              if accept_fresh_download; then
+                echo "Downloaded a fresh Oracle's Elixir CSV with gdown."
+              else
+                echo "::warning::gdown returned a response, but it was not the Oracle CSV."
+              fi
+            else
+              rm -f "$tmp_path"
+              echo "::warning::gdown could not download a fresh Oracle CSV."
+            fi
+          fi
+
+          if [[ "$fresh_download" != "true" ]]; then
+            echo "::warning::All fresh Oracle CSV download methods failed; checking the most recent GitHub Actions cache."
+
             if [[ ! -s "$ORACLE_CSV_PATH" || ! -s "$fetched_at_path" ]]; then
               echo "No usable cached Oracle CSV is available." >&2
               exit 1
@@ -99,14 +160,22 @@ jobs:
               exit 1
             fi
 
-            if ! head -n 1 "$ORACLE_CSV_PATH" | grep -q 'gameid' \
-              || ! head -n 1 "$ORACLE_CSV_PATH" | grep -q 'league'; then
+            if ! valid_csv "$ORACLE_CSV_PATH"; then
               echo "Cached Oracle CSV failed the dataset sanity check." >&2
               exit 1
             fi
 
-            echo "::warning::Using cached Oracle CSV (${cache_age}s old) because the fresh Google Drive download failed."
+            echo "::warning::Using cached Oracle CSV (${cache_age}s old) because all fresh download methods failed."
           fi
+
+          echo "fresh=${fresh_download}" >> "$GITHUB_OUTPUT"
+
+      - name: Save fresh Oracle's Elixir CSV cache
+        if: steps.oracle_download.outputs.fresh == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: tools/scraper/data/raw/oracles_elixir/2026
+          key: oracle-elixir-2026-${{ github.run_id }}
 
       - name: Generate Solo Queue datasets
         run: |
