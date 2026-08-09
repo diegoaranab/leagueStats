@@ -13,7 +13,7 @@ env:
   ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
   ORACLE_CSV_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
   ORACLE_CACHE_MAX_AGE_SECONDS: '604800'
-  PUBLISHED_SITE_BASE_URL: 'https://diegoaranab.github.io/leagueStats/'
+  ORACLE_BOOTSTRAP_COMMIT: 'bbb7181beec3bfc0b19d9a341a7ae9897ad304de'
   SOLO_OUTPUT_ROOT: apps/web/public/data
   TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
   DATA_REGIONS: 'na lan las'
@@ -62,17 +62,6 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Restore last published Teamplay fallback
-        id: published_teamplay
-        continue-on-error: true
-        run: |
-          python -m loltee_scraper.restore_published_teamplay \
-            --site-base-url "$PUBLISHED_SITE_BASE_URL" \
-            --output-root "$SOLO_OUTPUT_ROOT" \
-            --regions $DATA_REGIONS \
-            --tiers $DATA_TIERS \
-            --windows $DATA_WINDOWS
-
       - name: Restore Oracle's Elixir CSV cache
         uses: actions/cache/restore@v4
         with:
@@ -81,7 +70,7 @@ jobs:
           restore-keys: |
             oracle-elixir-2026-
 
-      - name: Download Oracle's Elixir CSV
+      - name: Resolve Oracle's Elixir CSV
         id: oracle_download
         run: |
           set -uo pipefail
@@ -94,6 +83,7 @@ jobs:
           fresh_download=false
           oracle_available=false
           oracle_source=none
+          oracle_warning=''
           rm -f "$tmp_path" "$cookie_jar"
 
           valid_csv() {
@@ -109,6 +99,7 @@ jobs:
               fresh_download=true
               oracle_available=true
               oracle_source=fresh
+              oracle_warning=''
               return 0
             fi
 
@@ -182,6 +173,7 @@ jobs:
                 if (( cache_age <= ORACLE_CACHE_MAX_AGE_SECONDS )) && valid_csv "$ORACLE_CSV_PATH"; then
                   oracle_available=true
                   oracle_source=cache
+                  oracle_warning="Oracle competitive source is a cached download (${cache_age}s old) because a fresh Google Drive download was unavailable."
                   echo "::warning::Using cached Oracle CSV (${cache_age}s old)."
                 else
                   echo "::warning::The cached Oracle CSV is stale or invalid and will not be used."
@@ -194,9 +186,31 @@ jobs:
             fi
           fi
 
+          if [[ "$oracle_available" != "true" ]]; then
+            echo "::warning::Bootstrapping Oracle data from the last known-good CSV retained in this repository's Git history."
+            bootstrap_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${ORACLE_BOOTSTRAP_COMMIT}/${ORACLE_CSV_PATH}"
+            if curl --fail --location --silent --show-error \
+              --retry 3 --retry-delay 2 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              "$bootstrap_url" \
+              --output "$tmp_path" \
+              && valid_csv "$tmp_path"; then
+              mv "$tmp_path" "$ORACLE_CSV_PATH"
+              oracle_available=true
+              oracle_source=git-bootstrap
+              oracle_warning="Oracle competitive source is a historical bootstrap snapshot from commit ${ORACLE_BOOTSTRAP_COMMIT} because fresh Google Drive data and the recent raw-data cache were unavailable. Teamplay pro evidence may be stale until a fresh Oracle download succeeds."
+              echo "::warning::Using the historical Git bootstrap Oracle CSV. Teamplay pro evidence will be stale, but the source is explicitly marked in dataset metadata."
+            else
+              rm -f "$tmp_path"
+              echo "Unable to obtain a valid Oracle CSV from fresh download, cache, or Git bootstrap." >&2
+              exit 1
+            fi
+          fi
+
           echo "fresh=${fresh_download}" >> "$GITHUB_OUTPUT"
           echo "available=${oracle_available}" >> "$GITHUB_OUTPUT"
           echo "source=${oracle_source}" >> "$GITHUB_OUTPUT"
+          echo "warning=${oracle_warning}" >> "$GITHUB_OUTPUT"
 
       - name: Save fresh Oracle's Elixir CSV cache
         if: steps.oracle_download.outputs.fresh == 'true'
@@ -204,17 +218,6 @@ jobs:
         with:
           path: tools/scraper/data/raw/oracles_elixir/2026
           key: oracle-elixir-2026-${{ github.run_id }}
-
-      - name: Ensure a Teamplay source is available
-        if: steps.oracle_download.outputs.available != 'true' && steps.published_teamplay.outcome != 'success'
-        run: |
-          echo "Neither a fresh/cached Oracle CSV nor the last published Teamplay datasets are available." >&2
-          exit 1
-
-      - name: Report Teamplay fallback mode
-        if: steps.oracle_download.outputs.available != 'true' && steps.published_teamplay.outcome == 'success'
-        run: |
-          echo "::warning::Oracle's Elixir is unavailable to this GitHub runner. Reusing the last successfully published Teamplay datasets while refreshing Solo Queue data."
 
       - name: Generate Solo Queue datasets
         run: |
@@ -227,7 +230,6 @@ jobs:
             --fail-fast
 
       - name: Generate Teamplay datasets
-        if: steps.oracle_download.outputs.available == 'true'
         run: |
           python -m loltee_scraper.build_teamplay \
             --oe-csv "$ORACLE_CSV_PATH" \
@@ -236,6 +238,8 @@ jobs:
             --regions $DATA_REGIONS \
             --tiers $DATA_TIERS \
             --windows $DATA_WINDOWS \
+            --oracle-source "${{ steps.oracle_download.outputs.source }}" \
+            --oracle-source-warning "${{ steps.oracle_download.outputs.warning }}" \
             --fail-fast
 
       - name: Verify Teamplay datasets exist

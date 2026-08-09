@@ -43,6 +43,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--regions", nargs="+", default=SUPPORTED_REGIONS, choices=SUPPORTED_REGIONS)
     parser.add_argument("--tiers", nargs="+", default=SUPPORTED_TIERS, choices=SUPPORTED_TIERS)
     parser.add_argument("--windows", nargs="+", default=SUPPORTED_WINDOWS, choices=SUPPORTED_WINDOWS)
+    parser.add_argument(
+        "--oracle-source",
+        default="local",
+        help="Describes where the Oracle CSV came from (for dataset metadata).",
+    )
+    parser.add_argument(
+        "--oracle-source-warning",
+        default="",
+        help="Optional warning added to Teamplay metadata when the Oracle source is degraded/stale.",
+    )
     parser.add_argument("--fail-fast", action="store_true")
     return parser
 
@@ -152,12 +162,16 @@ def build_teamplay_dataset(
     region: str,
     tier: str,
     window: str,
+    oracle_source: str = "local",
+    oracle_source_warning: str = "",
 ) -> Dict[str, Any]:
     generated_at_utc = datetime.now(timezone.utc).isoformat()
     solo_meta = solo_dataset.get("meta", {}) if isinstance(solo_dataset, dict) else {}
     solo_data = solo_dataset.get("data", {}) if isinstance(solo_dataset, dict) else {}
 
     combined_warnings = list(solo_meta.get("warnings", [])) + list(pro_snapshot.warnings)
+    if oracle_source_warning:
+        combined_warnings.append(oracle_source_warning)
     if solo_meta.get("is_partial"):
         combined_warnings.append("Solo source dataset is partial; teamplay rankings were blended from partial solo data.")
 
@@ -225,6 +239,7 @@ def build_teamplay_dataset(
         {
             "mode": "teamplay",
             "source": "Oracle's Elixir + LoLalytics",
+            "oracle_source": oracle_source,
             "region": region,
             "tier": tier,
             "window": window,
@@ -318,6 +333,8 @@ def main() -> None:
                         region=region,
                         tier=tier,
                         window=window,
+                        oracle_source=args.oracle_source,
+                        oracle_source_warning=args.oracle_source_warning,
                     )
                     write_teamplay_dataset(output_path, result)
 
