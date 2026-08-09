@@ -10,6 +10,7 @@ env:
   ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
   ORACLE_CSV_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
   ORACLE_CACHE_MAX_AGE_SECONDS: '604800'
+  PUBLISHED_SITE_BASE_URL: 'https://diegoaranab.github.io/leagueStats/'
   SOLO_OUTPUT_ROOT: apps/web/public/data
   TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
   DATA_REGIONS: 'na lan las'
@@ -45,6 +46,17 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
+      - name: Restore last published Teamplay fallback
+        id: published_teamplay
+        continue-on-error: true
+        run: |
+          python -m loltee_scraper.restore_published_teamplay \
+            --site-base-url "$PUBLISHED_SITE_BASE_URL" \
+            --output-root "$SOLO_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS
+
       - name: Restore Oracle's Elixir CSV cache
         uses: actions/cache/restore@v4
         with:
@@ -64,6 +76,8 @@ jobs:
           cookie_jar="${RUNNER_TEMP}/oracle-gdrive-cookies.txt"
           browser_user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36'
           fresh_download=false
+          oracle_available=false
+          oracle_source=none
           rm -f "$tmp_path" "$cookie_jar"
 
           valid_csv() {
@@ -77,6 +91,8 @@ jobs:
               mv "$tmp_path" "$ORACLE_CSV_PATH"
               date -u +%s > "$fetched_at_path"
               fresh_download=true
+              oracle_available=true
+              oracle_source=fresh
               return 0
             fi
 
@@ -139,36 +155,32 @@ jobs:
             fi
           fi
 
-          if [[ "$fresh_download" != "true" ]]; then
-            echo "::warning::All fresh Oracle CSV download methods failed; checking the most recent GitHub Actions cache."
+          if [[ "$oracle_available" != "true" ]]; then
+            echo "::warning::All fresh Oracle CSV download methods failed; checking the most recent raw-data cache."
 
-            if [[ ! -s "$ORACLE_CSV_PATH" || ! -s "$fetched_at_path" ]]; then
-              echo "No usable cached Oracle CSV is available." >&2
-              exit 1
+            if [[ -s "$ORACLE_CSV_PATH" && -s "$fetched_at_path" ]]; then
+              fetched_at="$(cat "$fetched_at_path")"
+              if [[ "$fetched_at" =~ ^[0-9]+$ ]]; then
+                now="$(date -u +%s)"
+                cache_age=$((now - fetched_at))
+                if (( cache_age <= ORACLE_CACHE_MAX_AGE_SECONDS )) && valid_csv "$ORACLE_CSV_PATH"; then
+                  oracle_available=true
+                  oracle_source=cache
+                  echo "::warning::Using cached Oracle CSV (${cache_age}s old)."
+                else
+                  echo "::warning::The cached Oracle CSV is stale or invalid and will not be used."
+                fi
+              else
+                echo "::warning::The cached Oracle CSV has invalid freshness metadata and will not be used."
+              fi
+            else
+              echo "::warning::No usable cached Oracle CSV is available."
             fi
-
-            fetched_at="$(cat "$fetched_at_path")"
-            if ! [[ "$fetched_at" =~ ^[0-9]+$ ]]; then
-              echo "Cached Oracle CSV has invalid freshness metadata." >&2
-              exit 1
-            fi
-
-            now="$(date -u +%s)"
-            cache_age=$((now - fetched_at))
-            if (( cache_age > ORACLE_CACHE_MAX_AGE_SECONDS )); then
-              echo "Cached Oracle CSV is too old (${cache_age}s; max ${ORACLE_CACHE_MAX_AGE_SECONDS}s)." >&2
-              exit 1
-            fi
-
-            if ! valid_csv "$ORACLE_CSV_PATH"; then
-              echo "Cached Oracle CSV failed the dataset sanity check." >&2
-              exit 1
-            fi
-
-            echo "::warning::Using cached Oracle CSV (${cache_age}s old) because all fresh download methods failed."
           fi
 
           echo "fresh=${fresh_download}" >> "$GITHUB_OUTPUT"
+          echo "available=${oracle_available}" >> "$GITHUB_OUTPUT"
+          echo "source=${oracle_source}" >> "$GITHUB_OUTPUT"
 
       - name: Save fresh Oracle's Elixir CSV cache
         if: steps.oracle_download.outputs.fresh == 'true'
@@ -176,6 +188,17 @@ jobs:
         with:
           path: tools/scraper/data/raw/oracles_elixir/2026
           key: oracle-elixir-2026-${{ github.run_id }}
+
+      - name: Ensure a Teamplay source is available
+        if: steps.oracle_download.outputs.available != 'true' && steps.published_teamplay.outcome != 'success'
+        run: |
+          echo "Neither a fresh/cached Oracle CSV nor the last published Teamplay datasets are available." >&2
+          exit 1
+
+      - name: Report Teamplay fallback mode
+        if: steps.oracle_download.outputs.available != 'true' && steps.published_teamplay.outcome == 'success'
+        run: |
+          echo "::warning::Oracle's Elixir is unavailable to this GitHub runner. Reusing the last successfully published Teamplay datasets while refreshing Solo Queue data."
 
       - name: Generate Solo Queue datasets
         run: |
@@ -188,6 +211,7 @@ jobs:
             --fail-fast
 
       - name: Generate Teamplay datasets
+        if: steps.oracle_download.outputs.available == 'true'
         run: |
           python -m loltee_scraper.build_teamplay \
             --oe-csv "$ORACLE_CSV_PATH" \
@@ -197,6 +221,28 @@ jobs:
             --tiers $DATA_TIERS \
             --windows $DATA_WINDOWS \
             --fail-fast
+
+      - name: Verify Teamplay datasets exist
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["TEAMPLAY_OUTPUT_ROOT"])
+          regions = os.environ["DATA_REGIONS"].split()
+          tiers = os.environ["DATA_TIERS"].split()
+          windows = os.environ["DATA_WINDOWS"].split()
+          missing = [
+              str(root / region / tier / f"{window}.json")
+              for region in regions
+              for tier in tiers
+              for window in windows
+              if not (root / region / tier / f"{window}.json").is_file()
+          ]
+          if missing:
+              raise SystemExit(f"Missing {len(missing)} Teamplay datasets; examples={missing[:5]}")
+          print(f"Verified {len(regions) * len(tiers) * len(windows)} Teamplay datasets.")
+          PY
 
       - name: Upload generated data artifact
         uses: actions/upload-artifact@v4
