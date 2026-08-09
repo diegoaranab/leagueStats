@@ -5,13 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '17 */12 * * *'
+    - cron: '23 */12 * * *'
 
 env:
   PYTHON_VERSION: '3.12'
   NODE_VERSION: '22'
   ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
   ORACLE_CSV_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
+  ORACLE_CACHE_MAX_AGE_SECONDS: '604800'
   SOLO_OUTPUT_ROOT: apps/web/public/data
   TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
   DATA_REGIONS: 'na lan las'
@@ -55,16 +56,73 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e tools/scraper gdown
+          pip install -e tools/scraper "gdown==6.1.0"
 
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
+      - name: Restore Oracle's Elixir CSV cache
+        uses: actions/cache@v4
+        with:
+          path: tools/scraper/data/raw/oracles_elixir/2026
+          key: oracle-elixir-2026-${{ github.run_id }}
+          restore-keys: |
+            oracle-elixir-2026-
+
       - name: Download Oracle's Elixir CSV
         run: |
+          set -uo pipefail
+
           mkdir -p "$(dirname "$ORACLE_CSV_PATH")"
-          gdown "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" -O "$ORACLE_CSV_PATH"
-          test -s "$ORACLE_CSV_PATH"
+          tmp_path="${ORACLE_CSV_PATH}.download"
+          fetched_at_path="${ORACLE_CSV_PATH}.fetched_at"
+          rm -f "$tmp_path"
+          download_ok=false
+
+          if gdown "https://drive.google.com/file/d/${ORACLE_FILE_ID}/view?usp=drive_link" -O "$tmp_path"; then
+            if [[ -s "$tmp_path" ]] \
+              && head -n 1 "$tmp_path" | grep -q 'gameid' \
+              && head -n 1 "$tmp_path" | grep -q 'league'; then
+              mv "$tmp_path" "$ORACLE_CSV_PATH"
+              date -u +%s > "$fetched_at_path"
+              download_ok=true
+              echo "Downloaded a fresh Oracle's Elixir CSV."
+            else
+              echo "::warning::Fresh Oracle CSV download did not pass the dataset sanity check."
+              rm -f "$tmp_path"
+            fi
+          else
+            echo "::warning::Fresh Oracle CSV download failed; checking the most recent GitHub Actions cache."
+            rm -f "$tmp_path"
+          fi
+
+          if [[ "$download_ok" != "true" ]]; then
+            if [[ ! -s "$ORACLE_CSV_PATH" || ! -s "$fetched_at_path" ]]; then
+              echo "No usable cached Oracle CSV is available." >&2
+              exit 1
+            fi
+
+            fetched_at="$(cat "$fetched_at_path")"
+            if ! [[ "$fetched_at" =~ ^[0-9]+$ ]]; then
+              echo "Cached Oracle CSV has invalid freshness metadata." >&2
+              exit 1
+            fi
+
+            now="$(date -u +%s)"
+            cache_age=$((now - fetched_at))
+            if (( cache_age > ORACLE_CACHE_MAX_AGE_SECONDS )); then
+              echo "Cached Oracle CSV is too old (${cache_age}s; max ${ORACLE_CACHE_MAX_AGE_SECONDS}s)." >&2
+              exit 1
+            fi
+
+            if ! head -n 1 "$ORACLE_CSV_PATH" | grep -q 'gameid' \
+              || ! head -n 1 "$ORACLE_CSV_PATH" | grep -q 'league'; then
+              echo "Cached Oracle CSV failed the dataset sanity check." >&2
+              exit 1
+            fi
+
+            echo "::warning::Using cached Oracle CSV (${cache_age}s old) because the fresh Google Drive download failed."
+          fi
 
       - name: Generate Solo Queue datasets
         run: |
