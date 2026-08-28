@@ -1,24 +1,154 @@
-.hero {
-  min-height: calc(100vh - 100px);
+.onboarding-page {
   display: grid;
-  place-items: center;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 1.25rem;
+  min-height: calc(100vh - 132px);
+  padding: 0.35rem 0 0.75rem;
 }
 
-.panel {
-  width: min(720px, 96%);
-  border: 1px solid var(--border);
+.hero-copy,
+.setup-card {
+  padding: 1.5rem;
+}
+
+.hero-copy {
+  display: grid;
+  align-content: center;
+  gap: 1.2rem;
+}
+
+.hero-copy h1 {
+  max-width: 12ch;
+  font-size: clamp(2.6rem, 4vw, 4.7rem);
+}
+
+.hero-description {
+  max-width: 62ch;
+  font-size: 1rem;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.hero-point {
+  display: grid;
+  gap: 0.4rem;
   padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
-header p {
-  color: var(--ink-1);
+.hero-point strong {
+  font-size: 0.96rem;
+  font-weight: 700;
 }
 
-.form-grid {
+.hero-point span {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.setup-card {
   display: grid;
-  gap: 0.8rem;
+  align-content: start;
+  gap: 1.2rem;
 }
 
-button {
-  justify-self: start;
+.setup-card__header {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.setup-card__header h2 {
+  font-size: clamp(1.75rem, 2vw, 2.5rem);
+}
+
+.mode-helper {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(111, 191, 232, 0.16);
+  border-radius: 20px;
+  background: rgba(111, 191, 232, 0.06);
+}
+
+.mode-helper strong {
+  font-size: 1rem;
+}
+
+.mode-helper span {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.setup-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.selection-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.cta-button {
+  min-height: 54px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.submit-note {
+  padding-top: 0.1rem;
+}
+
+@media (max-width: 1160px) {
+  .onboarding-page {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-copy h1 {
+    max-width: 15ch;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .onboarding-page {
+    min-height: auto;
+    padding-top: 0.1rem;
+  }
+
+  .hero-copy,
+  .setup-card {
+    padding: 1.15rem;
+  }
+
+  .hero-copy h1 {
+    max-width: none;
+    font-size: 2.35rem;
+  }
+
+  .selector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-button {
+    width: 100%;
+  }
 }

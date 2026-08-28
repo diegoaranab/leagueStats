@@ -1,0 +1,16 @@
+<div class="mode-selector" [class.mode-selector--compact]="variant === 'compact'">
+  <button
+    *ngFor="let mode of modes"
+    type="button"
+    class="mode-option"
+    [class.is-active]="mode === selectedMode"
+    [attr.aria-pressed]="mode === selectedMode"
+    (click)="modeChange.emit(mode)"
+  >
+    <span class="mode-kicker">{{ modeDetails[mode].kicker }}</span>
+    <span class="mode-label">{{ modeDetails[mode].label }}</span>
+    <span class="mode-description">
+      {{ variant === 'feature' ? modeDetails[mode].description : modeDetails[mode].helper }}
+    </span>
+  </button>
+</div>

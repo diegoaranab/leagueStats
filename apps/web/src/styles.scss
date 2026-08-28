@@ -1,0 +1,268 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: dark;
+
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$yellow-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+    typography: (
+      plain-family: ('Space Grotesk', 'Segoe UI', sans-serif),
+      brand-family: ('Cinzel', 'Georgia', serif),
+      bold-weight: 700,
+      medium-weight: 500,
+      regular-weight: 400,
+    ),
+    density: -1,
+  ));
+
+  @include mat.theme-overrides((
+    primary: #c5a35c,
+    on-primary: #170f04,
+    primary-container: #392a0d,
+    on-primary-container: #f4e3b6,
+    secondary: #6fbfe8,
+    on-secondary: #03141d,
+    secondary-container: #143244,
+    on-secondary-container: #d6efff,
+    tertiary: #82b8f5,
+    on-tertiary: #041727,
+    tertiary-container: #16324a,
+    on-tertiary-container: #d8e9ff,
+    background: #050b12,
+    on-background: #eef3ff,
+    surface: #0a111a,
+    surface-dim: #050b12,
+    surface-bright: #1d2838,
+    surface-container-lowest: #07101a,
+    surface-container-low: #0d1622,
+    surface-container: #121d2b,
+    surface-container-high: #172434,
+    surface-container-highest: #1d2c40,
+    on-surface: #eef3ff,
+    on-surface-variant: #aab7cc,
+    surface-variant: #253245,
+    outline: #40536f,
+    outline-variant: #273445,
+    error: #ff8d82,
+    on-error: #3c0704,
+    error-container: #5f1f1a,
+    on-error-container: #ffd9d5,
+    surface-tint: #c5a35c,
+    scrim: #000000,
+    shadow: #000000,
+    corner-small: 10px,
+    corner-medium: 16px,
+    corner-large: 22px,
+    corner-extra-large: 32px,
+  ));
+}
+
+:root {
+  --font-display: 'Cinzel', 'Georgia', serif;
+  --font-body: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --page-max-width: 1380px;
+  --content-max-width: 1200px;
+  --surface-panel: linear-gradient(180deg, rgba(18, 29, 43, 0.94), rgba(10, 17, 26, 0.94));
+  --surface-panel-strong: linear-gradient(180deg, rgba(24, 36, 52, 0.96), rgba(11, 17, 28, 0.98));
+  --surface-glass: rgba(9, 15, 23, 0.78);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(197, 163, 92, 0.28);
+  --shadow-soft: 0 18px 44px rgba(0, 0, 0, 0.34);
+  --shadow-heavy: 0 28px 80px rgba(0, 0, 0, 0.48);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--mat-sys-on-surface);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(111, 191, 232, 0.12), transparent 34%),
+    radial-gradient(circle at 85% 12%, rgba(197, 163, 92, 0.14), transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(48, 81, 128, 0.2), transparent 36%),
+    linear-gradient(180deg, #07101a 0%, #04070d 100%);
+  letter-spacing: 0.01em;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    linear-gradient(0deg, rgba(5, 11, 18, 0), rgba(5, 11, 18, 0.45));
+  pointer-events: none;
+  z-index: -1;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+}
+
+p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--mat-sys-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.meta-text {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.surface-panel {
+  border: 1px solid var(--border-subtle);
+  border-radius: 28px;
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+}
+
+.metric-pill strong {
+  color: var(--mat-sys-on-surface);
+  font-size: 0.9rem;
+}
+
+.mat-mdc-card {
+  border-radius: 28px;
+  background: var(--surface-panel);
+  box-shadow: none;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button {
+  --mat-text-button-state-layer-color: rgba(255, 255, 255, 0.06);
+}
+
+.mat-mdc-unelevated-button.mat-primary {
+  box-shadow: 0 12px 26px rgba(197, 163, 92, 0.22);
+}
+
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--mat-sys-primary);
+}
+
+.mat-mdc-chip {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel {
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px !important;
+  background: rgba(13, 22, 34, 0.96) !important;
+  backdrop-filter: blur(18px);
+}
+
+.mdc-text-field--outlined {
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
+  --mdc-outlined-text-field-focus-outline-color: var(--mat-sys-primary);
+  --mdc-outlined-text-field-hover-outline-color: rgba(111, 191, 232, 0.42);
+  --mdc-outlined-text-field-label-text-color: var(--mat-sys-on-surface-variant);
+  --mdc-outlined-text-field-input-text-color: var(--mat-sys-on-surface);
+  --mat-form-field-state-layer-color: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 18px;
+}
+
+.mat-mdc-icon-button {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(111, 191, 232, 0.85);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: rgba(111, 191, 232, 0.24);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

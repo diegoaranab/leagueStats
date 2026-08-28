@@ -1,56 +1,138 @@
-<mat-card class="champion-card">
-  <div class="head">
-    <img [src]="champion.icon_url || fallbackIcon" [alt]="champion.name" loading="lazy">
-
-    <div class="summary">
-      <h3>{{ champion.name }}</h3>
-      <div class="chips">
-        <mat-chip>{{ champion.tier }}</mat-chip>
-        <mat-chip>Rank {{ champion.filtered_rank || champion.rank || '-' }}</mat-chip>
-      </div>
+<mat-card class="champion-card" [class.champion-card--teamplay]="mode === 'teamplay'">
+  <div class="card-top">
+    <div class="rank-badge">
+      <span>{{ mode === 'teamplay' ? 'Teamplay' : 'Rank' }}</span>
+      <strong>#{{ primaryRank }}</strong>
     </div>
 
+    <div class="portrait-wrap">
+      <div class="portrait-glow"></div>
+      <img [src]="champion.icon_url || fallbackIcon" [alt]="champion.name" loading="lazy">
+    </div>
+
+    <div class="summary">
+      <p class="lane-label">{{ laneLabels[champion.lane] }} lane</p>
+      <h3>{{ champion.name }}</h3>
+      <p class="summary-note">
+        {{
+          mode === 'teamplay'
+            ? 'Coordinated-play signal with pro draft context.'
+            : 'Ladder-first recommendation for your selected context.'
+        }}
+      </p>
+    </div>
+
+    <div class="headline-tags">
+      <span class="tier-pill">{{ champion.tier }}</span>
+      <span
+        *ngIf="champion.difficulty"
+        class="difficulty-pill"
+        [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
+      >
+        {{ champion.difficulty | titlecase }}
+      </span>
+    </div>
+  </div>
+
+  <div class="stat-grid" *ngIf="mode === 'solo'; else teamplayStats">
+    <div class="stat-card stat-card--primary">
+      <span>Win rate</span>
+      <strong>{{ formatPercent(champion.win_rate) }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Pick rate</span>
+      <strong>{{ formatPercent(champion.pick_rate) }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Best win est.</span>
+      <strong>{{ formatPercent(champion.best_win_est) }}</strong>
+    </div>
+  </div>
+
+  <ng-template #teamplayStats>
+    <div class="stat-grid stat-grid--teamplay">
+      <div class="stat-card stat-card--primary">
+        <span>Draft score</span>
+        <strong>
+          {{
+            champion.flex_clash_score === null || champion.flex_clash_score === undefined
+              ? '--'
+              : ((champion.flex_clash_score * 100) | number: '1.0-0')
+          }}
+        </strong>
+      </div>
+      <div class="stat-card">
+        <span>Pro picks</span>
+        <strong>{{ champion.pro_pick_count ?? '--' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Pro bans</span>
+        <strong>{{ champion.pro_ban_count ?? '--' }}</strong>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="badge-row" *ngIf="mode === 'teamplay' && visibleBadges.length">
     <span
-      class="difficulty"
-      [ngStyle]="{ 'background-color': champion.difficulty_color || '#e2e8f0' }"
+      *ngFor="let badge of visibleBadges"
+      class="signal-badge"
+      [class.signal-badge--gold]="isGoldBadge(badge)"
+      [class.signal-badge--blue]="isBlueBadge(badge)"
     >
-      {{ champion.difficulty || 'n/a' }}
+      {{ badge }}
     </span>
   </div>
 
-  <div class="kpis">
+  <div class="secondary-row" *ngIf="mode === 'solo'; else teamplaySecondary">
     <div>
-      <small>Win rate</small>
-      <strong>{{ champion.win_rate | number: '1.1-2' }}%</strong>
+      <span>Difficulty</span>
+      <strong>{{ champion.difficulty ? (champion.difficulty | titlecase) : 'N/A' }}</strong>
     </div>
     <div>
-      <small>Pick rate</small>
-      <strong>{{ champion.pick_rate | number: '1.1-2' }}%</strong>
+      <span>Ban rate</span>
+      <strong>{{ formatPercent(champion.ban_rate) }}</strong>
+    </div>
+    <div>
+      <span>Lane delta</span>
+      <strong>{{ formatNumber(champion.delta) }}</strong>
     </div>
   </div>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Ver stats avanzadas</mat-panel-title>
-    </mat-expansion-panel-header>
-
-    <div class="advanced-grid">
-      <p>Ban rate: <strong>{{ champion.ban_rate | number: '1.1-2' }}%</strong></p>
-      <p>Delta: <strong>{{ champion.delta | number: '1.1-2' }}</strong></p>
-      <p>Mastery gap: <strong>{{ champion.mastery_gap_pct | number: '1.1-2' }}%</strong></p>
-      <p *ngIf="champion.best_win_est !== undefined">
-        Best win est.: <strong>{{ champion.best_win_est | number: '1.1-2' }}%</strong>
-      </p>
-      <a
-        *ngIf="champion.champion_url"
-        mat-stroked-button
-        color="primary"
-        [href]="champion.champion_url"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Ver build fuente
-      </a>
+  <ng-template #teamplaySecondary>
+    <div class="secondary-row">
+      <div>
+        <span>Solo rank</span>
+        <strong>#{{ champion.filtered_rank ?? champion.rank ?? '--' }}</strong>
+      </div>
+      <div>
+        <span>Tier</span>
+        <strong>{{ champion.tier }}</strong>
+      </div>
+      <div>
+        <span>Flex roles</span>
+        <strong>{{ champion.pro_flex_roles ?? '--' }}</strong>
+      </div>
     </div>
-  </mat-expansion-panel>
+  </ng-template>
+
+  <div class="card-footer">
+    <span>
+      {{
+        mode === 'teamplay'
+          ? 'Pro presence blended with solo viability.'
+          : 'Clean ladder signal for quick scanning.'
+      }}
+    </span>
+
+    <a
+      *ngIf="champion.champion_url"
+      mat-stroked-button
+      color="primary"
+      [href]="champion.champion_url"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Build
+    </a>
+  </div>
 </mat-card>
