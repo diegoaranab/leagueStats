@@ -29,33 +29,6 @@
   </mat-toolbar>
 
   <div class="app-layout">
-    <aside class="nav-rail" aria-label="Sections">
-      <a
-        class="nav-item"
-        routerLink="/"
-        routerLinkActive="is-active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <span class="material-symbols-outlined">home</span>
-        <span class="nav-copy">
-          <strong>Home</strong>
-          <small>Start with your mode</small>
-        </span>
-      </a>
-
-      <a
-        class="nav-item"
-        routerLink="/results"
-        routerLinkActive="is-active"
-      >
-        <span class="material-symbols-outlined">stacked_bar_chart</span>
-        <span class="nav-copy">
-          <strong>Results</strong>
-          <small>Scan picks by lane</small>
-        </span>
-      </a>
-    </aside>
-
     <main class="shell">
       <router-outlet></router-outlet>
     </main>
