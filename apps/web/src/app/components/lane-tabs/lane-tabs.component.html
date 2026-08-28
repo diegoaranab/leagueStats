@@ -1,9 +1,12 @@
-<mat-button-toggle-group
-  class="lane-group"
-  [value]="selectedLane"
-  (change)="laneChange.emit($event.value)"
->
-  <mat-button-toggle *ngFor="let lane of lanes" [value]="lane">
-    {{ laneLabel(lane) }}
-  </mat-button-toggle>
-</mat-button-toggle-group>
+<div class="lane-scroll">
+  <mat-button-toggle-group
+    class="lane-group"
+    [value]="selectedLane"
+    (change)="laneChange.emit($event.value)"
+  >
+    <mat-button-toggle *ngFor="let lane of lanes" [value]="lane">
+      <span class="lane-label">{{ laneLabels[lane] }}</span>
+      <small>{{ laneCounts[lane] ?? 0 }} picks</small>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
