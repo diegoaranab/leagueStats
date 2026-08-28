@@ -107,11 +107,17 @@
       {{ errorMessage }}
     </div>
 
+    <app-recommended-bans
+      *ngIf="!isLoading && !errorMessage && query.mode === 'solo'"
+      [champions]="recommendedBans"
+    ></app-recommended-bans>
+
     <section class="grid" aria-label="Champion recommendations" *ngIf="!isLoading && !errorMessage">
       <app-champion-card
         *ngFor="let champion of champions; trackBy: trackByChampion"
         [champion]="champion"
         [mode]="query.mode"
+        [banPriority]="banPriorityFor(champion)"
       ></app-champion-card>
     </section>
   </mat-drawer-content>

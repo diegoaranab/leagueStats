@@ -1,0 +1,34 @@
+<section class="recommended-bans" aria-labelledby="recommended-bans-heading">
+  <header class="recommended-bans__header">
+    <div>
+      <h2 id="recommended-bans-heading">Recommended bans</h2>
+      <p>Strong statistical ban options for this exact queue context.</p>
+    </div>
+    <span
+      class="material-symbols-outlined recommended-bans__header-icon"
+      aria-hidden="true"
+    >shield</span>
+  </header>
+
+  <div class="recommended-bans__list" *ngIf="champions.length; else emptyState">
+    <article
+      *ngFor="let champion of champions; let index = index; trackBy: trackByChampion"
+      class="ban-item"
+      [class.ban-item--first]="index === 0"
+    >
+      <span class="material-symbols-outlined ban-item__icon" aria-hidden="true">block</span>
+      <strong class="ban-item__priority">#{{ index + 1 }}</strong>
+      <img
+        class="ban-item__portrait"
+        [src]="champion.icon_url || fallbackIcon"
+        [alt]="champion.name + ' portrait'"
+        loading="lazy"
+      >
+      <span class="ban-item__name">{{ champion.name }}</span>
+    </article>
+  </div>
+
+  <ng-template #emptyState>
+    <p class="recommended-bans__empty">No standout bans for this selection.</p>
+  </ng-template>
+</section>

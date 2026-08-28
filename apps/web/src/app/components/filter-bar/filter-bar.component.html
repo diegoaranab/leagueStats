@@ -59,6 +59,7 @@
         <mat-option value="win_rate">Win rate</mat-option>
         <mat-option value="pick_rate">Pick rate</mat-option>
         <mat-option value="difficulty">Difficulty</mat-option>
+        <mat-option *ngIf="mode === 'solo'" value="ban_priority">Ban priority</mat-option>
       </mat-select>
     </mat-form-field>
 
