@@ -90,11 +90,13 @@ def merge_manifest(
         for entry in existing_manifest.get("datasets", []):
             if isinstance(entry, dict):
                 normalized = normalize_manifest_entry(entry)
-                merged_entries[manifest_entry_key(normalized)] = normalized
+                if normalized.get("tier") in SUPPORTED_TIERS:
+                    merged_entries[manifest_entry_key(normalized)] = normalized
 
     for entry in new_entries:
         normalized = normalize_manifest_entry(entry)
-        merged_entries[manifest_entry_key(normalized)] = normalized
+        if normalized.get("tier") in SUPPORTED_TIERS:
+            merged_entries[manifest_entry_key(normalized)] = normalized
 
     all_entries = sort_manifest_entries(merged_entries.values())
 
@@ -118,10 +120,7 @@ def merge_manifest(
                 list(existing_supported.get("regions", [])) + regions,
                 SUPPORTED_REGIONS,
             ),
-            "tiers": ordered_supported_values(
-                list(existing_supported.get("tiers", [])) + tiers,
-                SUPPORTED_TIERS,
-            ),
+            "tiers": list(SUPPORTED_TIERS),
             "windows": ordered_supported_values(
                 list(existing_supported.get("windows", [])) + windows,
                 SUPPORTED_WINDOWS,

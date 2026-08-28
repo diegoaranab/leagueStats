@@ -12,7 +12,7 @@ python -m playwright install chromium
 ## Single dataset
 
 ```bash
-python -m loltee_scraper --region na --tier diamond_plus --window 7d
+python -m loltee_scraper --region na --tier diamond --window 7d
 ```
 
 ## Full matrix + manifest

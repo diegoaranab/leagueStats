@@ -24,7 +24,7 @@ npm start
 ```bash
 pip install -e tools/scraper
 python -m playwright install chromium
-python -m loltee_scraper --region na --tier diamond_plus --window 7d
+python -m loltee_scraper --region na --tier diamond --window 7d
 ```
 
 ### 3) Scraper matrix + manifest
@@ -41,7 +41,7 @@ python -m loltee_scraper.run_matrix --output-root apps/web/public/data
 ## Supported (MVP)
 
 - Regions: `na`, `lan`, `las`
-- Tiers: `gold_plus`, `platinum_plus`, `emerald_plus`, `diamond_plus`, `d2_plus`, `master_plus`
+- Tiers: `iron`, `bronze`, `silver`, `gold`, `platinum`, `emerald`, `diamond`, `master`
 - Windows: `current`, `7d`, `14d`
 
 ## Notes

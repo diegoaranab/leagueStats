@@ -36,7 +36,7 @@ LANE_RETRY_BACKOFF_SECONDS = (0, 2, 5)
 @dataclass(slots=True)
 class ScrapeConfig:
     region: str = "na"
-    tier: str = "diamond_plus"
+    tier: str = "diamond"
     window: str = "7d"
     lanes: List[str] = field(default_factory=lambda: DEFAULT_LANES.copy())
     output_path: Optional[Path] = None
@@ -135,7 +135,7 @@ def build_lane_url(lane: str, config: ScrapeConfig) -> str:
 
 def build_window_url_smoke_samples(
     lane: str = "middle",
-    tier: str = "diamond_plus",
+    tier: str = "diamond",
     region: str = "na",
 ) -> Dict[str, str]:
     return {
@@ -146,9 +146,9 @@ def build_window_url_smoke_samples(
 
 def validate_window_url_builder() -> None:
     expected = {
-        "current": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na",
-        "7d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na&patch=7",
-        "14d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond_plus&region=na&patch=14",
+        "current": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond&region=na",
+        "7d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond&region=na&patch=7",
+        "14d": "https://lolalytics.com/lol/tierlist/?lane=middle&tier=diamond&region=na&patch=14",
     }
     actual = build_window_url_smoke_samples()
     if actual != expected:

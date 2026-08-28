@@ -28,10 +28,11 @@ import {
   DifficultyFilter,
   LANE_OPTIONS,
   Lane,
+  LEGACY_TIER_ALIASES,
+  normalizeTier,
   REGION_OPTIONS,
   Region,
   SortOption,
-  TIER_OPTIONS,
   Tier,
   TierlistDataset,
   WINDOW_OPTIONS,
@@ -96,7 +97,8 @@ export class ResultsPageComponent implements OnInit {
       .subscribe((params) => {
         const mode = this.readParam(params.get('mode'), PRODUCT_MODE_OPTIONS, DEFAULT_RESULTS_QUERY.mode);
         const region = this.readParam(params.get('region'), REGION_OPTIONS, DEFAULT_RESULTS_QUERY.region);
-        const tier = this.readParam(params.get('tier'), TIER_OPTIONS, DEFAULT_RESULTS_QUERY.tier);
+        const rawTier = params.get('tier');
+        const tier = normalizeTier(rawTier, DEFAULT_RESULTS_QUERY.tier);
         const window = this.readParam(params.get('window'), WINDOW_OPTIONS, DEFAULT_RESULTS_QUERY.window);
         const lane = this.readParam(params.get('lane'), LANE_OPTIONS, DEFAULT_RESULTS_QUERY.lane);
         const sort = this.readParam<SortOption>(
@@ -106,6 +108,15 @@ export class ResultsPageComponent implements OnInit {
         );
 
         this.query = { mode, region, tier, window, lane, sort };
+
+        if (rawTier && LEGACY_TIER_ALIASES[rawTier]) {
+          void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { tier },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
+        }
 
         const nextKey = `${mode}:${region}:${tier}:${window}`;
         if (nextKey !== this.datasetKey) {

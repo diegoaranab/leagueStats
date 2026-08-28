@@ -30,7 +30,7 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
 export class FilterBarComponent {
   @Input() mode: ProductMode = 'solo';
   @Input() region: Region = 'na';
-  @Input() tier: Tier = 'diamond_plus';
+  @Input() tier: Tier = 'diamond';
   @Input() window: WindowKey = '7d';
   @Input() sort: SortOption = 'tier';
   @Input() difficultyFilter: DifficultyFilter = 'all';

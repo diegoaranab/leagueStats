@@ -1,13 +1,13 @@
 export const REGION_OPTIONS = ['na', 'lan', 'las'] as const;
 export const TIER_OPTIONS = [
+  'iron',
   'bronze',
   'silver',
-  'gold_plus',
-  'platinum_plus',
-  'emerald_plus',
-  'diamond_plus',
-  'd2_plus',
-  'master_plus',
+  'gold',
+  'platinum',
+  'emerald',
+  'diamond',
+  'master',
 ] as const;
 export const WINDOW_OPTIONS = ['current', '7d', '14d'] as const;
 export const LANE_OPTIONS = ['top', 'jungle', 'middle', 'bottom', 'support'] as const;
@@ -16,6 +16,23 @@ export type Region = (typeof REGION_OPTIONS)[number];
 export type Tier = (typeof TIER_OPTIONS)[number];
 export type WindowKey = (typeof WINDOW_OPTIONS)[number];
 export type Lane = (typeof LANE_OPTIONS)[number];
+
+export const LEGACY_TIER_ALIASES: Readonly<Partial<Record<string, Tier>>> = {
+  gold_plus: 'gold',
+  platinum_plus: 'platinum',
+  emerald_plus: 'emerald',
+  diamond_plus: 'diamond',
+  d2_plus: 'diamond',
+  master_plus: 'master',
+};
+
+export function normalizeTier(value: string | null, fallback: Tier): Tier {
+  if (value && (TIER_OPTIONS as readonly string[]).includes(value)) {
+    return value as Tier;
+  }
+
+  return (value && LEGACY_TIER_ALIASES[value]) || fallback;
+}
 
 export type SortOption = 'tier' | 'win_rate' | 'pick_rate' | 'difficulty';
 export type DifficultyTag = 'easy' | 'medium' | 'hard' | null;

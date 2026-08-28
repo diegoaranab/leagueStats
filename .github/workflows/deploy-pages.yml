@@ -17,7 +17,7 @@ env:
   SOLO_OUTPUT_ROOT: apps/web/public/data
   TEAMPLAY_OUTPUT_ROOT: apps/web/public/data/teamplay
   DATA_REGIONS: 'na lan las'
-  DATA_TIERS: 'bronze silver gold_plus platinum_plus emerald_plus diamond_plus d2_plus master_plus'
+  DATA_TIERS: 'iron bronze silver gold platinum emerald diamond master'
   DATA_WINDOWS: 'current 7d 14d'
   DATA_LANES: 'top jungle middle bottom support'
 
