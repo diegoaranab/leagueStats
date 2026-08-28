@@ -25,7 +25,7 @@ export interface ModeDetail {
 export const DEFAULT_RESULTS_QUERY: ResultsQuery = {
   mode: 'solo',
   region: 'na',
-  tier: 'diamond_plus',
+  tier: 'diamond',
   window: '7d',
   lane: 'top',
   sort: 'tier',
@@ -63,14 +63,14 @@ export const REGION_SHORT_LABELS: Record<Region, string> = {
 };
 
 export const TIER_LABELS: Record<Tier, string> = {
-  bronze: 'Bronze+',
-  silver: 'Silver+',
-  gold_plus: 'Gold+',
-  platinum_plus: 'Platinum+',
-  emerald_plus: 'Emerald+',
-  diamond_plus: 'Diamond+',
-  d2_plus: 'D2+',
-  master_plus: 'Master+',
+  iron: 'Iron',
+  bronze: 'Bronze',
+  silver: 'Silver',
+  gold: 'Gold',
+  platinum: 'Platinum',
+  emerald: 'Emerald',
+  diamond: 'Diamond',
+  master: 'Master',
 };
 
 export const WINDOW_LABELS: Record<WindowKey, string> = {

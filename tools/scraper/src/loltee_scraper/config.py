@@ -5,14 +5,14 @@ from typing import Iterable, List
 DEFAULT_LANES = ["top", "jungle", "middle", "bottom", "support"]
 SUPPORTED_REGIONS = ["na", "lan", "las"]
 SUPPORTED_TIERS = [
+    "iron",
     "bronze",
     "silver",
-    "gold_plus",
-    "platinum_plus",
-    "emerald_plus",
-    "diamond_plus",
-    "d2_plus",
-    "master_plus",
+    "gold",
+    "platinum",
+    "emerald",
+    "diamond",
+    "master",
 ]
 SUPPORTED_WINDOWS = ["current", "7d", "14d"]
 

@@ -10,7 +10,7 @@ from .scraper import ScrapeConfig, scrape_to_file
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Scrape LoLalytics tier list by lane.")
     parser.add_argument("--region", default="na", choices=SUPPORTED_REGIONS)
-    parser.add_argument("--tier", default="diamond_plus", choices=SUPPORTED_TIERS)
+    parser.add_argument("--tier", default="diamond", choices=SUPPORTED_TIERS)
     parser.add_argument("--window", default="7d", choices=SUPPORTED_WINDOWS)
     parser.add_argument(
         "--lanes",

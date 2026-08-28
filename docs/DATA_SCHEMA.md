@@ -27,7 +27,7 @@ Top-level shape:
 
 - `source`: string
 - `region`: `na | lan | las`
-- `tier`: `gold_plus | platinum_plus | emerald_plus | diamond_plus | d2_plus | master_plus`
+- `tier`: `iron | bronze | silver | gold | platinum | emerald | diamond | master`
 - `window`: `current | 7d | 14d`
 - `min_pick_rate`: number
 - `allowed_tiers`: string[]
