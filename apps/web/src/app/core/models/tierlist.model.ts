@@ -38,7 +38,7 @@ export function normalizeTier(value: string | null, fallback: Tier): Tier {
   return fallback;
 }
 
-export type SortOption = 'tier' | 'win_rate' | 'pick_rate' | 'difficulty';
+export type SortOption = 'tier' | 'win_rate' | 'pick_rate' | 'difficulty' | 'ban_priority';
 export type DifficultyTag = 'easy' | 'medium' | 'hard' | null;
 export type DifficultyFilter = DifficultyTag | 'all';
 

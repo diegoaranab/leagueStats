@@ -12,6 +12,7 @@ import { ChampionCardComponent } from '../../components/champion-card/champion-c
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
+import { RecommendedBansComponent } from '../../components/recommended-bans/recommended-bans.component';
 import {
   DEFAULT_RESULTS_QUERY,
   LANE_LABELS,
@@ -51,6 +52,7 @@ import { TierlistService } from '../../core/services/tierlist.service';
     LaneTabsComponent,
     FilterBarComponent,
     ChampionCardComponent,
+    RecommendedBansComponent,
     InfoTooltipComponent,
   ],
   templateUrl: './results-page.component.html',
@@ -78,12 +80,14 @@ export class ResultsPageComponent implements OnInit {
   availableLanes: Lane[] = [...LANE_OPTIONS];
   laneCounts: Partial<Record<Lane, number>> = {};
   champions: Champion[] = [];
+  recommendedBans: Champion[] = [];
   difficultyFilter: DifficultyFilter = 'all';
 
   query: ResultsQuery = { ...DEFAULT_RESULTS_QUERY };
 
   private dataset: TierlistDataset | null = null;
   private datasetKey = '';
+  private banPriorities = new Map<string, number>();
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -101,9 +105,12 @@ export class ResultsPageComponent implements OnInit {
         const tier = normalizeTier(rawTier, DEFAULT_RESULTS_QUERY.tier);
         const window = this.readParam(params.get('window'), WINDOW_OPTIONS, DEFAULT_RESULTS_QUERY.window);
         const lane = this.readParam(params.get('lane'), LANE_OPTIONS, DEFAULT_RESULTS_QUERY.lane);
+        const sortOptions: readonly SortOption[] = mode === 'solo'
+          ? ['tier', 'win_rate', 'pick_rate', 'difficulty', 'ban_priority']
+          : ['tier', 'win_rate', 'pick_rate', 'difficulty'];
         const sort = this.readParam<SortOption>(
           params.get('sort'),
-          ['tier', 'win_rate', 'pick_rate', 'difficulty'] as const,
+          sortOptions,
           DEFAULT_RESULTS_QUERY.sort,
         );
 
@@ -169,6 +176,10 @@ export class ResultsPageComponent implements OnInit {
     return champion.name;
   }
 
+  banPriorityFor(champion: Champion): number | null {
+    return this.banPriorities.get(champion.name) ?? null;
+  }
+
   get currentMode() {
     return this.modeDetails[this.query.mode];
   }
@@ -203,6 +214,8 @@ export class ResultsPageComponent implements OnInit {
     this.datasetKey = nextKey;
     this.dataset = null;
     this.champions = [];
+    this.recommendedBans = [];
+    this.banPriorities.clear();
     this.laneCounts = {};
     this.errorMessage = '';
     this.isLoading = true;
@@ -257,6 +270,17 @@ export class ResultsPageComponent implements OnInit {
     }
 
     const laneChampions = this.dataset.data[this.query.lane] ?? [];
+    const rankedBans = this.query.mode === 'solo'
+      ? laneChampions
+          .filter((champion) => champion.pbi !== null && champion.pbi > 0)
+          .sort((a, b) => this.compareBanPriority(a, b))
+      : [];
+
+    this.banPriorities = new Map(
+      rankedBans.map((champion, index) => [champion.name, index + 1]),
+    );
+    this.recommendedBans = rankedBans.slice(0, 3);
+
     let next = [...laneChampions];
 
     if (this.difficultyFilter !== 'all') {
@@ -273,6 +297,9 @@ export class ResultsPageComponent implements OnInit {
       case 'difficulty':
         next.sort((a, b) => (a.difficulty_order ?? 999) - (b.difficulty_order ?? 999));
         break;
+      case 'ban_priority':
+        next.sort((a, b) => this.compareBanPriority(a, b));
+        break;
       default:
         next.sort((a, b) => {
           const rankA = this.query.mode === 'teamplay'
@@ -288,6 +315,24 @@ export class ResultsPageComponent implements OnInit {
     }
 
     this.champions = next;
+  }
+
+  private compareBanPriority(a: Champion, b: Champion): number {
+    const positiveA = a.pbi !== null && a.pbi > 0;
+    const positiveB = b.pbi !== null && b.pbi > 0;
+
+    if (positiveA !== positiveB) {
+      return positiveA ? -1 : 1;
+    }
+
+    if (positiveA && positiveB && a.pbi !== b.pbi) {
+      return (b.pbi ?? 0) - (a.pbi ?? 0);
+    }
+
+    const rankA = a.filtered_rank ?? a.rank ?? Number.MAX_SAFE_INTEGER;
+    const rankB = b.filtered_rank ?? b.rank ?? Number.MAX_SAFE_INTEGER;
+
+    return rankA - rankB || a.name.localeCompare(b.name);
   }
 
   private updateQuery(update: Partial<ResultsQuery>): void {

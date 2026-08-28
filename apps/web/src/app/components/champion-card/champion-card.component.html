@@ -82,8 +82,8 @@
 
     <div class="secondary-row" *ngIf="mode === 'solo'; else teamplaySecondary">
       <div>
-        <span>Ban rate</span>
-        <strong>{{ formatPercent(champion.ban_rate) }}</strong>
+        <span>Ban priority</span>
+        <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong>
       </div>
       <div>
         <span>Mastery gap</span>
