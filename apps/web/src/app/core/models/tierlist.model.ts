@@ -31,7 +31,11 @@ export function normalizeTier(value: string | null, fallback: Tier): Tier {
     return value as Tier;
   }
 
-  return (value && LEGACY_TIER_ALIASES[value]) || fallback;
+  if (value && Object.hasOwn(LEGACY_TIER_ALIASES, value)) {
+    return LEGACY_TIER_ALIASES[value] ?? fallback;
+  }
+
+  return fallback;
 }
 
 export type SortOption = 'tier' | 'win_rate' | 'pick_rate' | 'difficulty';
