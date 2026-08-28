@@ -1,60 +1,222 @@
 .champion-card {
-  border: 1px solid var(--border);
   display: grid;
+  align-content: start;
   gap: 0.8rem;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  background: rgba(12, 20, 31, 0.88);
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
-.head {
+.champion-card:hover {
+  border-color: rgba(111, 191, 232, 0.24);
+  background: rgba(15, 25, 38, 0.94);
+}
+
+.card-top {
   display: grid;
-  grid-template-columns: 56px 1fr auto;
-  gap: 0.7rem;
+  grid-template-columns: 48px 60px minmax(0, 1fr);
+  gap: 0.75rem;
   align-items: center;
+  min-width: 0;
 }
 
-.head img {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+.rank {
+  display: grid;
+  gap: 0.05rem;
+  align-self: start;
+}
+
+.rank span,
+.lane-label {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.rank strong {
+  font-size: 1.35rem;
+}
+
+.portrait {
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(197, 163, 92, 0.25);
+  border-radius: 14px;
   object-fit: cover;
 }
 
-.summary h3 {
-  margin: 0 0 0.3rem;
+.identity {
+  display: grid;
+  gap: 0.14rem;
+  min-width: 0;
 }
 
-.chips {
+.lane-label {
+  color: var(--mat-sys-secondary);
+}
+
+.identity h3 {
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headline-tags {
   display: flex;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  align-items: center;
 }
 
-.difficulty {
-  padding: 0.22rem 0.55rem;
-  border-radius: 999px;
-  text-transform: uppercase;
-  font-size: 0.72rem;
+.tier-label,
+.difficulty-label {
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
-.kpis {
+.tier-label {
+  color: #f2db9d;
+}
+
+.difficulty-label {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  color: color-mix(in srgb, var(--difficulty-color) 88%, white 12%);
+}
+
+.difficulty-label::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--difficulty-color);
+}
+
+.stat-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.kpis small {
-  display: block;
-  color: var(--ink-1);
-}
-
-.kpis strong {
-  font-size: 1rem;
-}
-
-.advanced-grid {
+.stat {
   display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.65rem 0.55rem;
+}
+
+.stat + .stat {
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.stat span,
+.secondary-row span {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.stat strong {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.champion-card--teamplay .stat:first-child strong {
+  color: #cfeeff;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.signal-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.signal-badge--gold {
+  background: rgba(197, 163, 92, 0.12);
+  color: #f0d897;
+}
+
+.signal-badge--blue {
+  background: rgba(111, 191, 232, 0.12);
+  color: #cfeeff;
+}
+
+.card-details {
+  min-width: 0;
+}
+
+.card-details summary {
+  width: max-content;
+  min-height: 32px;
+  padding: 0.35rem 0;
+  color: var(--mat-sys-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card-details[open] summary {
+  margin-bottom: 0.55rem;
+}
+
+.secondary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
-.advanced-grid p {
-  margin: 0;
+.secondary-row div {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.secondary-row strong {
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: none) {
+  .champion-card:hover {
+    border-color: var(--border-subtle);
+    background: rgba(12, 20, 31, 0.88);
+  }
+}
+
+@media (max-width: 380px) {
+  .card-top {
+    grid-template-columns: 42px 54px minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .portrait {
+    width: 54px;
+    height: 54px;
+  }
+
+  .stat {
+    padding-inline: 0.35rem;
+  }
 }

@@ -3,11 +3,17 @@ import { Component } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
+import { ModeSelectorComponent } from '../../components/mode-selector/mode-selector.component';
+import {
+  DEFAULT_RESULTS_QUERY,
+  ProductMode,
+  REGION_LABELS,
+  TIER_LABELS,
+  WINDOW_LABELS,
+} from '../../core/models/selection.model';
 import {
   REGION_OPTIONS,
   Region,
@@ -23,10 +29,9 @@ import {
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
-    MatInputModule,
     MatSelectModule,
+    ModeSelectorComponent,
   ],
   templateUrl: './onboarding-page.component.html',
   styleUrl: './onboarding-page.component.css',
@@ -35,11 +40,14 @@ export class OnboardingPageComponent {
   readonly regionOptions = REGION_OPTIONS;
   readonly tierOptions = TIER_OPTIONS;
   readonly windowOptions = WINDOW_OPTIONS;
-
+  readonly regionLabels = REGION_LABELS;
+  readonly tierLabels = TIER_LABELS;
+  readonly windowLabels = WINDOW_LABELS;
   readonly form = this.formBuilder.group({
-    tier: this.formBuilder.control<Tier>('diamond_plus', Validators.required),
-    region: this.formBuilder.control<Region>('na', Validators.required),
-    window: this.formBuilder.control<WindowKey>('7d', Validators.required),
+    mode: this.formBuilder.control<ProductMode>(DEFAULT_RESULTS_QUERY.mode, Validators.required),
+    tier: this.formBuilder.control<Tier>(DEFAULT_RESULTS_QUERY.tier, Validators.required),
+    region: this.formBuilder.control<Region>(DEFAULT_RESULTS_QUERY.region, Validators.required),
+    window: this.formBuilder.control<WindowKey>(DEFAULT_RESULTS_QUERY.window, Validators.required),
   });
 
   constructor(
@@ -52,14 +60,15 @@ export class OnboardingPageComponent {
       return;
     }
 
-    const { tier, region, window } = this.form.getRawValue();
+    const { mode, tier, region, window } = this.form.getRawValue();
     this.router.navigate(['/results'], {
       queryParams: {
+        mode,
         tier,
         region,
         window,
-        lane: 'top',
-        sort: 'tier',
+        lane: DEFAULT_RESULTS_QUERY.lane,
+        sort: DEFAULT_RESULTS_QUERY.sort,
       },
     });
   }

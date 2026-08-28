@@ -1,31 +1,75 @@
-<mat-card class="bar">
-  <div class="context">
-    <mat-chip-set>
-      <mat-chip>Región: {{ region | uppercase }}</mat-chip>
-      <mat-chip>Tier: {{ tier }}</mat-chip>
-      <mat-chip>Ventana: {{ window }}</mat-chip>
-    </mat-chip-set>
+<section class="bar" [class.bar--drawer]="isCompact" aria-label="Results filters">
+  <header class="bar__header" *ngIf="isCompact">
+    <div>
+      <p class="eyebrow">Filters</p>
+      <h2>Refine results</h2>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Close filters"
+      (click)="closeRequested.emit()"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <div class="filter-group filter-group--mode">
+    <span class="filter-label">Mode</span>
+    <app-mode-selector
+      [selectedMode]="mode"
+      variant="compact"
+      (modeChange)="modeChange.emit($event)"
+    ></app-mode-selector>
   </div>
 
-  <div class="controls">
+  <div class="control-grid">
     <mat-form-field appearance="outline">
-      <mat-label>Ordenar por</mat-label>
+      <mat-label>Region</mat-label>
+      <mat-select [value]="region" (valueChange)="regionChange.emit($event)">
+        <mat-option *ngFor="let option of regionOptions" [value]="option">
+          {{ regionLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Rank</mat-label>
+      <mat-select [value]="tier" (valueChange)="tierChange.emit($event)">
+        <mat-option *ngFor="let option of tierOptions" [value]="option">
+          {{ tierLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Window</mat-label>
+      <mat-select [value]="window" (valueChange)="windowChange.emit($event)">
+        <mat-option *ngFor="let option of windowOptions" [value]="option">
+          {{ windowLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sort by</mat-label>
       <mat-select [value]="sort" (valueChange)="sortChange.emit($event)">
-        <mat-option value="tier">Tier / ranking</mat-option>
+        <mat-option value="tier">Tier rank</mat-option>
         <mat-option value="win_rate">Win rate</mat-option>
         <mat-option value="pick_rate">Pick rate</mat-option>
-        <mat-option value="difficulty">Dificultad</mat-option>
+        <mat-option value="difficulty">Difficulty</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Dificultad</mat-label>
+      <mat-label>Difficulty</mat-label>
       <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
-        <mat-option value="all">Todas</mat-option>
-        <mat-option value="easy">Fácil</mat-option>
-        <mat-option value="medium">Media</mat-option>
-        <mat-option value="hard">Difícil</mat-option>
+        <mat-option value="all">All levels</mat-option>
+        <mat-option value="easy">Easy</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="hard">Hard</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-</mat-card>
+</section>

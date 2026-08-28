@@ -1,40 +1,118 @@
-<section class="results-layout">
-  <header class="headline">
-    <div>
-      <h2>Picks recomendados</h2>
-      <p>Solo se muestran stats esenciales. Expande cada card para ver detalles avanzados.</p>
+<mat-drawer-container class="results-shell" autosize>
+  <mat-drawer
+    class="results-shell__drawer"
+    mode="over"
+    [opened]="filtersOpen"
+    (closedStart)="filtersOpen = false"
+  >
+    <app-filter-bar
+      [mode]="query.mode"
+      [region]="query.region"
+      [tier]="query.tier"
+      [window]="query.window"
+      [sort]="query.sort"
+      [difficultyFilter]="difficultyFilter"
+      [isCompact]="true"
+      (modeChange)="onModeChange($event)"
+      (regionChange)="onRegionChange($event)"
+      (tierChange)="onTierChange($event)"
+      (windowChange)="onWindowChange($event)"
+      (sortChange)="onSortChange($event)"
+      (difficultyChange)="onDifficultyChange($event)"
+      (closeRequested)="closeFilters()"
+    ></app-filter-bar>
+  </mat-drawer>
+
+  <mat-drawer-content class="results-shell__content">
+    <section class="results-header surface-panel">
+      <div class="results-header__main">
+        <div class="results-header__copy">
+          <p class="eyebrow">{{ currentMode.shortLabel }} recommendations</p>
+          <h1>{{ laneHeadline }}</h1>
+          <p class="context-line">
+            <span>{{ regionShortLabels[query.region] }}</span>
+            <span>{{ tierLabels[query.tier] }}</span>
+            <span>{{ windowLabels[query.window] }}</span>
+            <span>{{ champions.length }} picks</span>
+          </p>
+        </div>
+
+        <div class="results-header__actions">
+          <button *ngIf="isCompact()" mat-stroked-button type="button" (click)="openFilters()">
+            <span class="material-symbols-outlined button-icon">tune</span>
+            Filters
+          </button>
+          <a mat-flat-button color="primary" routerLink="/">Change setup</a>
+        </div>
+      </div>
+
+      <div class="dataset-line" *ngIf="datasetMeta">
+        <span class="freshness" [class.freshness--warning]="hasDatasetWarning">
+          <span class="freshness__dot" aria-hidden="true"></span>
+          {{ hasDatasetWarning ? 'Data needs attention' : 'Dataset ready' }}
+        </span>
+        <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span>
+        <span *ngIf="query.mode === 'teamplay' && datasetMeta.leagues_used?.length">
+          {{ datasetMeta.leagues_used?.join(' · ') }}
+        </span>
+        <span *ngIf="query.mode === 'teamplay' && datasetMeta.patches_used?.length">
+          Patches {{ datasetMeta.patches_used?.join(', ') }}
+        </span>
+      </div>
+
+      <div class="warning-banner" *ngIf="datasetMeta && hasDatasetWarning">
+        <span class="material-symbols-outlined">warning</span>
+        <div>
+          <strong>Data quality note</strong>
+          <span>{{ warningMessage }}</span>
+        </div>
+      </div>
+    </section>
+
+    <app-filter-bar
+      *ngIf="!isCompact()"
+      [mode]="query.mode"
+      [region]="query.region"
+      [tier]="query.tier"
+      [window]="query.window"
+      [sort]="query.sort"
+      [difficultyFilter]="difficultyFilter"
+      (modeChange)="onModeChange($event)"
+      (regionChange)="onRegionChange($event)"
+      (tierChange)="onTierChange($event)"
+      (windowChange)="onWindowChange($event)"
+      (sortChange)="onSortChange($event)"
+      (difficultyChange)="onDifficultyChange($event)"
+    ></app-filter-bar>
+
+    <section class="lane-section" aria-labelledby="lane-heading">
+      <div class="lane-section__header">
+        <h2 id="lane-heading">Choose a lane</h2>
+        <app-info-tooltip></app-info-tooltip>
+      </div>
+
+      <app-lane-tabs
+        [lanes]="availableLanes"
+        [selectedLane]="query.lane"
+        [laneCounts]="laneCounts"
+        (laneChange)="onLaneChange($event)"
+      ></app-lane-tabs>
+    </section>
+
+    <div class="state" *ngIf="isLoading">
+      <mat-spinner diameter="42"></mat-spinner>
     </div>
-    <app-info-tooltip></app-info-tooltip>
-  </header>
 
-  <app-filter-bar
-    [region]="query.region"
-    [tier]="query.tier"
-    [window]="query.window"
-    [sort]="query.sort"
-    [difficultyFilter]="difficultyFilter"
-    (sortChange)="onSortChange($event)"
-    (difficultyChange)="onDifficultyChange($event)"
-  ></app-filter-bar>
+    <div class="state error" *ngIf="!isLoading && errorMessage">
+      {{ errorMessage }}
+    </div>
 
-  <app-lane-tabs
-    [lanes]="availableLanes"
-    [selectedLane]="query.lane"
-    (laneChange)="onLaneChange($event)"
-  ></app-lane-tabs>
-
-  <div class="state" *ngIf="isLoading">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <div class="state error" *ngIf="!isLoading && errorMessage">
-    {{ errorMessage }}
-  </div>
-
-  <section class="grid" *ngIf="!isLoading && !errorMessage">
-    <app-champion-card
-      *ngFor="let champion of champions; trackBy: trackByChampion"
-      [champion]="champion"
-    ></app-champion-card>
-  </section>
-</section>
+    <section class="grid" aria-label="Champion recommendations" *ngIf="!isLoading && !errorMessage">
+      <app-champion-card
+        *ngFor="let champion of champions; trackBy: trackByChampion"
+        [champion]="champion"
+        [mode]="query.mode"
+      ></app-champion-card>
+    </section>
+  </mat-drawer-content>
+</mat-drawer-container>

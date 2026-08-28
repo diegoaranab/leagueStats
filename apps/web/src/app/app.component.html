@@ -1,11 +1,37 @@
-<mat-toolbar class="topbar">
-  <div class="brand-wrap">
-    <span class="brand">LOL TEEEST</span>
-    <small class="tagline">Picks claros para tu elo</small>
-  </div>
-  <a mat-flat-button color="primary" routerLink="/">Inicio</a>
-</mat-toolbar>
+<div class="app-shell">
+  <mat-toolbar class="topbar">
+    <a class="brand-wrap" routerLink="/">
+      <span class="brand-mark">LS</span>
+      <span class="brand-copy">
+        <small class="brand-kicker">League of Legends</small>
+        <span class="brand">LeagueStats</span>
+      </span>
+    </a>
 
-<main class="shell">
-  <router-outlet></router-outlet>
-</main>
+    <nav class="toolbar-nav" aria-label="Primary">
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Home
+      </a>
+      <a
+        mat-flat-button
+        color="primary"
+        routerLink="/results"
+        routerLinkActive="is-active"
+      >
+        Results
+      </a>
+    </nav>
+  </mat-toolbar>
+
+  <div class="app-layout">
+    <main class="shell">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

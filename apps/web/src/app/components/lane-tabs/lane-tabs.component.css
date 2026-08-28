@@ -1,17 +1,56 @@
-.lane-group {
+.lane-scroll {
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+  overscroll-behavior-inline: contain;
+}
+
+.lane-group {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+  gap: 0.4rem;
+  background: transparent;
 }
 
 .lane-group mat-button-toggle {
-  text-transform: uppercase;
-  font-weight: 600;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.lane-group mat-button-toggle ::ng-deep .mat-button-toggle-button-content {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+}
+
+.lane-copy {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: baseline;
+}
+
+.lane-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+small {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 @media (max-width: 900px) {
   .lane-group {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.3rem;
+    display: inline-flex;
+    width: auto;
+    min-width: max-content;
+  }
+
+  .lane-group mat-button-toggle {
+    min-width: 100px;
   }
 }

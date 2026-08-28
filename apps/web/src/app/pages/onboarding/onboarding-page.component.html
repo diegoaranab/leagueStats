@@ -1,33 +1,59 @@
-<section class="hero">
-  <mat-card class="panel">
-    <header>
-      <h1>Encuentra picks fuertes para tu contexto real</h1>
-      <p>Selecciona tu elo, servidor y ventana para ver campeones recomendados.</p>
+<section class="onboarding-page">
+  <div class="hero-copy">
+    <p class="eyebrow">Context-Aware Pick Guidance</p>
+    <h1>Find stronger picks for the way you play.</h1>
+    <p class="hero-description meta-text">
+      Choose your queue and context, then scan recommendations built for your games.
+    </p>
+  </div>
+
+  <section class="setup-card surface-panel" aria-labelledby="setup-title">
+    <header class="setup-card__header">
+      <div>
+        <p class="eyebrow">Choose mode</p>
+        <h2 id="setup-title">Set up your tier list</h2>
+      </div>
     </header>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Tu rango actual</mat-label>
-        <mat-select formControlName="tier">
-          <mat-option *ngFor="let tier of tierOptions" [value]="tier">{{ tier }}</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <app-mode-selector
+      [selectedMode]="form.controls.mode.value"
+      (modeChange)="form.controls.mode.setValue($event)"
+    ></app-mode-selector>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Tu servidor</mat-label>
-        <mat-select formControlName="region">
-          <mat-option *ngFor="let region of regionOptions" [value]="region">{{ region | uppercase }}</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="setup-form">
+      <h3>Choose context</h3>
+      <div class="selector-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Region</mat-label>
+          <mat-select formControlName="region">
+            <mat-option *ngFor="let region of regionOptions" [value]="region">
+              {{ regionLabels[region] }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Ventana del meta</mat-label>
-        <mat-select formControlName="window">
-          <mat-option *ngFor="let window of windowOptions" [value]="window">{{ window }}</mat-option>
-        </mat-select>
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Rank</mat-label>
+          <mat-select formControlName="tier">
+            <mat-option *ngFor="let tier of tierOptions" [value]="tier">
+              {{ tierLabels[tier] }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <button mat-flat-button color="primary" type="submit">Ver mis picks</button>
+        <mat-form-field appearance="outline">
+          <mat-label>Window</mat-label>
+          <mat-select formControlName="window">
+            <mat-option *ngFor="let window of windowOptions" [value]="window">
+              {{ windowLabels[window] }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit" class="cta-button">
+        View recommendations
+      </button>
     </form>
-  </mat-card>
+  </section>
 </section>
