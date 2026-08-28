@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -21,7 +20,6 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
   imports: [
     CommonModule,
     MatButtonModule,
-    MatDividerModule,
     MatFormFieldModule,
     MatSelectModule,
     ModeSelectorComponent,

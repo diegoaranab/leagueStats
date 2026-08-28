@@ -1,12 +1,11 @@
-<section class="bar">
-  <header class="bar__header">
+<section class="bar" [class.bar--drawer]="isCompact" aria-label="Results filters">
+  <header class="bar__header" *ngIf="isCompact">
     <div>
       <p class="eyebrow">Filters</p>
-      <h3>Refine the board</h3>
+      <h2>Refine results</h2>
     </div>
 
     <button
-      *ngIf="isCompact"
       mat-icon-button
       type="button"
       aria-label="Close filters"
@@ -16,16 +15,8 @@
     </button>
   </header>
 
-  <p class="meta-text">
-    {{ modeDetails[mode].description }}
-  </p>
-
-  <div class="bar__section">
-    <div class="section-title">
-      <strong>Mode</strong>
-      <span>Switch between ladder-first and coordinated-play recommendations.</span>
-    </div>
-
+  <div class="filter-group filter-group--mode">
+    <span class="filter-label">Mode</span>
     <app-mode-selector
       [selectedMode]="mode"
       variant="compact"
@@ -33,77 +24,52 @@
     ></app-mode-selector>
   </div>
 
-  <mat-divider></mat-divider>
+  <div class="control-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Region</mat-label>
+      <mat-select [value]="region" (valueChange)="regionChange.emit($event)">
+        <mat-option *ngFor="let option of regionOptions" [value]="option">
+          {{ regionLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-  <div class="bar__section">
-    <div class="section-title">
-      <strong>Context</strong>
-      <span>Region, rank, and time window update the dataset immediately.</span>
-    </div>
+    <mat-form-field appearance="outline">
+      <mat-label>Rank</mat-label>
+      <mat-select [value]="tier" (valueChange)="tierChange.emit($event)">
+        <mat-option *ngFor="let option of tierOptions" [value]="option">
+          {{ tierLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-    <div class="controls">
-      <mat-form-field appearance="outline">
-        <mat-label>Region</mat-label>
-        <mat-select [value]="region" (valueChange)="regionChange.emit($event)">
-          <mat-option *ngFor="let option of regionOptions" [value]="option">
-            {{ regionLabels[option] }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Window</mat-label>
+      <mat-select [value]="window" (valueChange)="windowChange.emit($event)">
+        <mat-option *ngFor="let option of windowOptions" [value]="option">
+          {{ windowLabels[option] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Rank</mat-label>
-        <mat-select [value]="tier" (valueChange)="tierChange.emit($event)">
-          <mat-option *ngFor="let option of tierOptions" [value]="option">
-            {{ tierLabels[option] }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Sort by</mat-label>
+      <mat-select [value]="sort" (valueChange)="sortChange.emit($event)">
+        <mat-option value="tier">Tier rank</mat-option>
+        <mat-option value="win_rate">Win rate</mat-option>
+        <mat-option value="pick_rate">Pick rate</mat-option>
+        <mat-option value="difficulty">Difficulty</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Window</mat-label>
-        <mat-select [value]="window" (valueChange)="windowChange.emit($event)">
-          <mat-option *ngFor="let option of windowOptions" [value]="option">
-            {{ windowLabels[option] }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
-
-  <mat-divider></mat-divider>
-
-  <div class="bar__section">
-    <div class="section-title">
-      <strong>Presentation</strong>
-      <span>Sort the lane and trim the list by execution difficulty.</span>
-    </div>
-
-    <div class="controls controls--compact">
-      <mat-form-field appearance="outline">
-        <mat-label>Sort by</mat-label>
-        <mat-select [value]="sort" (valueChange)="sortChange.emit($event)">
-          <mat-option value="tier">Recommended rank</mat-option>
-          <mat-option value="win_rate">Win rate</mat-option>
-          <mat-option value="pick_rate">Pick rate</mat-option>
-          <mat-option value="difficulty">Difficulty</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Difficulty</mat-label>
-        <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
-          <mat-option value="all">All levels</mat-option>
-          <mat-option value="easy">Easy</mat-option>
-          <mat-option value="medium">Medium</mat-option>
-          <mat-option value="hard">Hard</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
-
-  <div class="filter-note">
-    <strong>{{ modeDetails[mode].label }}</strong>
-    <span>{{ modeDetails[mode].helper }}</span>
+    <mat-form-field appearance="outline">
+      <mat-label>Difficulty</mat-label>
+      <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
+        <mat-option value="all">All levels</mat-option>
+        <mat-option value="easy">Easy</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="hard">Hard</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 </section>

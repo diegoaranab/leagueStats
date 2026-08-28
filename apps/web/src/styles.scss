@@ -129,10 +129,16 @@ h2,
 h3,
 h4 {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-family: var(--font-display);
   line-height: 1.05;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.025em;
 }
 
 p {
@@ -155,7 +161,7 @@ p {
 
 .surface-panel {
   border: 1px solid var(--border-subtle);
-  border-radius: 28px;
+  border-radius: 22px;
   background: var(--surface-panel);
   box-shadow: var(--shadow-soft);
 }
@@ -185,7 +191,7 @@ p {
 }
 
 .mat-mdc-card {
-  border-radius: 28px;
+  border-radius: 18px;
   background: var(--surface-panel);
   box-shadow: none;
 }

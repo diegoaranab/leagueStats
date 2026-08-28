@@ -3,14 +3,12 @@ import { Component } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
 import { ModeSelectorComponent } from '../../components/mode-selector/mode-selector.component';
 import {
   DEFAULT_RESULTS_QUERY,
-  MODE_DETAILS,
   ProductMode,
   REGION_LABELS,
   TIER_LABELS,
@@ -31,7 +29,6 @@ import {
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
     ModeSelectorComponent,
@@ -43,25 +40,9 @@ export class OnboardingPageComponent {
   readonly regionOptions = REGION_OPTIONS;
   readonly tierOptions = TIER_OPTIONS;
   readonly windowOptions = WINDOW_OPTIONS;
-  readonly modeDetails = MODE_DETAILS;
   readonly regionLabels = REGION_LABELS;
   readonly tierLabels = TIER_LABELS;
   readonly windowLabels = WINDOW_LABELS;
-  readonly setupHighlights = [
-    {
-      title: 'Mode-first recommendations',
-      description: 'Solo Queue and Flex / Clash stay separate so the board reflects the way you actually queue.',
-    },
-    {
-      title: 'Clean scanning after submit',
-      description: 'Lane pills, priority cards, and tighter stat hierarchy make the next page easier to read fast.',
-    },
-    {
-      title: 'Dataset trust at a glance',
-      description: 'Freshness, partial coverage, and teamplay source context stay visible without feeling noisy.',
-    },
-  ];
-
   readonly form = this.formBuilder.group({
     mode: this.formBuilder.control<ProductMode>(DEFAULT_RESULTS_QUERY.mode, Validators.required),
     tier: this.formBuilder.control<Tier>(DEFAULT_RESULTS_QUERY.tier, Validators.required),

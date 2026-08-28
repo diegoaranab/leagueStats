@@ -1,57 +1,51 @@
 <mat-card class="champion-card" [class.champion-card--teamplay]="mode === 'teamplay'">
   <div class="card-top">
-    <div class="rank-badge">
-      <span>{{ mode === 'teamplay' ? 'Teamplay' : 'Rank' }}</span>
+    <div class="rank">
+      <span>{{ mode === 'teamplay' ? 'Team' : 'Rank' }}</span>
       <strong>#{{ primaryRank }}</strong>
     </div>
 
-    <div class="portrait-wrap">
-      <div class="portrait-glow"></div>
-      <img [src]="champion.icon_url || fallbackIcon" [alt]="champion.name" loading="lazy">
-    </div>
+    <img
+      class="portrait"
+      [src]="champion.icon_url || fallbackIcon"
+      [alt]="champion.name"
+      loading="lazy"
+    >
 
-    <div class="summary">
-      <p class="lane-label">{{ laneLabels[champion.lane] }} lane</p>
+    <div class="identity">
+      <span class="lane-label">{{ laneLabels[champion.lane] }}</span>
       <h3>{{ champion.name }}</h3>
-      <p class="summary-note">
-        {{
-          mode === 'teamplay'
-            ? 'Coordinated-play signal with pro draft context.'
-            : 'Ladder-first recommendation for your selected context.'
-        }}
-      </p>
-    </div>
-
-    <div class="headline-tags">
-      <span class="tier-pill">{{ champion.tier }}</span>
-      <span
-        *ngIf="champion.difficulty"
-        class="difficulty-pill"
-        [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
-      >
-        {{ champion.difficulty | titlecase }}
-      </span>
+      <div class="headline-tags">
+        <span class="tier-label">Tier {{ champion.tier }}</span>
+        <span
+          *ngIf="champion.difficulty"
+          class="difficulty-label"
+          [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
+        >
+          {{ champion.difficulty | titlecase }}
+        </span>
+      </div>
     </div>
   </div>
 
   <div class="stat-grid" *ngIf="mode === 'solo'; else teamplayStats">
-    <div class="stat-card stat-card--primary">
+    <div class="stat">
       <span>Win rate</span>
       <strong>{{ formatPercent(champion.win_rate) }}</strong>
     </div>
-    <div class="stat-card">
+    <div class="stat">
       <span>Pick rate</span>
       <strong>{{ formatPercent(champion.pick_rate) }}</strong>
     </div>
-    <div class="stat-card">
+    <div class="stat">
       <span>Best win est.</span>
       <strong>{{ formatPercent(champion.best_win_est) }}</strong>
     </div>
   </div>
 
   <ng-template #teamplayStats>
-    <div class="stat-grid stat-grid--teamplay">
-      <div class="stat-card stat-card--primary">
+    <div class="stat-grid">
+      <div class="stat">
         <span>Draft score</span>
         <strong>
           {{
@@ -61,11 +55,11 @@
           }}
         </strong>
       </div>
-      <div class="stat-card">
+      <div class="stat">
         <span>Pro picks</span>
         <strong>{{ champion.pro_pick_count ?? '--' }}</strong>
       </div>
-      <div class="stat-card">
+      <div class="stat">
         <span>Pro bans</span>
         <strong>{{ champion.pro_ban_count ?? '--' }}</strong>
       </div>
@@ -83,46 +77,40 @@
     </span>
   </div>
 
-  <div class="secondary-row" *ngIf="mode === 'solo'; else teamplaySecondary">
-    <div>
-      <span>Difficulty</span>
-      <strong>{{ champion.difficulty ? (champion.difficulty | titlecase) : 'N/A' }}</strong>
-    </div>
-    <div>
-      <span>Ban rate</span>
-      <strong>{{ formatPercent(champion.ban_rate) }}</strong>
-    </div>
-    <div>
-      <span>Lane delta</span>
-      <strong>{{ formatNumber(champion.delta) }}</strong>
-    </div>
-  </div>
+  <details class="card-details">
+    <summary>More details</summary>
 
-  <ng-template #teamplaySecondary>
-    <div class="secondary-row">
+    <div class="secondary-row" *ngIf="mode === 'solo'; else teamplaySecondary">
       <div>
-        <span>Solo rank</span>
-        <strong>#{{ champion.filtered_rank ?? champion.rank ?? '--' }}</strong>
+        <span>Ban rate</span>
+        <strong>{{ formatPercent(champion.ban_rate) }}</strong>
       </div>
       <div>
-        <span>Tier</span>
-        <strong>{{ champion.tier }}</strong>
+        <span>Mastery gap</span>
+        <strong>{{ formatPercent(champion.mastery_gap_pct) }}</strong>
       </div>
       <div>
-        <span>Flex roles</span>
-        <strong>{{ champion.pro_flex_roles ?? '--' }}</strong>
+        <span>Lane delta</span>
+        <strong>{{ formatNumber(champion.delta) }}</strong>
       </div>
     </div>
-  </ng-template>
 
-  <div class="card-footer">
-    <span>
-      {{
-        mode === 'teamplay'
-          ? 'Pro presence blended with solo viability.'
-          : 'Clean ladder signal for quick scanning.'
-      }}
-    </span>
+    <ng-template #teamplaySecondary>
+      <div class="secondary-row">
+        <div>
+          <span>Solo rank</span>
+          <strong>#{{ champion.filtered_rank ?? champion.rank ?? '--' }}</strong>
+        </div>
+        <div>
+          <span>Flex roles</span>
+          <strong>{{ champion.pro_flex_roles ?? '--' }}</strong>
+        </div>
+        <div>
+          <span>Solo win rate</span>
+          <strong>{{ formatPercent(champion.win_rate) }}</strong>
+        </div>
+      </div>
+    </ng-template>
 
     <a
       *ngIf="champion.champion_url"
@@ -132,7 +120,7 @@
       target="_blank"
       rel="noopener noreferrer"
     >
-      Build
+      View source build
     </a>
-  </div>
+  </details>
 </mat-card>

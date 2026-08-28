@@ -1,29 +1,18 @@
 <section class="onboarding-page">
-  <div class="hero-copy surface-panel">
+  <div class="hero-copy">
     <p class="eyebrow">Context-Aware Pick Guidance</p>
-    <h1>Find stronger picks for the games you actually play.</h1>
+    <h1>Find stronger picks for the way you play.</h1>
     <p class="hero-description meta-text">
-      Solo Queue and Flex / Clash ask for different recommendations. Start with your mode, then
-      narrow by region, rank, and time window to open a cleaner board.
+      Choose your queue and context, then scan recommendations built for your games.
     </p>
-
-    <div class="hero-grid">
-      <article class="hero-point" *ngFor="let highlight of setupHighlights">
-        <strong>{{ highlight.title }}</strong>
-        <span>{{ highlight.description }}</span>
-      </article>
-    </div>
   </div>
 
-  <mat-card class="setup-card surface-panel">
+  <section class="setup-card surface-panel" aria-labelledby="setup-title">
     <header class="setup-card__header">
       <div>
-        <p class="eyebrow">Build Your Board</p>
-        <h2>Choose your recommendation mode first.</h2>
+        <p class="eyebrow">Choose mode</p>
+        <h2 id="setup-title">Set up your tier list</h2>
       </div>
-      <p class="meta-text">
-        Everything below is designed to help you arrive at the right tier list with minimal friction.
-      </p>
     </header>
 
     <app-mode-selector
@@ -31,12 +20,8 @@
       (modeChange)="form.controls.mode.setValue($event)"
     ></app-mode-selector>
 
-    <div class="mode-helper">
-      <strong>{{ modeDetails[form.controls.mode.value].label }}</strong>
-      <span>{{ modeDetails[form.controls.mode.value].helper }}</span>
-    </div>
-
     <form [formGroup]="form" (ngSubmit)="submit()" class="setup-form">
+      <h3>Choose context</h3>
       <div class="selector-grid">
         <mat-form-field appearance="outline">
           <mat-label>Region</mat-label>
@@ -66,20 +51,9 @@
         </mat-form-field>
       </div>
 
-      <div class="selection-preview">
-        <span class="metric-pill"><strong>Mode</strong> {{ modeDetails[form.controls.mode.value].shortLabel }}</span>
-        <span class="metric-pill"><strong>Region</strong> {{ regionLabels[form.controls.region.value] }}</span>
-        <span class="metric-pill"><strong>Rank</strong> {{ tierLabels[form.controls.tier.value] }}</span>
-        <span class="metric-pill"><strong>Window</strong> {{ windowLabels[form.controls.window.value] }}</span>
-      </div>
-
       <button mat-flat-button color="primary" type="submit" class="cta-button">
-        Open recommendations
+        View recommendations
       </button>
-
-      <p class="submit-note meta-text">
-        {{ modeDetails[form.controls.mode.value].summary }}
-      </p>
     </form>
-  </mat-card>
+  </section>
 </section>

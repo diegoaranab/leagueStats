@@ -8,8 +8,8 @@
   position: relative;
   display: grid;
   gap: 0.4rem;
-  min-height: 144px;
-  padding: 1.1rem 1.15rem;
+  min-height: 118px;
+  padding: 0.95rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
   background:
@@ -81,20 +81,27 @@
 }
 
 .mode-selector--compact {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(132px, 1fr));
+  gap: 0.5rem;
 }
 
 .mode-selector--compact .mode-option {
-  min-height: 112px;
-  border-radius: 18px;
+  min-height: 56px;
+  padding: 0.55rem 0.7rem;
+  border-radius: 14px;
 }
 
-@media (max-width: 720px) {
-  .mode-selector {
-    grid-template-columns: 1fr;
-  }
+.mode-selector--compact .mode-kicker {
+  display: none;
+}
 
-  .mode-option {
-    min-height: 116px;
+.mode-selector--compact .mode-description {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+@media (max-width: 360px) {
+  .mode-selector:not(.mode-selector--compact) {
+    grid-template-columns: 1fr;
   }
 }

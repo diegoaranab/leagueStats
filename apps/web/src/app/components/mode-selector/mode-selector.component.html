@@ -10,7 +10,11 @@
     <span class="mode-kicker">{{ modeDetails[mode].kicker }}</span>
     <span class="mode-label">{{ modeDetails[mode].label }}</span>
     <span class="mode-description">
-      {{ variant === 'feature' ? modeDetails[mode].description : modeDetails[mode].helper }}
+      {{
+        variant === 'feature'
+          ? modeDetails[mode].description
+          : (mode === 'solo' ? 'Ranked performance' : 'Draft + pro presence')
+      }}
     </span>
   </button>
 </div>
