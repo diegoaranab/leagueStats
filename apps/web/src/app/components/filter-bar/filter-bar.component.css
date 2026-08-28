@@ -1,7 +1,7 @@
 .bar {
   display: grid;
+  align-content: start;
   gap: 1.15rem;
-  height: 100%;
   padding: 1.25rem;
   border: 1px solid var(--border-subtle);
   border-radius: 28px;
