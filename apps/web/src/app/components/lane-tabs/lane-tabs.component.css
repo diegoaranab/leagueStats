@@ -70,3 +70,17 @@ small {
     display: none;
   }
 }
+
+@media (max-width: 360px) {
+  .lane-group {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .lane-group mat-button-toggle {
+    grid-column: span 2;
+  }
+
+  .lane-group mat-button-toggle:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+}
