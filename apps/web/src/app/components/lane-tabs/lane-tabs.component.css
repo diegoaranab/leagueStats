@@ -1,9 +1,13 @@
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .lane-scroll {
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
-  padding-bottom: 0.1rem;
-  overscroll-behavior-inline: contain;
+  min-width: 0;
 }
 
 .lane-group {
@@ -43,14 +47,40 @@ small {
   line-height: 1.2;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 700px) {
   .lane-group {
-    display: inline-flex;
-    width: auto;
-    min-width: max-content;
+    gap: 0.25rem;
   }
 
   .lane-group mat-button-toggle {
-    min-width: 100px;
+    min-height: 44px;
+  }
+
+  .lane-group mat-button-toggle ::ng-deep .mat-button-toggle-button-content {
+    padding: 0.7rem 0.2rem;
+    text-align: center;
+  }
+
+  .lane-copy {
+    width: 100%;
+    justify-content: center;
+  }
+
+  small {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .lane-group {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .lane-group mat-button-toggle {
+    grid-column: span 2;
+  }
+
+  .lane-group mat-button-toggle:nth-child(n + 4) {
+    grid-column: span 3;
   }
 }
