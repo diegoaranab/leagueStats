@@ -4,6 +4,7 @@ src/loltee_scraper/__init__.py
 src/loltee_scraper/__main__.py
 src/loltee_scraper/cli.py
 src/loltee_scraper/config.py
+src/loltee_scraper/difficulty_scoring.py
 src/loltee_scraper/run_matrix.py
 src/loltee_scraper/scraper.py
 src/loltee_scraper.egg-info/PKG-INFO

@@ -5,9 +5,9 @@ import math
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup, Tag
@@ -24,12 +24,18 @@ from .data_io import (
     update_last_success_backup,
     write_json,
 )
+from .difficulty_scoring import (
+    HALF_LIFE_DAYS,
+    MIN_HISTORY_SAMPLES,
+    RETENTION_DAYS,
+    compute_difficulty_score,
+)
 
 BASE_URL = "https://lolalytics.com/lol/tierlist/"
 ALLOWED_TIERS = {"S+", "S", "S-", "A+", "A", "A-", "B+"}
 DIFFICULTY_COLORS = {"easy": "#5BC0FF", "medium": "#FFD54F", "hard": "#FF5A5F"}
 DIFFICULTY_ORDER = {"easy": 1, "medium": 2, "hard": 3}
-DIFFICULTY_METHOD = "lane_relative_mastery_gap_pct_tertiles_v1"
+DIFFICULTY_METHOD = "lane_relative_robust_recency_mastery_gap_pct_tertiles_v2"
 LANE_RETRY_BACKOFF_SECONDS = (0, 2, 5)
 
 
@@ -471,14 +477,14 @@ def assign_lane_difficulty(champions: List[Dict[str, Any]]) -> None:
     eligible = [
         champion
         for champion in champions
-        if isinstance(champion.get("mastery_gap_pct"), (int, float))
+        if isinstance(champion.get("difficulty_score"), (int, float))
     ]
     if not eligible:
         return
 
     eligible.sort(
         key=lambda c: (
-            c["mastery_gap_pct"],
+            c["difficulty_score"],
             c.get("rank") is None,
             c.get("rank") if c.get("rank") is not None else float("inf"),
             c.get("name", ""),
@@ -502,21 +508,107 @@ def assign_lane_difficulty(champions: List[Dict[str, Any]]) -> None:
         champion["difficulty_order"] = DIFFICULTY_ORDER[difficulty]
 
 
-def post_process_data(result: Dict[str, Any]) -> Dict[str, Any]:
+def _result_observation_date(result: Mapping[str, Any]) -> date:
+    meta = result.get("meta")
+    if isinstance(meta, Mapping):
+        generated_at = meta.get("generated_at_utc")
+        if isinstance(generated_at, str):
+            try:
+                return datetime.fromisoformat(generated_at.replace("Z", "+00:00")).astimezone(
+                    timezone.utc
+                ).date()
+            except ValueError:
+                pass
+    return datetime.now(timezone.utc).date()
+
+
+def add_difficulty_scores(
+    champions: List[Dict[str, Any]],
+    *,
+    difficulty_history: Mapping[str, Any] | None,
+    region: str,
+    tier: str,
+    window: str,
+    lane: str,
+    observation_date: date,
+) -> None:
+    for champion in champions:
+        champion["difficulty_score"] = None
+        champion["difficulty_history_samples"] = 0
+        champion["difficulty_history_applied"] = False
+
+        current_value = champion.get("mastery_gap_pct")
+        champion_name = champion.get("name")
+        if not isinstance(current_value, (int, float)) or not isinstance(champion_name, str):
+            continue
+
+        score = compute_difficulty_score(
+            difficulty_history,
+            region=region,
+            tier=tier,
+            window=window,
+            lane=lane,
+            champion=champion_name,
+            current_observation_date=observation_date,
+            current_value=float(current_value),
+        )
+        champion["difficulty_score"] = score.value
+        champion["difficulty_history_samples"] = score.sample_count
+        champion["difficulty_history_applied"] = score.history_applied
+
+
+def post_process_data(
+    result: Dict[str, Any],
+    *,
+    difficulty_history: Mapping[str, Any] | None = None,
+    observation_date: date | None = None,
+) -> Dict[str, Any]:
     data = result.get("data", {})
+    meta = result.get("meta")
+    scoring_date = observation_date or _result_observation_date(result)
+    region = str(meta.get("region", "")) if isinstance(meta, dict) else ""
+    tier = str(meta.get("tier", "")) if isinstance(meta, dict) else ""
+    window = str(meta.get("window", "")) if isinstance(meta, dict) else ""
+
     if isinstance(data, dict):
-        for champions in data.values():
+        for lane, champions in data.items():
             if not isinstance(champions, list):
                 continue
             add_filtered_ranks(champions)
             for champion in champions:
                 if isinstance(champion, dict):
                     compute_mastery_fields(champion)
+            add_difficulty_scores(
+                champions,
+                difficulty_history=difficulty_history,
+                region=region,
+                tier=tier,
+                window=window,
+                lane=str(lane),
+                observation_date=scoring_date,
+            )
             assign_lane_difficulty(champions)
 
-    meta = result.get("meta")
     if isinstance(meta, dict):
+        scored_champions = [
+            champion
+            for champions in data.values()
+            if isinstance(champions, list)
+            for champion in champions
+            if isinstance(champion, dict)
+            and isinstance(champion.get("difficulty_score"), (int, float))
+        ] if isinstance(data, dict) else []
         meta["difficulty_method"] = DIFFICULTY_METHOD
+        meta["difficulty_history_retention_days"] = RETENTION_DAYS
+        meta["difficulty_history_min_samples"] = MIN_HISTORY_SAMPLES
+        meta["difficulty_history_half_life_days"] = HALF_LIFE_DAYS
+        meta["difficulty_history_outlier_method"] = "median_mad_3sigma_winsorization"
+        meta["difficulty_history_smoothed_count"] = sum(
+            champion["difficulty_history_applied"] for champion in scored_champions
+        )
+        meta["difficulty_history_fallback_count"] = sum(
+            not champion["difficulty_history_applied"] for champion in scored_champions
+        )
         meta["rank_mode"] = "original_rank_plus_filtered_rank"
         meta["difficulty_colors"] = DIFFICULTY_COLORS
 
@@ -527,12 +619,17 @@ def default_output_path(config: ScrapeConfig) -> Path:
     return Path("apps/web/public/data") / config.region / config.tier / f"{config.window}.json"
 
 
-def scrape_to_file(config: ScrapeConfig, headless: bool = True) -> Dict[str, Any]:
+def scrape_to_file(
+    config: ScrapeConfig,
+    headless: bool = True,
+    *,
+    difficulty_history: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
     config = config.validated()
     output = config.output_path or default_output_path(config)
 
     result = scrape_all_lanes(config=config, headless=headless)
-    result = post_process_data(result)
+    result = post_process_data(result, difficulty_history=difficulty_history)
     existing_dataset = load_existing_dataset(output)
     is_partial = is_partial_dataset(result)
 
