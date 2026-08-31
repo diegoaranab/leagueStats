@@ -62,15 +62,52 @@ class DeployWorkflowTests(unittest.TestCase):
         self.assertEqual(upload["with"]["if-no-files-found"], "error")
 
     def test_normal_runs_cannot_cancel_midnight_history(self) -> None:
-        self.assertNotIn("concurrency", self.workflow)
-        self.assertNotIn("concurrency", self.jobs["build"])
-        self.assertNotIn("concurrency", self.jobs["persist-difficulty-history"])
+        concurrency = self.workflow["concurrency"]
+        triggers = self.workflow["on"]
 
-    def test_pages_deployments_are_serialized(self) -> None:
-        deployment_concurrency = self.jobs["deploy"]["concurrency"]
+        self.assertEqual(concurrency["group"], "pages")
+        self.assertEqual(concurrency["cancel-in-progress"], "false")
+        self.assertIn("push", triggers)
+        self.assertIn("workflow_dispatch", triggers)
+        self.assertEqual(
+            {entry["cron"] for entry in triggers["schedule"]},
+            {MIDNIGHT_CRON, NOON_CRON},
+        )
 
-        self.assertEqual(deployment_concurrency["group"], "pages")
-        self.assertEqual(deployment_concurrency["cancel-in-progress"], "true")
+    def test_entire_workflow_is_serialized_in_one_shared_group(self) -> None:
+        concurrency = self.workflow["concurrency"]
+
+        self.assertEqual(concurrency, {
+            "group": "pages",
+            "cancel-in-progress": "false",
+        })
+        for job in self.jobs.values():
+            self.assertNotIn("concurrency", job)
+
+    def test_builds_and_deployments_cannot_overlap_or_reorder(self) -> None:
+        self.assertEqual(self.workflow["concurrency"]["group"], "pages")
+        self.assertEqual(
+            self.workflow["concurrency"]["cancel-in-progress"],
+            "false",
+        )
+        self.assertEqual(
+            self.jobs["deploy"]["needs"],
+            ["build", "persist-difficulty-history"],
+        )
+
+    def test_pages_deployment_requires_successful_build_output(self) -> None:
+        build = self.jobs["build"]
+        deploy = self.jobs["deploy"]
+        upload = self.step_named(build, "Upload Pages artifact")
+        deployment = self.step_named(deploy, "Deploy Pages artifact")
+
+        self.assertIn("build", deploy["needs"])
+        self.assertEqual(
+            deploy["if"],
+            "${{ always() && !cancelled() && needs.build.result == 'success' }}",
+        )
+        self.assertEqual(upload["uses"], "actions/upload-pages-artifact@v3")
+        self.assertEqual(deployment["uses"], "actions/deploy-pages@v4")
 
     def test_only_midnight_schedule_mutates_history(self) -> None:
         schedules = self.workflow["on"]["schedule"]
