@@ -217,14 +217,52 @@ jobs:
           path: tools/scraper/data/raw/oracles_elixir/2026
           key: oracle-elixir-2026-${{ github.run_id }}
 
-      - name: Generate Solo Queue datasets
+      - name: Load difficulty history for scoring
+        env:
+          HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
         run: |
+          set -euo pipefail
+
+          set +e
+          git ls-remote --exit-code --heads origin difficulty-history > "${RUNNER_TEMP}/difficulty-history-scoring-ref"
+          lookup_status=$?
+          set -e
+
+          case "$lookup_status" in
+            0)
+              git fetch --no-tags origin difficulty-history
+              if git cat-file -e FETCH_HEAD:difficulty-history.json 2>/dev/null; then
+                git show FETCH_HEAD:difficulty-history.json > "$HISTORY_FILE"
+                echo "Loaded difficulty history for read-only scoring."
+              else
+                echo "Difficulty history branch has no state file; using snapshot fallback."
+              fi
+              ;;
+            2)
+              echo "Difficulty history branch does not exist; using snapshot fallback."
+              ;;
+            *)
+              echo "Unable to determine whether the difficulty-history branch exists." >&2
+              exit "$lookup_status"
+              ;;
+          esac
+
+      - name: Generate Solo Queue datasets
+        env:
+          HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
+        run: |
+          history_args=()
+          if [[ -f "$HISTORY_FILE" ]]; then
+            history_args=(--difficulty-history-file "$HISTORY_FILE")
+          fi
+
           python -m loltee_scraper.run_matrix \
             --output-root "$SOLO_OUTPUT_ROOT" \
             --regions $DATA_REGIONS \
             --tiers $DATA_TIERS \
             --windows $DATA_WINDOWS \
             --lanes $DATA_LANES \
+            "${history_args[@]}" \
             --fail-fast
 
       - name: Upload Solo matrix for difficulty history

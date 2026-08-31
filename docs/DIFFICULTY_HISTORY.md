@@ -1,7 +1,7 @@
-# Difficulty History Foundation
+# Difficulty v2 History
 
-Difficulty history is persistence infrastructure for a future Difficulty v2. It does not affect the
-current difficulty calculation, labels, or frontend behavior.
+Difficulty v2 uses persisted daily Solo observations to stabilize champion difficulty without
+changing the underlying `mastery_gap_pct` calculation or the Easy/Medium/Hard presentation.
 
 ## Storage
 
@@ -35,12 +35,43 @@ missing or null `mastery_gap_pct` are skipped rather than represented by a synth
 replaces the observation for the same UTC date and series. Each series retains only observations in
 the latest 30-day UTC window.
 
-## Planned Difficulty v2 (not active)
+## Difficulty v2 scoring
 
-The planned calculation will use rolling daily observations, robust median/MAD outlier handling,
-exponentially decaying recency weights with an approximately seven-day half-life, and a minimum
-history threshold before smoothing. Difficulty labels will then use lane/context-relative tertiles
-after smoothing.
+Each scrape selects the exact `region|tier|window|lane|champion` series and combines it with the
+current UTC day's `mastery_gap_pct`. Only observations from the last 30 days are eligible. Missing
+days stay missing: they are not interpolated or replaced with zero. Future observations are ignored.
+If history already includes the current UTC date, the current scrape replaces that value in memory
+for scoring. This makes the latest scrape authoritative without modifying the persisted file; only
+the midnight persistence job writes history.
 
-Median/MAD should reduce sensitivity to anomalous scrapes. Exponential weighting lets recent
-observations matter more while retaining useful older evidence without allowing it to dominate.
+Smoothing begins when the effective series contains at least seven distinct daily observations,
+including the current scrape. Until then, `difficulty_score` is the current `mastery_gap_pct`, so
+bootstrap behavior matches the snapshot-based calculation.
+
+For an eligible series, Difficulty v2 computes the median and median absolute deviation (MAD) of
+`mastery_gap_pct`. When MAD is greater than zero, every value is winsorized to:
+
+```text
+robust_sigma = 1.4826 * MAD
+lower = max(0, median - 3 * robust_sigma)
+upper = median + 3 * robust_sigma
+```
+
+Outliers are clamped, not deleted. When MAD is zero, values are deliberately left unchanged.
+
+The clamped values are averaged with actual UTC date ages and a seven-day half-life:
+
+```text
+weight = 2 ** (-age_days / 7)
+difficulty_score = sum(clamped_value * weight) / sum(weight)
+```
+
+A value from seven days ago therefore has half today's weight; one from 14 days ago has one quarter.
+More history generally improves stability, while exponential decay keeps older observations from
+dominating recent evidence.
+
+Finally, champions are sorted by `difficulty_score` only against champions in the same region,
+tier, window, and lane. Existing deterministic rank/name tie breakers and approximately equal
+tertile boundaries assign Easy, Medium, and Hard labels. Diagnostic sample counts and whether
+smoothing was applied are included in generated data, but history details and intermediate MAD
+values are not shown in the UI.

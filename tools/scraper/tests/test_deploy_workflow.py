@@ -136,6 +136,22 @@ class DeployWorkflowTests(unittest.TestCase):
         ]
         self.assertEqual(history_writers, ["persist-difficulty-history"])
 
+    def test_all_solo_builds_load_history_read_only_with_bootstrap_fallback(self) -> None:
+        build = self.jobs["build"]
+        load = self.step_named(build, "Load difficulty history for scoring")
+        generate = self.step_named(build, "Generate Solo Queue datasets")
+
+        self.assertNotIn("if", load)
+        self.assertLess(build["steps"].index(load), build["steps"].index(generate))
+        self.assertIn("git ls-remote --exit-code --heads origin difficulty-history", load["run"])
+        self.assertIn("git show FETCH_HEAD:difficulty-history.json", load["run"])
+        self.assertIn("using snapshot fallback", load["run"])
+        self.assertNotIn("git push", load["run"])
+        self.assertNotIn("git switch", load["run"])
+
+        self.assertIn("--difficulty-history-file", generate["run"])
+        self.assertIn('if [[ -f "$HISTORY_FILE" ]]', generate["run"])
+
 
 if __name__ == "__main__":
     unittest.main()

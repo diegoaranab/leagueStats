@@ -36,6 +36,12 @@ Top-level shape:
 - `failed_lanes`: string[]
 - `warnings`: string[]
 - `difficulty_method`: string
+- `difficulty_history_retention_days`: number
+- `difficulty_history_min_samples`: number
+- `difficulty_history_half_life_days`: number
+- `difficulty_history_outlier_method`: string
+- `difficulty_history_smoothed_count`: number
+- `difficulty_history_fallback_count`: number
 - `rank_mode`: string
 - `difficulty_colors`: object
 - `leagues_used`: string[]
@@ -67,6 +73,9 @@ Top-level shape:
 - `best_win_est`: number | null
 - `mastery_gap_raw`: number | null
 - `mastery_gap_pct`: number | null
+- `difficulty_score`: number | null
+- `difficulty_history_samples`: number
+- `difficulty_history_applied`: boolean
 - `difficulty`: `easy | medium | hard | null`
 - `difficulty_color`: hex string | null
 - `difficulty_order`: number | null

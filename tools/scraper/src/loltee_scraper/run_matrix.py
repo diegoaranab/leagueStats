@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from .config import DEFAULT_LANES, SUPPORTED_REGIONS, SUPPORTED_TIERS, SUPPORTED_WINDOWS
 from .data_io import count_champions
+from .difficulty_history import load_history
 from .manifest import load_manifest, merge_manifest, write_manifest
 from .scraper import ScrapeConfig, scrape_to_file
 
@@ -20,7 +21,21 @@ def main() -> None:
     parser.add_argument("--lanes", nargs="+", default=DEFAULT_LANES, choices=DEFAULT_LANES)
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--fail-fast", action="store_true")
+    parser.add_argument(
+        "--difficulty-history-file",
+        type=Path,
+        help="Optional validated difficulty-history.json used read-only for v2 scoring.",
+    )
     args = parser.parse_args()
+
+    difficulty_history = None
+    if args.difficulty_history_file is not None:
+        if not args.difficulty_history_file.is_file():
+            parser.error(
+                f"explicit difficulty history file does not exist: "
+                f"{args.difficulty_history_file}"
+            )
+        difficulty_history = load_history(args.difficulty_history_file)
 
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -58,6 +73,7 @@ def main() -> None:
                             output_path=output_path,
                         ),
                         headless=not args.headed,
+                        difficulty_history=difficulty_history,
                     )
                     meta = result.get("meta", {})
                     entry["generated_at_utc"] = meta.get("generated_at_utc")
