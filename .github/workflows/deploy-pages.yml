@@ -5,7 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '23 */12 * * *'
+    - cron: '23 0 * * *'
+    - cron: '23 12 * * *'
 
 env:
   PYTHON_VERSION: '3.12'
@@ -21,11 +22,6 @@ env:
   DATA_WINDOWS: 'current 7d 14d'
   DATA_LANES: 'top jungle middle bottom support'
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -33,6 +29,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -229,6 +227,17 @@ jobs:
             --lanes $DATA_LANES \
             --fail-fast
 
+      - name: Upload Solo matrix for difficulty history
+        if: ${{ github.event_name == 'schedule' && github.event.schedule == '23 0 * * *' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: difficulty-history-solo-matrix
+          path: |
+            apps/web/public/data/*/*/*.json
+            !apps/web/public/data/*/*/*.last_success.json
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Generate Teamplay datasets
         run: |
           python -m loltee_scraper.build_teamplay \
@@ -297,22 +306,112 @@ jobs:
 
           echo "path=$(dirname "$output_path")" >> "$GITHUB_OUTPUT"
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/${{ steps.output.outputs.path }}
 
-  deploy:
+  persist-difficulty-history:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '23 0 * * *' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download complete Solo matrix
+        uses: actions/download-artifact@v4
+        with:
+          name: difficulty-history-solo-matrix
+          path: ${{ runner.temp }}/difficulty-history-solo-data
+
+      - name: Load existing difficulty history
+        id: history_state
+        env:
+          HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
+        run: |
+          set -euo pipefail
+
+          set +e
+          git ls-remote --exit-code --heads origin difficulty-history > "${RUNNER_TEMP}/difficulty-history-ref"
+          lookup_status=$?
+          set -e
+
+          case "$lookup_status" in
+            0)
+              git fetch --no-tags origin difficulty-history
+              if git cat-file -e FETCH_HEAD:difficulty-history.json 2>/dev/null; then
+                git show FETCH_HEAD:difficulty-history.json > "$HISTORY_FILE"
+              fi
+              echo "branch_exists=true" >> "$GITHUB_OUTPUT"
+              ;;
+            2)
+              echo "branch_exists=false" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unable to determine whether the difficulty-history branch exists." >&2
+              exit "$lookup_status"
+              ;;
+          esac
+
+      - name: Merge daily Solo observations
+        env:
+          HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
+          SOLO_HISTORY_ROOT: ${{ runner.temp }}/difficulty-history-solo-data
+          PYTHONPATH: tools/scraper/src
+        run: |
+          python -m loltee_scraper.difficulty_history \
+            --history-file "$HISTORY_FILE" \
+            --data-root "$SOLO_HISTORY_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --lanes $DATA_LANES \
+            --date "$(date -u +%F)"
+
+      - name: Commit history only when changed
+        env:
+          BRANCH_EXISTS: ${{ steps.history_state.outputs.branch_exists }}
+          HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
+        run: |
+          set -euo pipefail
+
+          if [[ "$BRANCH_EXISTS" == "true" ]]; then
+            git switch -C difficulty-history FETCH_HEAD
+          else
+            git switch --orphan difficulty-history
+          fi
+
+          cp "$HISTORY_FILE" difficulty-history.json
+          git add difficulty-history.json
+          if git diff --cached --quiet; then
+            echo "Difficulty history is already current; no commit needed."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update difficulty history"
+          git push origin HEAD:difficulty-history
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, persist-difficulty-history]
+    if: ${{ always() && !cancelled() && needs.build.result == 'success' }}
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Deploy Pages artifact
         id: deployment
         uses: actions/deploy-pages@v4

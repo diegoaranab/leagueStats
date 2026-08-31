@@ -2,8 +2,6 @@ name: Validate Data Generation
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '53 3 * * *'
 
 env:
   PYTHON_VERSION: '3.12'
