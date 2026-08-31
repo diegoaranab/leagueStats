@@ -67,14 +67,20 @@ def write_dataset(
     )
 
 
-def merge_fixture(history: dict[str, object], root: Path, day: date) -> dict[str, object]:
+def merge_fixture(
+    history: dict[str, object],
+    root: Path,
+    day: date,
+    *,
+    lanes: list[str] = LANES,
+) -> dict[str, object]:
     return merge_solo_matrix(
         history,
         root,
         regions=REGIONS,
         tiers=TIERS,
         windows=WINDOWS,
-        lanes=LANES,
+        lanes=lanes,
         observation_date=day,
         updated_at_utc=FIXED_UPDATE_TIME,
     )
@@ -127,6 +133,67 @@ class DifficultyHistoryTests(unittest.TestCase):
         observations = history["series"]["na|gold|7d|top|Aatrox"]
         self.assertEqual(len(observations), 1)
         self.assertEqual(observations[0]["mastery_gap_pct"], 9.7)
+
+    def test_same_day_missing_champion_removes_current_observation(self) -> None:
+        write_dataset(self.root, top=[champion("Aatrox")])
+        history = merge_fixture(new_history(), self.root, date(2026, 8, 1))
+        write_dataset(self.root)
+
+        history = merge_fixture(history, self.root, date(2026, 8, 1))
+
+        self.assertNotIn("na|gold|7d|top|Aatrox", history["series"])
+
+    def test_same_day_null_mastery_gap_removes_current_observation(self) -> None:
+        write_dataset(self.root, top=[champion("Aatrox")])
+        history = merge_fixture(new_history(), self.root, date(2026, 8, 1))
+        write_dataset(self.root, top=[champion("Aatrox", mastery_gap_pct=None)])
+
+        history = merge_fixture(history, self.root, date(2026, 8, 1))
+
+        self.assertNotIn("na|gold|7d|top|Aatrox", history["series"])
+
+    def test_same_day_replacement_preserves_prior_day_observation(self) -> None:
+        write_dataset(self.root, top=[champion("Aatrox", mastery_gap_pct=8.1)])
+        history = merge_fixture(new_history(), self.root, date(2026, 8, 1))
+        write_dataset(self.root, top=[champion("Aatrox", mastery_gap_pct=8.5)])
+        history = merge_fixture(history, self.root, date(2026, 8, 2))
+        write_dataset(self.root)
+
+        history = merge_fixture(history, self.root, date(2026, 8, 2))
+
+        self.assertEqual(
+            history["series"]["na|gold|7d|top|Aatrox"],
+            [
+                {
+                    "date": "2026-08-01",
+                    "delta": 4.2,
+                    "win_rate": 51.5,
+                    "mastery_gap_pct": 8.1,
+                }
+            ],
+        )
+
+    def test_same_day_replacement_preserves_unrequested_lane(self) -> None:
+        write_dataset(
+            self.root,
+            top=[champion("Aatrox", mastery_gap_pct=8.1)],
+            middle=[champion("Ahri", mastery_gap_pct=12.4)],
+        )
+        history = merge_fixture(new_history(), self.root, date(2026, 8, 1))
+        write_dataset(self.root)
+
+        history = merge_fixture(
+            history,
+            self.root,
+            date(2026, 8, 1),
+            lanes=["top"],
+        )
+
+        self.assertNotIn("na|gold|7d|top|Aatrox", history["series"])
+        self.assertEqual(
+            history["series"]["na|gold|7d|middle|Ahri"][0]["mastery_gap_pct"],
+            12.4,
+        )
 
     def test_duplicate_existing_dates_are_normalized(self) -> None:
         history = new_history()

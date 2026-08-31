@@ -221,19 +221,26 @@ def merge_observations(
     history: Mapping[str, Any],
     observations: Iterable[tuple[str, Mapping[str, Any]]],
     *,
+    replace_contexts: Iterable[tuple[str, str, str, str]],
     observation_date: date,
     updated_at_utc: datetime | None = None,
 ) -> dict[str, Any]:
     validate_history(history)
     retention_days = history["retention_days"]
     cutoff = observation_date - timedelta(days=retention_days - 1)
+    replacement_date = observation_date.isoformat()
+    replacement_contexts = set(replace_contexts)
 
     merged_by_key: dict[str, dict[str, dict[str, Any]]] = {}
     for key, existing_observations in history["series"].items():
+        context = tuple(key.split("|")[:4])
         by_date: dict[str, dict[str, Any]] = {}
         for existing in existing_observations:
             existing_date = _parse_date(existing["date"], field=f"series {key!r}.date")
-            if cutoff <= existing_date <= observation_date:
+            replaces_existing = (
+                context in replacement_contexts and existing["date"] == replacement_date
+            )
+            if cutoff <= existing_date <= observation_date and not replaces_existing:
                 by_date[existing["date"]] = dict(existing)
         if by_date:
             merged_by_key[key] = by_date
@@ -298,6 +305,13 @@ def merge_solo_matrix(
     return merge_observations(
         history,
         observations,
+        replace_contexts=(
+            (region, tier, window, lane)
+            for region in regions
+            for tier in tiers
+            for window in windows
+            for lane in lanes
+        ),
         observation_date=observation_date,
         updated_at_utc=updated_at_utc,
     )
