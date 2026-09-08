@@ -2,7 +2,9 @@
   <header class="recommended-bans__header">
     <div>
       <h2 id="recommended-bans-heading">Recommended bans</h2>
-      <p>Strong statistical ban options for this exact queue context.</p>
+      <p>{{ mode === 'teamplay'
+        ? 'Draft-denial priorities for this Flex / Clash context.'
+        : 'Strong statistical ban options for this exact queue context.' }}</p>
     </div>
     <span
       class="material-symbols-outlined recommended-bans__header-icon"

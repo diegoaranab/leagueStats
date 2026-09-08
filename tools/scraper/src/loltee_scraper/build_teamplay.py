@@ -31,6 +31,11 @@ STRICT_PRO_EVIDENCE_MODE = "strict_pro_evidence_v2"
 TEAMPLAY_RANK_MODE = "teamplay_blend_v3"
 TEAMPLAY_SCORE_FORMULA = "0.90*pro_score_v3 + 0.10*solo_strength_score"
 TEAMPLAY_PRO_SCORE_FORMULA = "0.75*normalized_role_pick_rate + 0.25*normalized_role_adjusted_ban_rate"
+TEAMPLAY_BAN_SCORE_METHOD = "teamplay_deny_v1"
+TEAMPLAY_BAN_SCORE_FORMULA = "0.70*normalized_role_adjusted_ban_rate + 0.20*normalized_role_pick_rate + 0.10*solo_strength_score"
+TEAMPLAY_BAN_WEIGHT_ROLE_ADJUSTED_BAN = 0.70
+TEAMPLAY_BAN_WEIGHT_ROLE_PICK = 0.20
+TEAMPLAY_BAN_WEIGHT_SOLO_STRENGTH = 0.10
 TEAMPLAY_BAN_CREDIT_MODE = "role_adjusted_v1"
 TEAMPLAY_ELIGIBILITY_RULE = "solo_pool && pro_pick_count>0 && (pro_pick_count+pro_ban_count)>=5"
 
@@ -123,6 +128,12 @@ def build_teamplay_champion(
     pro_score = (0.75 * normalized_role_pick_rate) + (0.25 * normalized_role_adjusted_ban_rate)
     flex_clash_score = (0.90 * pro_score) + (0.10 * solo_strength_score)
 
+    teamplay_ban_score = (
+        TEAMPLAY_BAN_WEIGHT_ROLE_ADJUSTED_BAN * normalized_role_adjusted_ban_rate
+        + TEAMPLAY_BAN_WEIGHT_ROLE_PICK * normalized_role_pick_rate
+        + TEAMPLAY_BAN_WEIGHT_SOLO_STRENGTH * solo_strength_score
+    )
+
     champion.update(
         {
             "lane": lane,
@@ -137,6 +148,7 @@ def build_teamplay_champion(
             "pro_win_rate": safe_round(pro_win_rate),
             "pro_score": safe_round(pro_score),
             "flex_clash_score": safe_round(flex_clash_score),
+            "teamplay_ban_score": safe_round(teamplay_ban_score),
             "pro_flex_roles": pro_flex_roles,
             "badges": build_badges(
                 solo_strength_score=solo_strength_score,
@@ -147,6 +159,17 @@ def build_teamplay_champion(
         }
     )
     return champion
+
+
+def teamplay_ban_sort_key(champion: Dict[str, Any]) -> tuple:
+    return (
+        -(champion.get("teamplay_ban_score") or 0.0),
+        -(champion.get("role_adjusted_ban_rate") or 0.0),
+        -(champion.get("pro_role_pick_rate") or 0.0),
+        -(champion.get("solo_strength_score") or 0.0),
+        champion.get("teamplay_rank") or 9999,
+        champion.get("name") or "",
+    )
 
 
 def is_teamplay_eligible(champion: Dict[str, Any]) -> bool:
@@ -232,6 +255,10 @@ def build_teamplay_dataset(
         for idx, champion in enumerate(teamplay_champions, start=1):
             champion["teamplay_rank"] = idx
 
+        # Rank the eligible pool separately, preserving its existing pick order.
+        for idx, champion in enumerate(sorted(teamplay_champions, key=teamplay_ban_sort_key), start=1):
+            champion["teamplay_ban_rank"] = idx
+
         teamplay_data[lane] = teamplay_champions
 
     meta = dict(solo_meta) if isinstance(solo_meta, dict) else {}
@@ -257,6 +284,8 @@ def build_teamplay_dataset(
             "score_formula": TEAMPLAY_SCORE_FORMULA,
             "pro_score_formula": TEAMPLAY_PRO_SCORE_FORMULA,
             "ban_credit_mode": TEAMPLAY_BAN_CREDIT_MODE,
+            "teamplay_ban_score_method": TEAMPLAY_BAN_SCORE_METHOD,
+            "teamplay_ban_score_formula": TEAMPLAY_BAN_SCORE_FORMULA,
             "eligibility_rule": TEAMPLAY_ELIGIBILITY_RULE,
         }
     )

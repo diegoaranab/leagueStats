@@ -98,6 +98,10 @@
     <ng-template #teamplaySecondary>
       <div class="secondary-row">
         <div>
+          <span>Ban priority</span>
+          <strong>{{ champion.teamplay_ban_rank == null ? '--' : '#' + champion.teamplay_ban_rank }}</strong>
+        </div>
+        <div>
           <span>Solo rank</span>
           <strong>#{{ champion.filtered_rank ?? champion.rank ?? '--' }}</strong>
         </div>

@@ -105,9 +105,7 @@ export class ResultsPageComponent implements OnInit {
         const tier = normalizeTier(rawTier, DEFAULT_RESULTS_QUERY.tier);
         const window = this.readParam(params.get('window'), WINDOW_OPTIONS, DEFAULT_RESULTS_QUERY.window);
         const lane = this.readParam(params.get('lane'), LANE_OPTIONS, DEFAULT_RESULTS_QUERY.lane);
-        const sortOptions: readonly SortOption[] = mode === 'solo'
-          ? ['tier', 'win_rate', 'pick_rate', 'difficulty', 'ban_priority']
-          : ['tier', 'win_rate', 'pick_rate', 'difficulty'];
+        const sortOptions: readonly SortOption[] = ['tier', 'win_rate', 'pick_rate', 'difficulty', 'ban_priority'];
         const sort = this.readParam<SortOption>(
           params.get('sort'),
           sortOptions,
@@ -274,10 +272,14 @@ export class ResultsPageComponent implements OnInit {
       ? laneChampions
           .filter((champion) => champion.pbi !== null && champion.pbi > 0)
           .sort((a, b) => this.compareBanPriority(a, b))
-      : [];
+      : laneChampions
+          .filter((champion) => (champion.teamplay_ban_rank ?? 0) > 0)
+          .sort((a, b) => this.compareBanPriority(a, b));
 
     this.banPriorities = new Map(
-      rankedBans.map((champion, index) => [champion.name, index + 1]),
+      rankedBans.map((champion, index) => [
+        champion.name, this.query.mode === 'teamplay' ? champion.teamplay_ban_rank! : index + 1,
+      ]),
     );
     this.recommendedBans = rankedBans.slice(0, 3);
 
@@ -318,6 +320,12 @@ export class ResultsPageComponent implements OnInit {
   }
 
   private compareBanPriority(a: Champion, b: Champion): number {
+    if (this.query.mode === 'teamplay') {
+      return (a.teamplay_ban_rank ?? Number.MAX_SAFE_INTEGER)
+        - (b.teamplay_ban_rank ?? Number.MAX_SAFE_INTEGER)
+        || a.name.localeCompare(b.name);
+    }
+
     const positiveA = a.pbi !== null && a.pbi > 0;
     const positiveB = b.pbi !== null && b.pbi > 0;
 

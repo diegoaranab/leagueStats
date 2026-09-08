@@ -52,6 +52,8 @@ Top-level shape:
 - `excluded_low_evidence_count`: number
 - `score_formula`: string
 - `pro_score_formula`: string
+- `teamplay_ban_score_method`: string (Teamplay: `teamplay_deny_v1`)
+- `teamplay_ban_score_formula`: string (see below)
 - `ban_credit_mode`: string
 - `eligibility_rule`: string
 
@@ -80,6 +82,8 @@ Top-level shape:
 - `difficulty_color`: hex string | null
 - `difficulty_order`: number | null
 - `teamplay_rank`: number | null
+- `teamplay_ban_score`: number | null (Teamplay internal denial score, rounded to 4 decimals)
+- `teamplay_ban_rank`: number | null (Teamplay lane ban priority, starting at 1)
 - `solo_strength_score`: number | null
 - `pro_pick_count`: number
 - `pro_role_pick_rate`: number | null
@@ -117,3 +121,33 @@ Contains:
   - `failed_lanes`
   - `warnings`
   - `champion_count`
+
+## Teamplay Recommended Bans
+
+Teamplay datasets under `data/teamplay/{region}/{tier}/{window}.json` use
+`teamplay_ban_score_method: "teamplay_deny_v1"` and this exact
+`teamplay_ban_score_formula`:
+
+```text
+0.70*normalized_role_adjusted_ban_rate + 0.20*normalized_role_pick_rate + 0.10*solo_strength_score
+```
+
+The builder uses its existing lane-normalized professional inputs and Solo strength.
+Ban evidence receives role-specific credit through the existing role pick share.
+Only the existing eligible Teamplay pool participates; zero pro bans do not exclude
+an otherwise eligible champion.
+
+Ban ranks cover the full eligible lane, ordered by rounded ban score descending,
+role-adjusted ban rate descending, pro role pick rate descending, Solo strength
+descending, Teamplay pick rank ascending, then champion name ascending.
+The stored lane array and `teamplay_rank` retain their existing pick order.
+The pick formulas remain `0.75*normalized_role_pick_rate + 0.25*normalized_role_adjusted_ban_rate`
+for `pro_score` and `0.90*pro_score + 0.10*solo_strength_score` for `flex_clash_score`.
+
+Results show the first three ban ranks (or fewer for smaller pools), independent of
+Difficulty and Sort. Lane, mode, region, tier, and window select the source pool.
+Teamplay Ban priority sorting and More details use the generated rank; the raw
+score is internal. Older datasets without ban ranks show no recommendations until
+rebuilt, and missing ranks sort last. Solo retains its positive-PBI recommendations
+and existing comparator; Teamplay denial scoring, eligibility, and tie breakers
+never read PBI.
