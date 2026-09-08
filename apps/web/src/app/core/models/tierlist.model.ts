@@ -71,6 +71,8 @@ export interface TierlistMeta {
   score_formula?: string;
   pro_score_formula?: string;
   ban_credit_mode?: string;
+  teamplay_ban_score_method?: string;
+  teamplay_ban_score_formula?: string;
   eligibility_rule?: string;
 }
 
@@ -79,6 +81,8 @@ export interface Champion {
   rank: number | null;
   filtered_rank?: number;
   teamplay_rank?: number;
+  teamplay_ban_score?: number | null;
+  teamplay_ban_rank?: number | null;
   name: string;
   icon_url: string | null;
   champion_url: string | null;

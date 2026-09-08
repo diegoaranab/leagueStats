@@ -108,8 +108,9 @@
     </div>
 
     <app-recommended-bans
-      *ngIf="!isLoading && !errorMessage && query.mode === 'solo'"
+      *ngIf="!isLoading && !errorMessage"
       [champions]="recommendedBans"
+      [mode]="query.mode"
     ></app-recommended-bans>
 
     <section class="grid" aria-label="Champion recommendations" *ngIf="!isLoading && !errorMessage">
