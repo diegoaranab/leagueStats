@@ -63,9 +63,9 @@ formulas, eligibility, tie breakers, and frontend Recommended Bans behavior.
 
 The Angular SPA reads these paths relative to the deployed app's base URL:
 
-- Solo: `/data/{region}/{tier}/{window}.json`
-- Teamplay: `/data/teamplay/{region}/{tier}/{window}.json`
-- Manifest: `/data/manifest.json`
+- Solo: `data/{region}/{tier}/{window}.json`
+- Teamplay: `data/teamplay/{region}/{tier}/{window}.json`
+- Manifest: `data/manifest.json`
 
 Generated files live under `apps/web/public/data/` and are intentionally
 gitignored. The results route uses query state for `mode`, `region`, `tier`,
