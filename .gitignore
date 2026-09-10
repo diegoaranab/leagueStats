@@ -4,8 +4,9 @@ apps/web/dist/
 apps/web/.angular/
 
 # Python
-**/__pycache__/
+__pycache__/
 *.pyc
+*.egg-info/
 
 # OS / IDE
 .DS_Store
@@ -21,5 +22,3 @@ tools/scraper/data/raw/
 
 # Local Python environment
 tools/scraper/.venv/
-__pycache__/
-*.pyc
