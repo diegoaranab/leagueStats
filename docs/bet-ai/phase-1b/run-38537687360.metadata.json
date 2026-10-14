@@ -1,0 +1,77 @@
+{
+  "provenance": {
+    "repository": "diegoaranab/leagueStats",
+    "pull_request": 16,
+    "merge_commit": "d7925d6d4be00e244477510c89688e464d4c8278",
+    "run_id": 38537687360,
+    "job_id": 115764482575,
+    "job_conclusion": "success",
+    "log_url": "https://github.com/diegoaranab/leagueStats/actions/runs/38537687360/job/115764482575",
+    "extraction": "JSON printed by Resolve and validate Oracle CSV, 2026-10-14T08:48:38Z; not a new download"
+  },
+  "metadata": {
+    "attempts": [
+      {
+        "attempt": 1,
+        "detail": "CsvValidationError: response is HTML or a Google Drive quota page, not CSV",
+        "outcome": "rejected",
+        "source": "google-drive-direct"
+      },
+      {
+        "attempt": 2,
+        "detail": "CsvValidationError: response is HTML or a Google Drive quota page, not CSV",
+        "outcome": "rejected",
+        "source": "google-drive-direct"
+      },
+      {
+        "attempt": 1,
+        "detail": "CsvValidationError: response is HTML or a Google Drive quota page, not CSV",
+        "outcome": "rejected",
+        "source": "google-drive-alternate"
+      },
+      {
+        "attempt": 2,
+        "detail": "CsvValidationError: response is HTML or a Google Drive quota page, not CSV",
+        "outcome": "rejected",
+        "source": "google-drive-alternate"
+      },
+      {
+        "attempt": 1,
+        "detail": "DownloadError: gdown exited 1: ded this file recently. Please\n\ttry accessing the file again later. If the file you are trying to\n\taccess is particularly large or is shared with many people, it may\n\ttake up to 24 hours to be able to view or download the file. If you\n\tstill can't access a file after 24 hours, contact your domain\n\tadministrator.\n\nYou may still be able to access the file from the browser:\n\n\thttps://drive.google.com/uc?id=1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm\n\nbut Gdown can't. Please check connections and permissions.",
+        "outcome": "rejected",
+        "source": "gdown"
+      },
+      {
+        "attempt": 2,
+        "detail": "DownloadError: gdown exited 1: ded this file recently. Please\n\ttry accessing the file again later. If the file you are trying to\n\taccess is particularly large or is shared with many people, it may\n\ttake up to 24 hours to be able to view or download the file. If you\n\tstill can't access a file after 24 hours, contact your domain\n\tadministrator.\n\nYou may still be able to access the file from the browser:\n\n\thttps://drive.google.com/uc?id=1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm\n\nbut Gdown can't. Please check connections and permissions.",
+        "outcome": "rejected",
+        "source": "gdown"
+      },
+      {
+        "attempt": 1,
+        "detail": "valid CSV",
+        "outcome": "accepted",
+        "source": "snapshot"
+      }
+    ],
+    "bet_ai_max_data_age_hours": 24,
+    "cache_updated": false,
+    "checksum_verified": true,
+    "content_changed": true,
+    "data_age_seconds": 17935781,
+    "download_age_seconds": 0,
+    "downloaded_at": "2026-10-14T08:48:17.711129Z",
+    "game_count": 2147,
+    "is_recent_for_bet_ai": false,
+    "last_match_at": "2026-03-20T18:38:36Z",
+    "metadata_path": "/home/runner/work/_temp/oracle-download/metadata.json",
+    "output_path": "/home/runner/work/_temp/oracle-download/2026.csv",
+    "row_count": 25764,
+    "selected_at": "2026-10-14T08:48:17.711129Z",
+    "sha256": "1e9b3410a3c732a7ee66b4d40a63aee0159625c8b6584edc2fd9b178faa7a2f2",
+    "size_bytes": 16798319,
+    "source": "snapshot",
+    "state": "STALE",
+    "valid_record_count": 25764
+  }
+}
