@@ -1,0 +1,105 @@
+name: Validate Oracle Download Reliability
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-oracle-download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
+      ORACLE_BOOTSTRAP_COMMIT: 'bbb7181beec3bfc0b19d9a341a7ae9897ad304de'
+      ORACLE_REPOSITORY_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
+      BET_AI_MAX_DATA_AGE_HOURS: '24'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tools/scraper/pyproject.toml
+
+      - name: Install downloader dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "tools/scraper[oracle-download]"
+
+      - name: Restore validated Oracle cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/oracle-cache
+          key: oracle-download-validation-2026-${{ github.run_id }}
+          restore-keys: |
+            oracle-download-validation-2026-
+
+      - name: Resolve and validate Oracle CSV
+        id: oracle
+        run: |
+          snapshot_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${ORACLE_BOOTSTRAP_COMMIT}/${ORACLE_REPOSITORY_PATH}"
+          mkdir -p "${RUNNER_TEMP}/oracle-download"
+          python -m loltee_scraper.oracle_download \
+            --file-id "$ORACLE_FILE_ID" \
+            --output "${RUNNER_TEMP}/oracle-download/2026.csv" \
+            --metadata "${RUNNER_TEMP}/oracle-download/metadata.json" \
+            --cache "${RUNNER_TEMP}/oracle-cache/2026.csv" \
+            --snapshot-url "$snapshot_url" \
+            --attempts 3 \
+            --backoff-seconds 2 \
+            --timeout-seconds 180 \
+            --cache-max-age-hours 168 \
+            --bet-ai-max-data-age-hours "$BET_AI_MAX_DATA_AGE_HOURS"
+
+      - name: Report freshness separately from workflow success
+        if: always()
+        run: |
+          metadata="${RUNNER_TEMP}/oracle-download/metadata.json"
+          if [[ ! -f "$metadata" ]]; then
+            echo "Oracle metadata was not produced." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          python - "$metadata" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json
+          import sys
+
+          metadata = json.load(open(sys.argv[1], encoding="utf-8"))
+          print("## Oracle CSV validation")
+          print()
+          print("A successful workflow only means a valid CSV was resolved; use the fields below to determine freshness.")
+          print()
+          for key in (
+              "state",
+              "source",
+              "content_changed",
+              "downloaded_at",
+              "last_match_at",
+              "download_age_seconds",
+              "data_age_seconds",
+              "sha256",
+              "is_recent_for_bet_ai",
+          ):
+              print(f"- **{key}:** `{metadata.get(key)}`")
+          PY
+
+      - name: Save newly validated Oracle cache
+        if: steps.oracle.outputs.cache_updated == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/oracle-cache
+          key: oracle-download-validation-2026-${{ github.run_id }}
+
+      - name: Upload validation metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-download-validation-metadata
+          path: ${{ runner.temp }}/oracle-download/metadata.json
+          if-no-files-found: error
+          retention-days: 14
