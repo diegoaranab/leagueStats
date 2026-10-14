@@ -65,3 +65,9 @@ a successful command does not by itself mean the upstream CSV was updated.
 The isolated GitHub workflow `oracle-download-validation.yml` exposes this
 validation only through `workflow_dispatch` and does not generate or publish
 application data.
+
+Phase 1B source investigation returned **NO-GO for fresh LoL Bet AI data**;
+see [the evidence report](../../docs/bet-ai/phase-1b/README.md). The resolver's
+24-hour latest-match threshold is a legacy eligibility heuristic, not proof
+of an upstream update. The report specifies separate publisher, retrieval and
+match clocks without changing this resolver or production workflows.

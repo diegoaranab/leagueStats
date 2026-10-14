@@ -1,0 +1,369 @@
+{
+  "column_count": 165,
+  "columns": [
+    "gameid",
+    "datacompleteness",
+    "url",
+    "league",
+    "year",
+    "split",
+    "playoffs",
+    "date",
+    "game",
+    "patch",
+    "participantid",
+    "side",
+    "position",
+    "playername",
+    "playerid",
+    "teamname",
+    "teamid",
+    "firstPick",
+    "champion",
+    "ban1",
+    "ban2",
+    "ban3",
+    "ban4",
+    "ban5",
+    "pick1",
+    "pick2",
+    "pick3",
+    "pick4",
+    "pick5",
+    "gamelength",
+    "result",
+    "kills",
+    "deaths",
+    "assists",
+    "teamkills",
+    "teamdeaths",
+    "doublekills",
+    "triplekills",
+    "quadrakills",
+    "pentakills",
+    "firstblood",
+    "firstbloodkill",
+    "firstbloodassist",
+    "firstbloodvictim",
+    "team kpm",
+    "ckpm",
+    "firstdragon",
+    "dragons",
+    "opp_dragons",
+    "elementaldrakes",
+    "opp_elementaldrakes",
+    "infernals",
+    "mountains",
+    "clouds",
+    "oceans",
+    "chemtechs",
+    "hextechs",
+    "dragons (type unknown)",
+    "elders",
+    "opp_elders",
+    "firstherald",
+    "heralds",
+    "opp_heralds",
+    "void_grubs",
+    "opp_void_grubs",
+    "firstbaron",
+    "barons",
+    "opp_barons",
+    "atakhans",
+    "opp_atakhans",
+    "firsttower",
+    "towers",
+    "opp_towers",
+    "firstmidtower",
+    "firsttothreetowers",
+    "turretplates",
+    "opp_turretplates",
+    "inhibitors",
+    "opp_inhibitors",
+    "damagetochampions",
+    "dpm",
+    "damageshare",
+    "damagetakenperminute",
+    "damagemitigatedperminute",
+    "damagetotowers",
+    "wardsplaced",
+    "wpm",
+    "wardskilled",
+    "wcpm",
+    "controlwardsbought",
+    "visionscore",
+    "vspm",
+    "totalgold",
+    "earnedgold",
+    "earned gpm",
+    "earnedgoldshare",
+    "goldspent",
+    "gspd",
+    "gpr",
+    "total cs",
+    "minionkills",
+    "monsterkills",
+    "monsterkillsownjungle",
+    "monsterkillsenemyjungle",
+    "cspm",
+    "goldat10",
+    "xpat10",
+    "csat10",
+    "opp_goldat10",
+    "opp_xpat10",
+    "opp_csat10",
+    "golddiffat10",
+    "xpdiffat10",
+    "csdiffat10",
+    "killsat10",
+    "assistsat10",
+    "deathsat10",
+    "opp_killsat10",
+    "opp_assistsat10",
+    "opp_deathsat10",
+    "goldat15",
+    "xpat15",
+    "csat15",
+    "opp_goldat15",
+    "opp_xpat15",
+    "opp_csat15",
+    "golddiffat15",
+    "xpdiffat15",
+    "csdiffat15",
+    "killsat15",
+    "assistsat15",
+    "deathsat15",
+    "opp_killsat15",
+    "opp_assistsat15",
+    "opp_deathsat15",
+    "goldat20",
+    "xpat20",
+    "csat20",
+    "opp_goldat20",
+    "opp_xpat20",
+    "opp_csat20",
+    "golddiffat20",
+    "xpdiffat20",
+    "csdiffat20",
+    "killsat20",
+    "assistsat20",
+    "deathsat20",
+    "opp_killsat20",
+    "opp_assistsat20",
+    "opp_deathsat20",
+    "goldat25",
+    "xpat25",
+    "csat25",
+    "opp_goldat25",
+    "opp_xpat25",
+    "opp_csat25",
+    "golddiffat25",
+    "xpdiffat25",
+    "csdiffat25",
+    "killsat25",
+    "assistsat25",
+    "deathsat25",
+    "opp_killsat25",
+    "opp_assistsat25",
+    "opp_deathsat25"
+  ],
+  "completeness": {
+    "complete": 23196,
+    "partial": 2568
+  },
+  "duplicate_game_participant_keys": 0,
+  "empty_ids": {
+    "playerid": {
+      "all_rows": 4903,
+      "player_rows": 609
+    },
+    "teamid": {
+      "all_rows": 978,
+      "player_rows": 815
+    }
+  },
+  "leagues": {
+    "AL": {
+      "games": 114,
+      "last_match_at": "2026-02-26 21:21:02",
+      "rows": 1368
+    },
+    "Americas Cup": {
+      "games": 19,
+      "last_match_at": "2026-03-08 20:51:01",
+      "rows": 228
+    },
+    "CBLOL": {
+      "games": 68,
+      "last_match_at": "2026-03-01 18:04:57",
+      "rows": 816
+    },
+    "CCWS": {
+      "games": 40,
+      "last_match_at": "2026-02-05 20:20:41",
+      "rows": 480
+    },
+    "CD": {
+      "games": 16,
+      "last_match_at": "2026-03-01 23:07:17",
+      "rows": 192
+    },
+    "EBL": {
+      "games": 63,
+      "last_match_at": "2026-03-06 18:41:42",
+      "rows": 756
+    },
+    "EM": {
+      "games": 113,
+      "last_match_at": "2026-03-15 19:09:37",
+      "rows": 1356
+    },
+    "FST": {
+      "games": 35,
+      "last_match_at": "2026-03-20 18:38:36",
+      "rows": 420
+    },
+    "HLL": {
+      "games": 65,
+      "last_match_at": "2026-02-28 14:22:19",
+      "rows": 780
+    },
+    "HW": {
+      "games": 103,
+      "last_match_at": "2026-03-07 17:12:29",
+      "rows": 1236
+    },
+    "LCK": {
+      "games": 125,
+      "last_match_at": "2026-03-01 10:01:17",
+      "rows": 1500
+    },
+    "LCKC": {
+      "games": 117,
+      "last_match_at": "2026-03-03 10:52:23",
+      "rows": 1404
+    },
+    "LCP": {
+      "games": 102,
+      "last_match_at": "2026-03-01 07:57:07",
+      "rows": 1224
+    },
+    "LCS": {
+      "games": 59,
+      "last_match_at": "2026-03-02 00:22:41",
+      "rows": 708
+    },
+    "LEC": {
+      "games": 105,
+      "last_match_at": "2026-03-01 20:19:40",
+      "rows": 1260
+    },
+    "LES": {
+      "games": 25,
+      "last_match_at": "2026-02-15 17:46:22",
+      "rows": 300
+    },
+    "LFL": {
+      "games": 97,
+      "last_match_at": "2026-03-06 18:59:18",
+      "rows": 1164
+    },
+    "LIT": {
+      "games": 96,
+      "last_match_at": "2026-03-06 19:02:29",
+      "rows": 1152
+    },
+    "LJL": {
+      "games": 161,
+      "last_match_at": "2026-03-15 11:06:39",
+      "rows": 1932
+    },
+    "LPL": {
+      "games": 214,
+      "last_match_at": "2026-03-08 12:04:35",
+      "rows": 2568
+    },
+    "LPLOL": {
+      "games": 39,
+      "last_match_at": "2026-03-06 22:04:35",
+      "rows": 468
+    },
+    "LRN": {
+      "games": 27,
+      "last_match_at": "2026-03-11 03:39:35",
+      "rows": 324
+    },
+    "LRS": {
+      "games": 31,
+      "last_match_at": "2026-03-13 00:05:39",
+      "rows": 372
+    },
+    "NLC": {
+      "games": 53,
+      "last_match_at": "2026-03-07 18:52:08",
+      "rows": 636
+    },
+    "PRM": {
+      "games": 51,
+      "last_match_at": "2026-03-07 19:55:24",
+      "rows": 612
+    },
+    "RL": {
+      "games": 51,
+      "last_match_at": "2026-03-07 19:22:00",
+      "rows": 612
+    },
+    "ROL": {
+      "games": 69,
+      "last_match_at": "2026-02-19 18:45:42",
+      "rows": 828
+    },
+    "TCL": {
+      "games": 57,
+      "last_match_at": "2026-03-06 17:03:04",
+      "rows": 684
+    },
+    "VCS": {
+      "games": 32,
+      "last_match_at": "2026-03-15 10:52:45",
+      "rows": 384
+    }
+  },
+  "participants_per_game": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "100",
+    "200"
+  ],
+  "patches": [
+    "16.01",
+    "16.02",
+    "16.03",
+    "16.04",
+    "16.05"
+  ],
+  "provenance": {
+    "commit": "bbb7181beec3bfc0b19d9a341a7ae9897ad304de",
+    "date_timezone_assumption": "UTC, matching PR #16 parser; CSV date has no offset",
+    "git_blob": "fbcf4f59e53481adf25934620220d01754dc2168",
+    "kind": "historical_repository_snapshot",
+    "last_match_at": "2026-03-20T18:38:36Z",
+    "path": "tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv",
+    "repository": "diegoaranab/leagueStats",
+    "repository_committed_at": "2026-03-21T20:47:41Z",
+    "sha256": "1e9b3410a3c732a7ee66b4d40a63aee0159625c8b6584edc2fd9b178faa7a2f2",
+    "size_bytes": 16798319,
+    "upstream_changed_at": null
+  },
+  "rows_per_game": {
+    "12": 2147
+  }
+}
