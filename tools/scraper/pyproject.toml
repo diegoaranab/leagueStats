@@ -14,6 +14,9 @@ dependencies = [
   "PyYAML>=6.0.1",
 ]
 
+[project.optional-dependencies]
+oracle-download = ["gdown==6.1.0"]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
@@ -23,3 +26,4 @@ where = ["src"]
 [project.scripts]
 loltee-scrape = "loltee_scraper.cli:main"
 loltee-scrape-matrix = "loltee_scraper.run_matrix:main"
+loltee-oracle-download = "loltee_scraper.oracle_download:main"
