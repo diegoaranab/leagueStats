@@ -48,8 +48,14 @@ def evaluate(candidate: dict, asof: str) -> dict:
     source = candidate.get("source") or {}
     model = candidate.get("model") or {}
     price = candidate.get("price") or {}
-    if candidate.get("mode") == "STAR_RECREATIONAL":
-        reasons.append("STAR is recreational, never automatically VALUE")
+    if not isinstance(source, dict):
+        source = {}
+    if not isinstance(model, dict):
+        model = {}
+    if not isinstance(price, dict):
+        price = {}
+    if candidate.get("mode") != "VALUE":
+        reasons.append("non-VALUE or missing mode cannot pass the VALUE gate")
     if candidate.get("phase") != "PREGAME":
         reasons.append("only pregame candidates; live or unknown rejected")
     try:
