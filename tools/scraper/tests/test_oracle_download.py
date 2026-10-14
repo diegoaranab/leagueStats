@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import csv
 import json
+import subprocess
 import tempfile
 import unittest
 import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 
-from loltee_scraper.oracle_download import DownloadState, OracleDownloader
+from loltee_scraper.oracle_download import DownloadError, DownloadState, OracleDownloader
 
 
 NOW = datetime(2026, 10, 14, 12, 0, tzinfo=timezone.utc)
@@ -80,6 +82,20 @@ def write_csv(path: Path, *, match_at: datetime = NOW, games: int = 2) -> None:
                         "ban5": "E",
                     }
                 )
+
+
+def replace_row_date(path: Path, *, row_index: int, match_at: datetime) -> None:
+    with path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = reader.fieldnames
+    if fieldnames is None:
+        raise AssertionError("test CSV has no header")
+    rows[row_index]["date"] = match_at.strftime("%Y-%m-%d %H:%M:%S")
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 class FakeSources:
@@ -164,12 +180,19 @@ class OracleDownloadTests(unittest.TestCase):
         self.assertEqual(result.row_count, 24)
         self.assertEqual(result.valid_record_count, 24)
         self.assertEqual(result.game_count, 2)
+        self.assertEqual(result.downloaded_at, "2026-10-14T12:00:00Z")
+        self.assertEqual(result.last_match_at, "2026-10-14T10:00:00Z")
+        self.assertEqual(result.download_age_seconds, 0)
         self.assertEqual(result.data_age_seconds, 7200)
         self.assertEqual(len(result.sha256 or ""), 64)
         self.assertEqual((self.root / "output.csv").read_bytes(), self.valid_csv.read_bytes())
         stored = json.loads((self.root / "metadata.json").read_text(encoding="utf-8"))
         self.assertEqual(stored["state"], "FRESH")
         self.assertEqual(stored["sha256"], result.sha256)
+        self.assertNotEqual(stored["downloaded_at"], stored["last_match_at"])
+        self.assertNotEqual(
+            stored["download_age_seconds"], stored["data_age_seconds"],
+        )
 
     def test_html_quota_pages_and_http_errors_fall_through_to_gdown(self) -> None:
         self.sources.http_responses.extend(
@@ -217,6 +240,23 @@ class OracleDownloadTests(unittest.TestCase):
             "FAILED",
         )
 
+    def test_one_future_csv_record_rejects_the_entire_download(self) -> None:
+        future_csv = self.root / "future.csv"
+        future_csv.write_bytes(self.valid_csv.read_bytes())
+        replace_row_date(
+            future_csv, row_index=5, match_at=NOW + timedelta(seconds=1),
+        )
+        self.sources.http_responses.extend(
+            [future_csv, ConnectionError("alternate unavailable")]
+        )
+        self.sources.gdown_responses.append(ConnectionError("gdown unavailable"))
+
+        result = self.resolve(self.downloader())
+
+        self.assertEqual(result.state, DownloadState.FAILED)
+        self.assertIn("future match timestamp", result.attempts[0].detail)
+        self.assertFalse((self.root / "output.csv").exists())
+
     def test_recent_cache_is_used_after_all_downloads_fail(self) -> None:
         cache = self.root / "cache.csv"
         self.sources.http_responses.append(self.valid_csv)
@@ -252,6 +292,22 @@ class OracleDownloadTests(unittest.TestCase):
         self.assertEqual(result.state, DownloadState.STALE)
         self.assertEqual(result.download_age_seconds, 4 * 24 * 3600)
         self.assertFalse(result.is_recent_for_bet_ai)
+
+    def test_future_cache_download_timestamp_is_rejected(self) -> None:
+        cache = self.root / "cache.csv"
+        self.sources.http_responses.append(self.valid_csv)
+        self.resolve(self.downloader(), cache_path=cache)
+        cache_metadata_path = cache.with_suffix(".csv.metadata.json")
+        cache_metadata = json.loads(cache_metadata_path.read_text(encoding="utf-8"))
+        cache_metadata["downloaded_at"] = "2026-10-14T12:00:01Z"
+        cache_metadata_path.write_text(json.dumps(cache_metadata), encoding="utf-8")
+        self.fail_fresh_sources()
+
+        result = self.resolve(self.downloader(), cache_path=cache)
+
+        self.assertEqual(result.state, DownloadState.FAILED)
+        cache_attempt = next(item for item in result.attempts if item.source == "cache")
+        self.assertIn("later than selection time", cache_attempt.detail)
 
     def test_corrupt_cache_checksum_is_rejected(self) -> None:
         cache = self.root / "cache.csv"
@@ -330,6 +386,43 @@ class OracleDownloadTests(unittest.TestCase):
             [attempt.source for attempt in result.attempts],
             ["google-drive-direct", "google-drive-alternate", "gdown"],
         )
+
+    def test_gdown_is_killed_as_soon_as_it_exceeds_max_bytes(self) -> None:
+        destination = self.root / "oversized.csv"
+
+        class OversizedProcess:
+            returncode: int | None = None
+
+            def __init__(self) -> None:
+                self.killed = False
+                self.calls = 0
+
+            def communicate(self, timeout: float | None = None):
+                self.calls += 1
+                if self.calls == 1:
+                    destination.write_bytes(b"x" * 11)
+                    raise subprocess.TimeoutExpired("gdown", timeout)
+                return "", ""
+
+            def kill(self) -> None:
+                self.killed = True
+                self.returncode = -9
+
+        process = OversizedProcess()
+        downloader = OracleDownloader(attempts=1)
+
+        with patch(
+            "loltee_scraper.oracle_download.subprocess.Popen",
+            return_value=process,
+        ) as popen:
+            with self.assertRaisesRegex(DownloadError, "10-byte maximum"):
+                downloader._download_gdown(
+                    "https://drive.google.com/test", destination, 5, 10,
+                )
+
+        self.assertTrue(process.killed)
+        self.assertEqual(destination.stat().st_size, 11)
+        self.assertIsNotNone(popen.call_args.kwargs["preexec_fn"])
 
 
 if __name__ == "__main__":

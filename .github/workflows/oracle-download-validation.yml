@@ -9,11 +9,14 @@ permissions:
 jobs:
   validate-oracle-download:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       ORACLE_FILE_ID: '1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm'
       ORACLE_BOOTSTRAP_COMMIT: 'bbb7181beec3bfc0b19d9a341a7ae9897ad304de'
       ORACLE_REPOSITORY_PATH: tools/scraper/data/raw/oracles_elixir/2026/2026_LoL_esports_match_data_from_OraclesElixir.csv
+      ORACLE_DOWNLOAD_ATTEMPTS: '2'
+      ORACLE_DOWNLOAD_TIMEOUT_SECONDS: '60'
+      ORACLE_DOWNLOAD_BACKOFF_SECONDS: '2'
       BET_AI_MAX_DATA_AGE_HOURS: '24'
 
     steps:
@@ -51,9 +54,9 @@ jobs:
             --metadata "${RUNNER_TEMP}/oracle-download/metadata.json" \
             --cache "${RUNNER_TEMP}/oracle-cache/2026.csv" \
             --snapshot-url "$snapshot_url" \
-            --attempts 3 \
-            --backoff-seconds 2 \
-            --timeout-seconds 180 \
+            --attempts "$ORACLE_DOWNLOAD_ATTEMPTS" \
+            --backoff-seconds "$ORACLE_DOWNLOAD_BACKOFF_SECONDS" \
+            --timeout-seconds "$ORACLE_DOWNLOAD_TIMEOUT_SECONDS" \
             --cache-max-age-hours 168 \
             --bet-ai-max-data-age-hours "$BET_AI_MAX_DATA_AGE_HOURS"
 

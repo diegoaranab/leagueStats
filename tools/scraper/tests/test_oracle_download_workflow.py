@@ -36,6 +36,25 @@ class OracleDownloadWorkflowTests(unittest.TestCase):
         self.assertIn("content_changed", commands)
         self.assertIn("is_recent_for_bet_ai", commands)
 
+    def test_retry_budget_leaves_time_for_every_source_and_reporting(self) -> None:
+        attempts = int(self.job["env"]["ORACLE_DOWNLOAD_ATTEMPTS"])
+        timeout_seconds = int(
+            self.job["env"]["ORACLE_DOWNLOAD_TIMEOUT_SECONDS"]
+        )
+        backoff_seconds = int(
+            self.job["env"]["ORACLE_DOWNLOAD_BACKOFF_SECONDS"]
+        )
+        remote_sources = 4  # direct, alternate, gdown, and snapshot
+        backoff_per_source = backoff_seconds * (2 ** (attempts - 1) - 1)
+        worst_case_download_seconds = remote_sources * (
+            attempts * timeout_seconds + backoff_per_source
+        )
+        job_seconds = int(self.job["timeout-minutes"]) * 60
+
+        self.assertLessEqual(worst_case_download_seconds, job_seconds - 300)
+        self.assertEqual(attempts, 2)
+        self.assertEqual(timeout_seconds, 60)
+
     def test_workflow_does_not_generate_or_publish_application_data(self) -> None:
         forbidden = (
             "deploy-pages",

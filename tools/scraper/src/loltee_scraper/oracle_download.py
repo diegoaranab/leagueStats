@@ -19,6 +19,11 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Callable, Sequence
 
+try:
+    import resource
+except ImportError:  # pragma: no cover - Windows uses the polling guard below.
+    resource = None  # type: ignore[assignment]
+
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -137,7 +142,11 @@ def _parse_datetime(value: str) -> datetime:
 
 
 def _age_seconds(now: datetime, value: datetime) -> int:
-    return max(0, int((now - value).total_seconds()))
+    if value > now:
+        raise CsvValidationError(
+            f"timestamp {_isoformat(value)} is later than selection time {_isoformat(now)}"
+        )
+    return int((now - value).total_seconds())
 
 
 def _sha256(path: Path) -> str:
@@ -182,12 +191,14 @@ def _atomic_copy(source: Path, destination: Path) -> None:
 def validate_oracle_csv(
     path: Path,
     *,
+    not_after: datetime | None = None,
     expected_year: int = 2026,
     min_bytes: int = 1_000_000,
     max_bytes: int = 1_000_000_000,
     min_records: int = 12,
     min_valid_ratio: float = 0.95,
 ) -> ValidationReport:
+    not_after = (not_after or _utc_now()).astimezone(timezone.utc)
     try:
         size_bytes = path.stat().st_size
     except OSError as error:
@@ -236,6 +247,11 @@ def validate_oracle_csv(
                     match_at = _parse_datetime(row.get("date") or "")
                 except (TypeError, ValueError):
                     continue
+                if match_at > not_after:
+                    raise CsvValidationError(
+                        "CSV contains a future match timestamp: "
+                        f"{_isoformat(match_at)} > {_isoformat(not_after)}"
+                    )
 
                 player_fields_valid = True
                 if position in PLAYER_POSITIONS:
@@ -348,8 +364,20 @@ class OracleDownloader:
     def _download_gdown(
         self, url: str, destination: Path, timeout: float, max_bytes: int,
     ) -> None:
-        del max_bytes
-        completed = subprocess.run(
+        def limit_child_file_size() -> None:
+            if resource is None:
+                return
+            _, hard_limit = resource.getrlimit(resource.RLIMIT_FSIZE)
+            enforced_limit = (
+                max_bytes
+                if hard_limit == resource.RLIM_INFINITY
+                else min(max_bytes, hard_limit)
+            )
+            resource.setrlimit(
+                resource.RLIMIT_FSIZE, (enforced_limit, enforced_limit),
+            )
+
+        process = subprocess.Popen(
             [
                 sys.executable,
                 "-m",
@@ -360,18 +388,47 @@ class OracleDownloader:
                 "-O",
                 str(destination),
             ],
-            check=False,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=timeout,
+            preexec_fn=limit_child_file_size if resource is not None else None,
         )
-        if completed.returncode != 0:
-            detail = (completed.stderr or completed.stdout).strip()
-            raise DownloadError(f"gdown exited {completed.returncode}: {detail[-500:]}")
+        deadline = time.monotonic() + timeout
+        stdout = ""
+        stderr = ""
+        while True:
+            size_bytes = destination.stat().st_size if destination.exists() else 0
+            if size_bytes > max_bytes:
+                process.kill()
+                stdout, stderr = process.communicate()
+                raise DownloadError(
+                    f"gdown response exceeds the {max_bytes}-byte maximum"
+                )
 
-    def _validate(self, path: Path) -> ValidationReport:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                process.kill()
+                stdout, stderr = process.communicate()
+                raise DownloadError(f"gdown exceeded the {timeout}-second timeout")
+            try:
+                stdout, stderr = process.communicate(timeout=min(0.1, remaining))
+                break
+            except subprocess.TimeoutExpired:
+                continue
+
+        size_bytes = destination.stat().st_size if destination.exists() else 0
+        if size_bytes > max_bytes or (process.returncode != 0 and size_bytes >= max_bytes):
+            raise DownloadError(
+                f"gdown response reached the {max_bytes}-byte maximum"
+            )
+        if process.returncode != 0:
+            detail = (stderr or stdout).strip()
+            raise DownloadError(f"gdown exited {process.returncode}: {detail[-500:]}")
+
+    def _validate(self, path: Path, *, not_after: datetime) -> ValidationReport:
         return validate_oracle_csv(
             path,
+            not_after=not_after,
             expected_year=self.expected_year,
             min_bytes=self.min_bytes,
             max_bytes=self.max_bytes,
@@ -394,12 +451,13 @@ class OracleDownloader:
         fetch: Callable[[Path], None],
         temp_parent: Path,
         attempts: list[AttemptReport],
+        not_after: datetime,
     ) -> tuple[Path, ValidationReport] | None:
         for attempt in range(1, self.attempts + 1):
             temporary = self._temporary_path(temp_parent, source)
             try:
                 fetch(temporary)
-                report = self._validate(temporary)
+                report = self._validate(temporary, not_after=not_after)
                 attempts.append(AttemptReport(source, attempt, "accepted", "valid CSV"))
                 return temporary, report
             except Exception as error:  # Each source must fail closed and allow fallback.
@@ -521,6 +579,7 @@ class OracleDownloader:
                 fetch=fetch,
                 temp_parent=output_path.parent,
                 attempts=attempts,
+                not_after=selected_at,
             )
             if accepted is None:
                 continue
@@ -559,7 +618,7 @@ class OracleDownloader:
 
         if cache_path is not None and cache_path.is_file():
             try:
-                report = self._validate(cache_path)
+                report = self._validate(cache_path, not_after=selected_at)
                 cache_metadata_path = cache_path.with_suffix(
                     cache_path.suffix + ".metadata.json"
                 )
@@ -578,6 +637,10 @@ class OracleDownloader:
                     if isinstance(downloaded_raw, str)
                     else datetime.fromtimestamp(cache_path.stat().st_mtime, timezone.utc)
                 )
+                for field in ("selected_at", "last_match_at"):
+                    value = cache_metadata.get(field)
+                    if isinstance(value, str):
+                        _age_seconds(selected_at, _parse_datetime(value))
                 download_age = _age_seconds(selected_at, downloaded_at)
                 data_age = _age_seconds(
                     selected_at, _parse_datetime(report.last_match_at)
@@ -632,6 +695,7 @@ class OracleDownloader:
                 fetch=snapshot_fetch,
                 temp_parent=output_path.parent,
                 attempts=attempts,
+                not_after=selected_at,
             )
             if accepted is not None:
                 temporary, report = accepted
