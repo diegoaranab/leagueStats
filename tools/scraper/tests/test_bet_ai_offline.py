@@ -53,6 +53,14 @@ class GateTests(unittest.TestCase):
         c = deepcopy(BASE); c["mode"] = "STAR_RECREATIONAL"
         self.assertEqual(evaluate(c, ASOF)["decision"], "NO_BET")
 
+    def test_unknown_mode_rejected(self):
+        c = deepcopy(BASE); c.pop("mode")
+        self.assertEqual(evaluate(c, ASOF)["decision"], "NO_BET")
+
+    def test_malformed_source_rejected(self):
+        c = deepcopy(BASE); c["source"] = ["VALID"]
+        self.assertEqual(evaluate(c, ASOF)["decision"], "NO_BET")
+
     def test_bad_probability(self):
         c = deepcopy(BASE); c["model"]["p_lower"] = 1.01
         self.assertEqual(evaluate(c, ASOF)["decision"], "NO_BET")
