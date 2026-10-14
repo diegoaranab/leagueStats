@@ -25,6 +25,14 @@ class GateTests(unittest.TestCase):
         self.assertEqual(r["minimum_decimal_odds"], 1.82)
         self.assertAlmostEqual(r["ev_conservative"], 0.1)
 
+    def test_exact_break_even_is_not_a_pass(self):
+        c = deepcopy(BASE)
+        c["model"]["p_lower"] = 0.5
+        c["price"]["decimal_odds"] = 2.0
+        result = evaluate(c, ASOF)
+        self.assertEqual(result["decision"], "NO_BET")
+        self.assertEqual(result["minimum_decimal_odds"], 2.01)
+
     def test_low_price(self):
         c = deepcopy(BASE); c["price"]["decimal_odds"] = 1.66
         self.assertEqual(evaluate(c, ASOF)["decision"], "NO_BET")
