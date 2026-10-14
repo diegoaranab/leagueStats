@@ -84,8 +84,11 @@ def evaluate(candidate: dict, asof: str) -> dict:
         if not (odds > 1 and Decimal(0) < lower <= p < Decimal(1)):
             raise ValueError("price or probability out of bounds")
         output["p_break_even"] = float(Decimal(1) / odds)
-        output["minimum_decimal_odds"] = float(
-            (Decimal(1) / lower).quantize(Decimal("0.01"), rounding=ROUND_CEILING))
+        boundary = Decimal(1) / lower
+        minimum = boundary.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
+        if minimum * lower <= Decimal(1):
+            minimum += Decimal("0.01")
+        output["minimum_decimal_odds"] = float(minimum)
         output["ev_conservative"] = float(lower * odds - Decimal(1))
         if lower * odds <= Decimal(1):
             reasons.append("insufficient price under conservative probability")
