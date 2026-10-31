@@ -106,10 +106,23 @@ class DeployWorkflowTests(unittest.TestCase):
     def test_snapshot_is_persisted_only_after_complete_validation(self) -> None:
         prepare = self.jobs["prepare-data"]
         validate = self.step_named(prepare, "Validate selected production data")
+        resolve_artifact = self.step_named(
+            prepare,
+            "Resolve production data artifact name",
+        )
         upload = self.step_named(prepare, "Upload validated production data")
         persist = self.jobs["persist-production-data"]
 
         self.assertLess(prepare["steps"].index(validate), prepare["steps"].index(upload))
+        self.assertEqual(
+            prepare["outputs"]["artifact_name"],
+            "${{ steps.production_data_artifact.outputs.name }}",
+        )
+        self.assertIn("${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}", resolve_artifact["run"])
+        self.assertEqual(
+            upload["with"]["name"],
+            "${{ steps.production_data_artifact.outputs.name }}",
+        )
         self.assertEqual(persist["needs"], "prepare-data")
         self.assertEqual(persist["if"], "needs.prepare-data.outputs.refreshed == 'true'")
         self.assertEqual(persist["permissions"], {"contents": "write"})
@@ -118,6 +131,11 @@ class DeployWorkflowTests(unittest.TestCase):
             self.step_named(persist, "Commit validated snapshot only when changed")["run"],
         )
         self.assertEqual(prepare["permissions"], {"contents": "read"})
+        download = self.step_named(persist, "Download validated production data")
+        self.assertEqual(
+            download["with"]["name"],
+            "${{ needs.prepare-data.outputs.artifact_name }}",
+        )
 
     def test_fast_build_has_no_scraper_toolchain(self) -> None:
         build = self.jobs["build"]
@@ -126,6 +144,11 @@ class DeployWorkflowTests(unittest.TestCase):
         self.assertNotIn("Install Playwright Chromium", step_names)
         self.assertIn("Download selected production data", step_names)
         self.assertFalse(any("python" in step.get("run", "") for step in build["steps"]))
+        download = self.step_named(build, "Download selected production data")
+        self.assertEqual(
+            download["with"]["name"],
+            "${{ needs.prepare-data.outputs.artifact_name }}",
+        )
 
         self.assertEqual(build["needs"], ["prepare-data", "persist-production-data"])
         self.assertIn("needs.persist-production-data.result == 'success'", build["if"])

@@ -24,7 +24,6 @@ env:
   DATA_TIERS: 'iron bronze silver gold platinum emerald diamond master'
   DATA_WINDOWS: 'current 7d 14d'
   DATA_LANES: 'top jungle middle bottom support'
-  PRODUCTION_DATA_ARTIFACT: production-data-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
   prepare-data:
@@ -33,6 +32,7 @@ jobs:
       contents: read
     outputs:
       refreshed: ${{ steps.data_source.outputs.refresh }}
+      artifact_name: ${{ steps.production_data_artifact.outputs.name }}
 
     steps:
       - name: Checkout
@@ -290,10 +290,14 @@ jobs:
             --windows $DATA_WINDOWS \
             --lanes $DATA_LANES
 
+      - name: Resolve production data artifact name
+        id: production_data_artifact
+        run: echo "name=production-data-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
       - name: Upload validated production data
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          name: ${{ steps.production_data_artifact.outputs.name }}
           path: apps/web/public/data
           if-no-files-found: error
           retention-days: 1
@@ -312,7 +316,7 @@ jobs:
       - name: Download validated production data
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          name: ${{ needs.prepare-data.outputs.artifact_name }}
           path: ${{ runner.temp }}/production-data
 
       - name: Revalidate production data before persistence
@@ -378,7 +382,7 @@ jobs:
       - name: Download selected production data
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          name: ${{ needs.prepare-data.outputs.artifact_name }}
           path: apps/web/public/data
 
       - name: Setup Node
