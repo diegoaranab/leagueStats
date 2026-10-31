@@ -84,15 +84,29 @@ the same PR/ref.
 
 [Production deployment](../.github/workflows/deploy-pages.yml) runs on pushes to
 `main`, manual dispatch, and daily schedules at **00:23 UTC** and **12:23 UTC**.
-Both scheduled runs generate fresh Solo and Teamplay datasets for the full
-configured matrix, including `current`, `7d`, and `14d`, then build and deploy
-the SPA to GitHub Pages. Production runs share the `pages` concurrency group
-with cancellation of in-progress runs disabled.
+Both scheduled runs and every manual dispatch generate fresh Solo and Teamplay
+datasets for the full configured matrix, including `current`, `7d`, and `14d`,
+then build and deploy the SPA to GitHub Pages. A normal `main` push instead
+restores the last fully validated dataset from the dedicated `production-data`
+branch before building. Changes to the scraper, dataset model/loader, validator,
+or production workflow conservatively force a fresh generation.
+
+`production-data` is an operational state branch containing only the deployable
+dataset under `data/`; generated data remains gitignored on `main`. Fresh output
+is validated before that branch is updated, and the build waits for persistence
+to succeed. If the branch is missing or its snapshot fails validation, a `main`
+push automatically falls back to full generation and bootstraps/replaces the
+snapshot only after validation succeeds. To request fresh production statistics
+at any time, manually run **Deploy Web to GitHub Pages**; manual runs refresh by
+default. All production runs share the `pages` concurrency group with
+cancellation of in-progress runs disabled.
 
 Generation loads existing Difficulty history for scoring. Only the **00:23 UTC
 scheduled run** persists daily observations on `difficulty-history`, using a
 complete Solo matrix artifact. Push, manual, and 12:23 UTC runs do not write
-history. See [Difficulty v2 History](DIFFICULTY_HISTORY.md) for details.
+history. Unlike `production-data`, which is the last-known-good deployable
+snapshot, `difficulty-history` stores the rolling observations used by Difficulty
+scoring. See [Difficulty v2 History](DIFFICULTY_HISTORY.md) for details.
 
 ## Oracle source resilience
 

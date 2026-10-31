@@ -24,18 +24,105 @@ env:
   DATA_TIERS: 'iron bronze silver gold platinum emerald diamond master'
   DATA_WINDOWS: 'current 7d 14d'
   DATA_LANES: 'top jungle middle bottom support'
+  PRODUCTION_DATA_ARTIFACT: production-data-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
-  build:
+  prepare-data:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      refreshed: ${{ steps.data_source.outputs.refresh }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select production data source
+        id: data_source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          refresh=true
+          reason="${EVENT_NAME} requires a full refresh"
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            data_sensitive=false
+            if [[ -z "$BEFORE_SHA" || "$BEFORE_SHA" =~ ^0+$ ]] || ! git cat-file -e "${BEFORE_SHA}^{commit}"; then
+              data_sensitive=true
+              reason="the previous main commit is unavailable"
+            else
+              changed_files="$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")"
+              while IFS= read -r path; do
+                case "$path" in
+                  tools/scraper/*|\
+                  .github/workflows/deploy-pages.yml|\
+                  .github/scripts/validate-production-data.py|\
+                  apps/web/src/app/core/models/tierlist.model.ts|\
+                  apps/web/src/app/core/services/tierlist.service.ts)
+                    data_sensitive=true
+                    reason="main changed the production data contract ($path)"
+                    break
+                    ;;
+                esac
+              done <<< "$changed_files"
+            fi
+
+            if [[ "$data_sensitive" == "false" ]]; then
+              set +e
+              git ls-remote --exit-code --heads origin production-data > "${RUNNER_TEMP}/production-data-ref"
+              lookup_status=$?
+              set -e
+
+              if [[ "$lookup_status" == "0" ]]; then
+                snapshot_root="${RUNNER_TEMP}/production-data-snapshot"
+                mkdir -p "$snapshot_root"
+                if git fetch --no-tags origin production-data:refs/remotes/origin/production-data && \
+                  git archive refs/remotes/origin/production-data data | tar -x -C "$snapshot_root"; then
+                  if python3 .github/scripts/validate-production-data.py \
+                    --root "$snapshot_root/data" \
+                    --regions $DATA_REGIONS \
+                    --tiers $DATA_TIERS \
+                    --windows $DATA_WINDOWS \
+                    --lanes $DATA_LANES; then
+                    rm -rf "$SOLO_OUTPUT_ROOT"
+                    mkdir -p "$SOLO_OUTPUT_ROOT"
+                    cp -a "$snapshot_root/data/." "$SOLO_OUTPUT_ROOT/"
+                    refresh=false
+                    reason="the validated production-data snapshot is reusable"
+                  else
+                    reason="the production-data snapshot is invalid"
+                  fi
+                else
+                  reason="the production-data snapshot could not be restored"
+                fi
+              elif [[ "$lookup_status" == "2" ]]; then
+                reason="the production-data branch does not exist yet"
+              else
+                reason="the production-data branch could not be queried"
+              fi
+            fi
+          fi
+
+          echo "refresh=$refresh" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Production data selection"
+            echo "- **Full refresh:** \`$refresh\`"
+            echo "- **Reason:** $reason"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clear stale production data before refresh
+        if: steps.data_source.outputs.refresh == 'true'
+        run: rm -rf "$SOLO_OUTPUT_ROOT"
 
       - name: Setup Python
+        if: steps.data_source.outputs.refresh == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -44,22 +131,18 @@ jobs:
             tools/scraper/pyproject.toml
             tools/scraper/requirements.txt
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
-
       - name: Install Python dependencies
+        if: steps.data_source.outputs.refresh == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -e "tools/scraper[oracle-download]"
 
       - name: Install Playwright Chromium
+        if: steps.data_source.outputs.refresh == 'true'
         run: python -m playwright install --with-deps chromium
 
       - name: Restore validated Oracle cache
+        if: steps.data_source.outputs.refresh == 'true'
         uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/oracle-cache
@@ -68,6 +151,7 @@ jobs:
             oracle-production-2026-
 
       - name: Resolve Oracle's Elixir CSV
+        if: steps.data_source.outputs.refresh == 'true'
         id: oracle_download
         run: |
           mkdir -p "${RUNNER_TEMP}/oracle-download"
@@ -80,7 +164,7 @@ jobs:
             --require-production-current
 
       - name: Summarize Oracle resolution
-        if: always()
+        if: always() && steps.data_source.outputs.refresh == 'true'
         run: |
           python - "${RUNNER_TEMP}/oracle-download/metadata.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
           import json
@@ -111,6 +195,7 @@ jobs:
           key: oracle-production-2026-${{ github.run_id }}
 
       - name: Load difficulty history for scoring
+        if: steps.data_source.outputs.refresh == 'true'
         env:
           HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
         run: |
@@ -141,6 +226,7 @@ jobs:
           esac
 
       - name: Generate Solo Queue datasets
+        if: steps.data_source.outputs.refresh == 'true'
         env:
           HISTORY_FILE: ${{ runner.temp }}/difficulty-history.json
         run: |
@@ -159,7 +245,7 @@ jobs:
             --fail-fast
 
       - name: Upload Solo matrix for difficulty history
-        if: ${{ github.event_name == 'schedule' && github.event.schedule == '23 0 * * *' }}
+        if: ${{ steps.data_source.outputs.refresh == 'true' && github.event_name == 'schedule' && github.event.schedule == '23 0 * * *' }}
         uses: actions/upload-artifact@v4
         with:
           name: difficulty-history-solo-matrix
@@ -170,6 +256,7 @@ jobs:
           retention-days: 1
 
       - name: Generate Teamplay datasets
+        if: steps.data_source.outputs.refresh == 'true'
         run: |
           python -m loltee_scraper.build_teamplay \
             --oe-csv "$ORACLE_CSV_PATH" \
@@ -182,6 +269,7 @@ jobs:
             --fail-fast
 
       - name: Add Teamplay patches to workflow summary
+        if: steps.data_source.outputs.refresh == 'true'
         run: |
           python - "$TEAMPLAY_OUTPUT_ROOT" >> "$GITHUB_STEP_SUMMARY" <<'PY'
           import json
@@ -193,27 +281,112 @@ jobs:
           print(f"- **Patches used:** `{', '.join(patches)}`")
           PY
 
-      - name: Verify Teamplay datasets exist
+      - name: Validate selected production data
         run: |
-          python - <<'PY'
-          import os
-          from pathlib import Path
+          python3 .github/scripts/validate-production-data.py \
+            --root "$SOLO_OUTPUT_ROOT" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --lanes $DATA_LANES
 
-          root = Path(os.environ["TEAMPLAY_OUTPUT_ROOT"])
-          regions = os.environ["DATA_REGIONS"].split()
-          tiers = os.environ["DATA_TIERS"].split()
-          windows = os.environ["DATA_WINDOWS"].split()
-          missing = [
-              str(root / region / tier / f"{window}.json")
-              for region in regions
-              for tier in tiers
-              for window in windows
-              if not (root / region / tier / f"{window}.json").is_file()
-          ]
-          if missing:
-              raise SystemExit(f"Missing {len(missing)} Teamplay datasets; examples={missing[:5]}")
-          print(f"Verified {len(regions) * len(tiers) * len(windows)} Teamplay datasets.")
-          PY
+      - name: Upload validated production data
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          path: apps/web/public/data
+          if-no-files-found: error
+          retention-days: 1
+
+  persist-production-data:
+    runs-on: ubuntu-latest
+    needs: prepare-data
+    if: needs.prepare-data.outputs.refreshed == 'true'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download validated production data
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          path: ${{ runner.temp }}/production-data
+
+      - name: Revalidate production data before persistence
+        run: |
+          python3 .github/scripts/validate-production-data.py \
+            --root "${RUNNER_TEMP}/production-data" \
+            --regions $DATA_REGIONS \
+            --tiers $DATA_TIERS \
+            --windows $DATA_WINDOWS \
+            --lanes $DATA_LANES
+
+      - name: Commit validated snapshot only when changed
+        env:
+          SNAPSHOT_ROOT: ${{ runner.temp }}/production-data
+        run: |
+          set -euo pipefail
+
+          set +e
+          git ls-remote --exit-code --heads origin production-data > "${RUNNER_TEMP}/production-data-persist-ref"
+          lookup_status=$?
+          set -e
+
+          case "$lookup_status" in
+            0)
+              git fetch --no-tags origin production-data
+              git switch -C production-data FETCH_HEAD
+              ;;
+            2)
+              git switch --orphan production-data
+              ;;
+            *)
+              echo "Unable to determine whether the production-data branch exists." >&2
+              exit "$lookup_status"
+              ;;
+          esac
+
+          git rm -r --ignore-unmatch .
+          mkdir -p data
+          cp -a "$SNAPSHOT_ROOT/." data/
+          git add data
+
+          if git diff --cached --quiet; then
+            echo "Production data snapshot is already current; no commit needed."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update production data"
+          git push origin HEAD:production-data
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [prepare-data, persist-production-data]
+    if: ${{ always() && !cancelled() && needs.prepare-data.result == 'success' && (needs.persist-production-data.result == 'success' || needs.persist-production-data.result == 'skipped') }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download selected production data
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PRODUCTION_DATA_ARTIFACT }}
+          path: apps/web/public/data
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: apps/web
@@ -255,7 +428,7 @@ jobs:
 
   persist-difficulty-history:
     runs-on: ubuntu-latest
-    needs: build
+    needs: prepare-data
     if: ${{ always() && github.event_name == 'schedule' && github.event.schedule == '23 0 * * *' }}
     permissions:
       contents: write
