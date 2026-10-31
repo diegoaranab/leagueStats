@@ -1,0 +1,11 @@
+gameid,datacompleteness,league,patch,participantid,side,position,champion,result,ban1,ban2,ban3,ban4,ban5
+lck-old,complete,LCK,16.16,1,Blue,top,Renekton,1,,,,,
+lpl-old,complete,LPL,16.17,1,Blue,top,Jax,1,,,,,
+msi-current,complete,MSI,16.18,1,Blue,top,KSante,1,,,,,
+msi-current,complete,MSI,16.18,100,Blue,team,,1,Lee Sin,,,,
+fst-current,complete,FST,16.19,1,Blue,mid,Orianna,1,,,,,
+worlds-current,complete,WLDs,16.20,1,Blue,top,Aurora,1,,,,,
+worlds-current,complete,WLDs,16.20,1,Blue,top,Aurora,1,,,,,
+worlds-current,complete,WLDs,16.20,100,Blue,team,,1,Yone,,,,
+worlds-current,complete,WLDs,16.20,200,Red,team,,0,Yone,,,,
+minor-future,complete,EM,99.99,1,Blue,top,Excluded Champion,1,,,,,

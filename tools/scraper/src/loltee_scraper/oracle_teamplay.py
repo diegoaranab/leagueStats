@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-TEAMPLAY_LEAGUES = ["LCK", "LPL", "LEC", "LCS"]
+TEAMPLAY_LEAGUES = ["LCK", "LPL", "LEC", "LCS", "WLDs", "MSI", "FST"]
 ORACLE_POSITION_TO_LANE = {
     "top": "top",
     "jng": "jungle",
