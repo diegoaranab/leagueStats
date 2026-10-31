@@ -96,19 +96,26 @@ history. See [Difficulty v2 History](DIFFICULTY_HISTORY.md) for details.
 
 ## Oracle source resilience
 
-CI resolves Oracle's Elixir data through a layered strategy:
+Production resolves Oracle's Elixir data through the hardened Python downloader:
 
 ```text
-Fresh download -> alternate download mechanisms -> recent Actions cache
-               -> historical Git bootstrap fallback
+validated live download -> validated Actions cache (downloaded within 48 hours)
+                        -> fail before Teamplay generation
 ```
 
-Fresh download attempts use the direct Google Drive URL, an alternate download
-endpoint, and gdown. If all fail, a valid cached download no older than seven
-days can be used, followed by a known historical CSV from Git as the final
-fallback. Only fresh downloads refresh the cache. If no valid source can be
-obtained, generation fails.
+Live attempts use the direct Google Drive URL, an alternate endpoint, and
+gdown. If all fail, production may use a checksum-verified cache whose original
+download is no older than 48 hours. Only a successfully validated live download
+refreshes that cache or its `downloaded_at`; selecting cached content never
+renews its age. An expired cache or historical snapshot fails production before
+new Teamplay data or a Pages artifact is published. The downloader retains its
+snapshot fallback for diagnostics and manual validation, but production does
+not provide one.
 
-Degraded sources are identified through dataset `meta.oracle_source` and
-`meta.warnings`, so cached or historical professional evidence is distinguishable
-from fresh evidence.
+Oracle metadata keeps two independent clocks. `oracle_downloaded_at` records
+when LeagueStats retrieved the exact CSV and determines cache eligibility;
+`oracle_last_match_at` records the newest professional match in the CSV and is
+displayed as context. A fresh download with no match in the last 24 hours is
+valid for LeagueStats. The downloader's separate Bet AI recency flag retains
+its 24-hour match-age meaning and is not used as the production acceptance rule.
+Cached sources are identified through dataset `meta.oracle_source` and warnings.

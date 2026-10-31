@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
@@ -38,6 +39,15 @@ TEAMPLAY_BAN_WEIGHT_ROLE_PICK = 0.20
 TEAMPLAY_BAN_WEIGHT_SOLO_STRENGTH = 0.10
 TEAMPLAY_BAN_CREDIT_MODE = "role_adjusted_v1"
 TEAMPLAY_ELIGIBILITY_RULE = "solo_pool && pro_pick_count>0 && (pro_pick_count+pro_ban_count)>=5"
+ORACLE_METADATA_FIELDS = {
+    "source": "oracle_source",
+    "downloaded_at": "oracle_downloaded_at",
+    "selected_at": "oracle_selected_at",
+    "last_match_at": "oracle_last_match_at",
+    "download_age_seconds": "oracle_download_age_seconds",
+    "data_age_seconds": "oracle_data_age_seconds",
+    "content_changed": "oracle_content_changed",
+}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -57,6 +67,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--oracle-source-warning",
         default="",
         help="Optional warning added to Teamplay metadata when the Oracle source is degraded/stale.",
+    )
+    parser.add_argument(
+        "--oracle-metadata",
+        type=Path,
+        help="Metadata JSON produced by loltee_scraper.oracle_download.",
     )
     parser.add_argument("--fail-fast", action="store_true")
     return parser
@@ -187,14 +202,21 @@ def build_teamplay_dataset(
     window: str,
     oracle_source: str = "local",
     oracle_source_warning: str = "",
+    oracle_metadata: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     generated_at_utc = datetime.now(timezone.utc).isoformat()
     solo_meta = solo_dataset.get("meta", {}) if isinstance(solo_dataset, dict) else {}
     solo_data = solo_dataset.get("data", {}) if isinstance(solo_dataset, dict) else {}
 
     combined_warnings = list(solo_meta.get("warnings", [])) + list(pro_snapshot.warnings)
+    oracle_metadata = oracle_metadata or {}
+    resolved_oracle_source = str(oracle_metadata.get("source") or oracle_source)
     if oracle_source_warning:
         combined_warnings.append(oracle_source_warning)
+    elif resolved_oracle_source == "cache":
+        combined_warnings.append(
+            "Oracle professional data came from the validated production cache because live download sources were unavailable."
+        )
     if solo_meta.get("is_partial"):
         combined_warnings.append("Solo source dataset is partial; teamplay rankings were blended from partial solo data.")
 
@@ -266,7 +288,7 @@ def build_teamplay_dataset(
         {
             "mode": "teamplay",
             "source": "Oracle's Elixir + LoLalytics",
-            "oracle_source": oracle_source,
+            "oracle_source": resolved_oracle_source,
             "region": region,
             "tier": tier,
             "window": window,
@@ -289,6 +311,9 @@ def build_teamplay_dataset(
             "eligibility_rule": TEAMPLAY_ELIGIBILITY_RULE,
         }
     )
+    for source_field, teamplay_field in ORACLE_METADATA_FIELDS.items():
+        if source_field in oracle_metadata:
+            meta[teamplay_field] = oracle_metadata[source_field]
 
     return {
         "meta": meta,
@@ -317,6 +342,12 @@ def main() -> None:
     solo_root = Path(args.solo_root).resolve()
     output_root = Path(args.output_root).resolve()
     manifest_path = solo_root / "manifest.json"
+    oracle_metadata: Dict[str, Any] = {}
+    if args.oracle_metadata:
+        loaded_metadata = json.loads(args.oracle_metadata.read_text(encoding="utf-8"))
+        if not isinstance(loaded_metadata, dict):
+            raise ValueError("oracle metadata must be a JSON object")
+        oracle_metadata = loaded_metadata
 
     try:
         output_root_rel = output_root.relative_to(solo_root)
@@ -364,6 +395,7 @@ def main() -> None:
                         window=window,
                         oracle_source=args.oracle_source,
                         oracle_source_warning=args.oracle_source_warning,
+                        oracle_metadata=oracle_metadata,
                     )
                     write_teamplay_dataset(output_path, result)
 

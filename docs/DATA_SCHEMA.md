@@ -47,6 +47,13 @@ Top-level shape:
 - `leagues_used`: string[]
 - `patches_used`: string[]
 - `total_games_filtered`: number
+- `oracle_source`: string (live endpoint name or `cache`)
+- `oracle_downloaded_at`: ISO timestamp | null (when LeagueStats retrieved this exact CSV)
+- `oracle_selected_at`: ISO timestamp (when this workflow selected the source)
+- `oracle_last_match_at`: ISO timestamp | null (newest professional match in the CSV)
+- `oracle_download_age_seconds`: number | null
+- `oracle_data_age_seconds`: number | null
+- `oracle_content_changed`: boolean | null
 - `inclusion_mode`: string
 - `excluded_zero_pro_count`: number
 - `excluded_low_evidence_count`: number
@@ -56,6 +63,12 @@ Top-level shape:
 - `teamplay_ban_score_formula`: string (see below)
 - `ban_credit_mode`: string
 - `eligibility_rule`: string
+
+The Oracle download and match timestamps are intentionally independent. Cache
+acceptance uses `oracle_download_age_seconds`; it does not require a professional
+match within the last 24 hours. `oracle_last_match_at` and
+`oracle_data_age_seconds` describe match coverage for observability and the UI.
+Bet AI-specific recency fields are not copied into Teamplay datasets.
 
 ## Champion Object
 
