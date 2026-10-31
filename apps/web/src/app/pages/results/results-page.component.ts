@@ -12,6 +12,7 @@ import { ChampionCardComponent } from '../../components/champion-card/champion-c
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
+import { RecommendationSpotlightComponent } from '../../components/recommendation-spotlight/recommendation-spotlight.component';
 import { RecommendedBansComponent } from '../../components/recommended-bans/recommended-bans.component';
 import {
   DEFAULT_RESULTS_QUERY,
@@ -52,6 +53,7 @@ import { TierlistService } from '../../core/services/tierlist.service';
     LaneTabsComponent,
     FilterBarComponent,
     ChampionCardComponent,
+    RecommendationSpotlightComponent,
     RecommendedBansComponent,
     InfoTooltipComponent,
   ],
@@ -80,6 +82,8 @@ export class ResultsPageComponent implements OnInit {
   availableLanes: Lane[] = [...LANE_OPTIONS];
   laneCounts: Partial<Record<Lane, number>> = {};
   champions: Champion[] = [];
+  spotlightChampion: Champion | null = null;
+  spotlightRank: number | null = null;
   recommendedBans: Champion[] = [];
   difficultyFilter: DifficultyFilter = 'all';
 
@@ -212,6 +216,8 @@ export class ResultsPageComponent implements OnInit {
     this.datasetKey = nextKey;
     this.dataset = null;
     this.champions = [];
+    this.spotlightChampion = null;
+    this.spotlightRank = null;
     this.recommendedBans = [];
     this.banPriorities.clear();
     this.laneCounts = {};
@@ -268,6 +274,7 @@ export class ResultsPageComponent implements OnInit {
     }
 
     const laneChampions = this.dataset.data[this.query.lane] ?? [];
+    this.selectSpotlight(laneChampions);
     const rankedBans = this.query.mode === 'solo'
       ? laneChampions
           .filter((champion) => champion.pbi !== null && champion.pbi > 0)
@@ -317,6 +324,42 @@ export class ResultsPageComponent implements OnInit {
     }
 
     this.champions = next;
+  }
+
+  private selectSpotlight(laneChampions: Champion[]): void {
+    let strongestChampion: Champion | null = null;
+    let strongestRank: number | null = null;
+
+    for (const champion of laneChampions) {
+      if (this.difficultyFilter !== 'all' && champion.difficulty !== this.difficultyFilter) {
+        continue;
+      }
+
+      const rank = this.canonicalRankFor(champion);
+      if (rank === null) {
+        continue;
+      }
+
+      if (
+        strongestRank === null
+        || rank < strongestRank
+        || (rank === strongestRank && champion.name.localeCompare(strongestChampion?.name ?? '') < 0)
+      ) {
+        strongestChampion = champion;
+        strongestRank = rank;
+      }
+    }
+
+    this.spotlightChampion = strongestChampion;
+    this.spotlightRank = strongestRank;
+  }
+
+  private canonicalRankFor(champion: Champion): number | null {
+    const rank = this.query.mode === 'teamplay'
+      ? champion.teamplay_rank ?? champion.filtered_rank ?? champion.rank
+      : champion.filtered_rank ?? champion.rank;
+
+    return typeof rank === 'number' && Number.isFinite(rank) && rank > 0 ? rank : null;
   }
 
   private compareBanPriority(a: Champion, b: Champion): number {
