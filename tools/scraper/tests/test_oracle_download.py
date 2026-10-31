@@ -10,7 +10,12 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from loltee_scraper.oracle_download import DownloadError, DownloadState, OracleDownloader
+from loltee_scraper.oracle_download import (
+    DownloadError,
+    DownloadState,
+    OracleDownloader,
+    is_production_current,
+)
 
 
 NOW = datetime(2026, 10, 14, 12, 0, tzinfo=timezone.utc)
@@ -275,6 +280,25 @@ class OracleDownloadTests(unittest.TestCase):
         self.assertTrue(result.is_recent_for_bet_ai)
         self.assertEqual(first.sha256, result.sha256)
 
+    def test_cached_reuse_preserves_original_download_timestamp(self) -> None:
+        cache = self.root / "cache.csv"
+        self.sources.http_responses.append(self.valid_csv)
+        first = self.resolve(self.downloader(), cache_path=cache)
+        cache_metadata_path = cache.with_suffix(".csv.metadata.json")
+        original_metadata = cache_metadata_path.read_bytes()
+        self.fail_fresh_sources()
+
+        result = self.resolve(
+            self.downloader(now=lambda: NOW + timedelta(hours=12)),
+            cache_path=cache,
+        )
+
+        self.assertEqual(result.state, DownloadState.CACHED)
+        self.assertEqual(result.downloaded_at, first.downloaded_at)
+        self.assertEqual(result.download_age_seconds, 12 * 3600)
+        self.assertFalse(result.cache_updated)
+        self.assertEqual(cache_metadata_path.read_bytes(), original_metadata)
+
     def test_old_cache_is_explicitly_stale(self) -> None:
         cache = self.root / "cache.csv"
         self.sources.http_responses.append(self.valid_csv)
@@ -292,6 +316,7 @@ class OracleDownloadTests(unittest.TestCase):
         self.assertEqual(result.state, DownloadState.STALE)
         self.assertEqual(result.download_age_seconds, 4 * 24 * 3600)
         self.assertFalse(result.is_recent_for_bet_ai)
+        self.assertFalse(is_production_current(result))
 
     def test_future_cache_download_timestamp_is_rejected(self) -> None:
         cache = self.root / "cache.csv"
@@ -337,8 +362,9 @@ class OracleDownloadTests(unittest.TestCase):
         self.assertEqual(result.source, "snapshot")
         self.assertEqual(result.data_age_seconds, 30 * 24 * 3600)
         self.assertFalse(result.is_recent_for_bet_ai)
+        self.assertFalse(is_production_current(result))
 
-    def test_fresh_download_with_old_latest_match_is_stale_for_bet_ai(self) -> None:
+    def test_fresh_download_with_old_latest_match_is_valid_for_league_stats(self) -> None:
         stale_download = self.root / "stale.csv"
         write_csv(stale_download, match_at=NOW - timedelta(hours=25))
         self.sources.http_responses.append(stale_download)
@@ -347,9 +373,11 @@ class OracleDownloadTests(unittest.TestCase):
             self.downloader(bet_ai_max_data_age_hours=24),
         )
 
-        self.assertEqual(result.state, DownloadState.STALE)
+        self.assertEqual(result.state, DownloadState.FRESH)
         self.assertEqual(result.source, "google-drive-direct")
         self.assertFalse(result.is_recent_for_bet_ai)
+        self.assertTrue(is_production_current(result))
+        self.assertEqual(result.download_age_seconds, 0)
         self.assertEqual(result.data_age_seconds, 25 * 3600)
 
     def test_identical_download_is_successful_but_not_updated(self) -> None:

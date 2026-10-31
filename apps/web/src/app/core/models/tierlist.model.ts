@@ -65,6 +65,13 @@ export interface TierlistMeta {
   leagues_used?: string[];
   patches_used?: string[];
   total_games_filtered?: number;
+  oracle_source?: string;
+  oracle_downloaded_at?: string | null;
+  oracle_selected_at?: string;
+  oracle_last_match_at?: string | null;
+  oracle_download_age_seconds?: number | null;
+  oracle_data_age_seconds?: number | null;
+  oracle_content_changed?: boolean | null;
   inclusion_mode?: string;
   excluded_zero_pro_count?: number;
   excluded_low_evidence_count?: number;

@@ -52,22 +52,21 @@ Cache metadata includes a SHA-256 checksum that is verified before reuse.
 
 The JSON metadata uses these states:
 
-- `FRESH`: a live source produced valid data whose latest match is within the
-  configured Bet AI threshold.
-- `CACHED`: a checksum-verified cache is within both the cache and Bet AI age
-  thresholds.
-- `STALE`: a valid source is available, but it is too old or is the historical
-  snapshot.
-- `FAILED`: no valid live, cached, or snapshot source exists.
+- `FRESH`: a live source produced valid data, regardless of latest-match age.
+- `CACHED`: a checksum-verified cache whose original retrieval/download age is
+  within the configured cache-age limit.
+- `STALE`: a valid cache is over its configured age limit, or a diagnostic or
+  historical snapshot was selected.
+- `FAILED`: no usable source could be resolved.
 
-`content_changed` and `is_recent_for_bet_ai` must be inspected independently;
-a successful command does not by itself mean the upstream CSV was updated.
+Retrieval/download age and latest-match/data age are independent. A freshly
+retrieved CSV can legitimately contain older matches, while a cached CSV can
+have a recent latest match even though the retrieval itself is stale.
+`is_recent_for_bet_ai` is retained only as a separate legacy signal that checks
+whether the latest match is within 24 hours; it is not the LeagueStats
+production acceptance gate. `content_changed` must also be inspected
+independently; a successful command does not by itself mean the upstream CSV
+was updated.
 The isolated GitHub workflow `oracle-download-validation.yml` exposes this
 validation only through `workflow_dispatch` and does not generate or publish
 application data.
-
-Phase 1B source investigation returned **NO-GO for fresh LoL Bet AI data**;
-see [the evidence report](../../docs/bet-ai/phase-1b/README.md). The resolver's
-24-hour latest-match threshold is a legacy eligibility heuristic, not proof
-of an upstream update. The report specifies separate publisher, retrieval and
-match clocks without changing this resolver or production workflows.

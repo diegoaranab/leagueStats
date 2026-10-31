@@ -30,6 +30,41 @@ def dataset(solo=None, roles=None, stats=None):
 
 
 class TeamplayBanTests(unittest.TestCase):
+    def test_oracle_freshness_metadata_is_propagated(self):
+        oracle_metadata = {
+            "source": "cache",
+            "downloaded_at": "2026-10-29T08:00:00Z",
+            "selected_at": "2026-10-30T08:00:00Z",
+            "last_match_at": "2026-10-27T21:00:00Z",
+            "download_age_seconds": 86400,
+            "data_age_seconds": 212400,
+            "content_changed": False,
+            "is_recent_for_bet_ai": False,
+        }
+
+        result = build_teamplay_dataset(
+            solo_dataset={"meta": {"warnings": []}, "data": {}},
+            pro_snapshot=OracleTeamplaySnapshot(
+                ["LCK"], ["16.20"], 10, {}, {}, {}, {}, 0, False, [], 0, 0,
+            ),
+            region="na",
+            tier="gold",
+            window="7d",
+            oracle_metadata=oracle_metadata,
+        )
+
+        self.assertEqual(result["meta"]["oracle_source"], "cache")
+        self.assertEqual(
+            result["meta"]["oracle_downloaded_at"], "2026-10-29T08:00:00Z",
+        )
+        self.assertEqual(
+            result["meta"]["oracle_last_match_at"], "2026-10-27T21:00:00Z",
+        )
+        self.assertEqual(result["meta"]["oracle_download_age_seconds"], 86400)
+        self.assertEqual(result["meta"]["oracle_data_age_seconds"], 212400)
+        self.assertFalse(result["meta"]["oracle_content_changed"])
+        self.assertNotIn("is_recent_for_bet_ai", result["meta"])
+
     def test_exact_formula_and_pick_scores_unchanged(self):
         c = champion()
         self.assertEqual(c["teamplay_ban_score"], 0.88)

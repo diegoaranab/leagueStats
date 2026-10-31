@@ -58,6 +58,9 @@
         <span *ngIf="query.mode === 'teamplay' && datasetMeta.patches_used?.length">
           Patches {{ datasetMeta.patches_used?.join(', ') }}
         </span>
+        <span *ngIf="query.mode === 'teamplay' && datasetMeta.oracle_last_match_at">
+          Pro data through {{ datasetMeta.oracle_last_match_at | date: 'mediumDate': 'UTC' }}<ng-container *ngIf="datasetMeta.oracle_source === 'cache'"> · cached source</ng-container>
+        </span>
       </div>
 
       <div class="warning-banner" *ngIf="datasetMeta && hasDatasetWarning">

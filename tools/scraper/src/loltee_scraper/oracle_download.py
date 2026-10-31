@@ -588,14 +588,8 @@ class OracleDownloader:
                 os.replace(temporary, output_path)
             finally:
                 temporary.unlink(missing_ok=True)
-            data_age = _age_seconds(selected_at, _parse_datetime(report.last_match_at))
-            state = (
-                DownloadState.FRESH
-                if data_age <= self.bet_ai_max_data_age_seconds
-                else DownloadState.STALE
-            )
             result = self._base_result(
-                state=state,
+                state=DownloadState.FRESH,
                 source=source,
                 output=output_path,
                 metadata=metadata_path,
@@ -642,13 +636,9 @@ class OracleDownloader:
                     if isinstance(value, str):
                         _age_seconds(selected_at, _parse_datetime(value))
                 download_age = _age_seconds(selected_at, downloaded_at)
-                data_age = _age_seconds(
-                    selected_at, _parse_datetime(report.last_match_at)
-                )
                 cache_is_recent = (
                     checksum_verified
                     and download_age <= self.cache_max_age_seconds
-                    and data_age <= self.bet_ai_max_data_age_seconds
                 )
                 state = DownloadState.CACHED if cache_is_recent else DownloadState.STALE
                 _atomic_copy(cache_path, output_path)
@@ -743,9 +733,30 @@ def _write_github_outputs(result: DownloadResult) -> None:
         handle.write(f"source={result.source}\n")
         handle.write(f"cache_updated={str(result.cache_updated).lower()}\n")
         handle.write(f"content_changed={str(result.content_changed).lower()}\n")
+        handle.write(f"downloaded_at={result.downloaded_at or ''}\n")
+        handle.write(f"selected_at={result.selected_at}\n")
+        handle.write(f"last_match_at={result.last_match_at or ''}\n")
+        handle.write(
+            f"download_age_seconds={result.download_age_seconds if result.download_age_seconds is not None else ''}\n"
+        )
+        handle.write(
+            f"data_age_seconds={result.data_age_seconds if result.data_age_seconds is not None else ''}\n"
+        )
         handle.write(
             f"is_recent_for_bet_ai={str(result.is_recent_for_bet_ai).lower()}\n"
         )
+
+
+def is_production_current(result: DownloadResult) -> bool:
+    """Return whether LeagueStats may publish Teamplay data from this result.
+
+    This policy deliberately uses retrieval/cache age (encoded by state), not
+    the age of the newest match. Snapshots remain diagnostic-only.
+    """
+    return (
+        result.state in {DownloadState.FRESH, DownloadState.CACHED}
+        and result.source != "snapshot"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -768,6 +779,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-records", type=int, default=12)
     parser.add_argument("--cache-max-age-hours", type=float, default=168.0)
     parser.add_argument("--bet-ai-max-data-age-hours", type=float, default=24.0)
+    parser.add_argument(
+        "--require-production-current",
+        action="store_true",
+        help=(
+            "Fail unless resolution produced a fresh live download or a validated "
+            "cache within --cache-max-age-hours. Match age does not affect this gate."
+        ),
+    )
     return parser
 
 
@@ -794,6 +813,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     _write_github_outputs(result)
     print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    if args.require_production_current:
+        return 0 if is_production_current(result) else 1
     return 1 if result.state is DownloadState.FAILED else 0
 
 
