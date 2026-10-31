@@ -110,6 +110,14 @@
       {{ errorMessage }}
     </div>
 
+    <app-recommendation-spotlight
+      *ngIf="!isLoading && !errorMessage && spotlightChampion && spotlightRank !== null"
+      [champion]="spotlightChampion"
+      [canonicalRank]="spotlightRank"
+      [mode]="query.mode"
+      [difficultyFilter]="difficultyFilter"
+    ></app-recommendation-spotlight>
+
     <app-recommended-bans
       *ngIf="!isLoading && !errorMessage"
       [champions]="recommendedBans"

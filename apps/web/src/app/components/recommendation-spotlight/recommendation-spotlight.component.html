@@ -1,0 +1,90 @@
+<section class="spotlight" aria-labelledby="recommendation-spotlight-heading">
+  <div class="spotlight__accent" aria-hidden="true"></div>
+
+  <div class="spotlight__identity">
+    <p class="eyebrow">Top recommendation</p>
+
+    <div class="spotlight__champion">
+      <img
+        class="spotlight__portrait"
+        [src]="champion.icon_url || fallbackIcon"
+        [alt]="champion.name + ' champion portrait'"
+      >
+
+      <div class="spotlight__name">
+        <span class="spotlight__lane">{{ laneLabels[champion.lane] }}</span>
+        <h2 id="recommendation-spotlight-heading">{{ champion.name }}</h2>
+        <span
+          *ngIf="champion.difficulty"
+          class="spotlight__difficulty"
+          [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
+        >
+          {{ champion.difficulty | titlecase }} difficulty
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="spotlight__recommendation">
+    <div class="spotlight__rank" aria-label="Canonical recommendation rank">
+      <span>{{ mode === 'teamplay' ? 'Teamplay rank' : 'Recommendation rank' }}</span>
+      <strong>#{{ canonicalRank }}</strong>
+    </div>
+    <p>{{ explanation }}</p>
+  </div>
+
+  <div class="spotlight__evidence" [class.spotlight__evidence--teamplay]="mode === 'teamplay'">
+    <ng-container *ngIf="mode === 'solo'; else teamplayEvidence">
+      <div class="spotlight__metric">
+        <span>Win rate</span>
+        <strong>{{ formatPercent(champion.win_rate) }}</strong>
+      </div>
+      <div class="spotlight__metric">
+        <span>Pick rate</span>
+        <strong>{{ formatPercent(champion.pick_rate) }}</strong>
+      </div>
+      <div class="spotlight__metric">
+        <span>Difficulty</span>
+        <strong>{{ champion.difficulty ? (champion.difficulty | titlecase) : '--' }}</strong>
+      </div>
+    </ng-container>
+
+    <ng-template #teamplayEvidence>
+      <div class="spotlight__metric">
+        <span>Draft score</span>
+        <strong>
+          {{
+            champion.flex_clash_score === null || champion.flex_clash_score === undefined
+              ? '--'
+              : ((champion.flex_clash_score * 100) | number: '1.0-0')
+          }}
+        </strong>
+      </div>
+      <div class="spotlight__metric">
+        <span>Pro picks</span>
+        <strong>{{ champion.pro_pick_count ?? '--' }}</strong>
+      </div>
+      <div class="spotlight__metric">
+        <span>Pro bans</span>
+        <strong>{{ champion.pro_ban_count ?? '--' }}</strong>
+      </div>
+      <div class="spotlight__metric">
+        <span>Difficulty</span>
+        <strong>{{ champion.difficulty ? (champion.difficulty | titlecase) : '--' }}</strong>
+      </div>
+    </ng-template>
+  </div>
+
+  <a
+    *ngIf="champion.champion_url"
+    class="spotlight__link"
+    mat-stroked-button
+    color="primary"
+    [href]="champion.champion_url"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    View source build
+    <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+  </a>
+</section>
