@@ -1,0 +1,230 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.easy-lineup {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(111, 191, 232, 0.24);
+  border-radius: 18px;
+  background:
+    linear-gradient(120deg, rgba(111, 191, 232, 0.08), transparent 42%),
+    rgba(13, 22, 34, 0.78);
+}
+
+.easy-lineup__intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.easy-lineup__title-group {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.easy-lineup__title-group > div {
+  display: grid;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.easy-lineup__title-group h2 {
+  font-size: 1.18rem;
+}
+
+.easy-lineup__title-group p:last-child,
+.easy-lineup__explanation,
+.easy-lineup__limitation,
+.easy-lineup__unavailable p {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.easy-lineup__icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(111, 191, 232, 0.28);
+  border-radius: 13px;
+  background: rgba(111, 191, 232, 0.08);
+  color: var(--mat-sys-secondary);
+}
+
+.easy-lineup__intro button {
+  flex: 0 0 auto;
+  min-height: 42px;
+}
+
+.easy-lineup__details {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.easy-lineup__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.role-card {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.role-card__lane {
+  color: #f2db9d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.role-card__champion {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.role-card__champion img {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(197, 163, 92, 0.28);
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.role-card__champion div {
+  min-width: 0;
+}
+
+.role-card__champion h3 {
+  overflow: hidden;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-card__champion span,
+.role-card__signals {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.74rem;
+}
+
+.role-card__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  align-items: center;
+}
+
+.role-card__difficulty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #bde8ff;
+  font-weight: 700;
+}
+
+.role-card__difficulty::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6fbfe8;
+  content: '';
+}
+
+.easy-lineup__limitation {
+  padding-left: 0.65rem;
+  border-left: 2px solid rgba(197, 163, 92, 0.45);
+}
+
+.easy-lineup__unavailable {
+  display: flex;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.75rem;
+  border: 1px solid rgba(197, 163, 92, 0.22);
+  border-radius: 12px;
+  background: rgba(197, 163, 92, 0.06);
+}
+
+.easy-lineup__unavailable > span {
+  color: var(--mat-sys-primary);
+  font-size: 1.2rem;
+}
+
+.easy-lineup__unavailable div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.easy-lineup__unavailable strong {
+  font-size: 0.88rem;
+}
+
+@media (max-width: 1000px) {
+  .easy-lineup__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .easy-lineup__intro {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .easy-lineup__intro button {
+    align-self: start;
+  }
+
+  .easy-lineup__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .easy-lineup {
+    padding: 0.8rem;
+  }
+
+  .easy-lineup__title-group {
+    align-items: start;
+  }
+
+  .easy-lineup__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .easy-lineup__intro button {
+    width: 100%;
+  }
+
+  .easy-lineup__grid {
+    grid-template-columns: 1fr;
+  }
+}

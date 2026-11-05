@@ -118,6 +118,13 @@
       [difficultyFilter]="difficultyFilter"
     ></app-recommendation-spotlight>
 
+    <app-easy-clash-lineup
+      *ngIf="!isLoading && !errorMessage && query.mode === 'teamplay' && easyClashLineup"
+      [lineup]="easyClashLineup"
+      [expanded]="easyClashLineupExpanded"
+      (expandedChange)="easyClashLineupExpanded = $event"
+    ></app-easy-clash-lineup>
+
     <app-recommended-bans
       *ngIf="!isLoading && !errorMessage"
       [champions]="recommendedBans"
