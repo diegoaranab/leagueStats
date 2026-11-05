@@ -30,8 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pages: read
     outputs:
       refreshed: ${{ steps.data_source.outputs.refresh }}
+      needs_persistence: ${{ steps.data_source.outputs.needs_persistence }}
+      snapshot_reused: ${{ steps.data_source.outputs.snapshot_reused }}
+      snapshot_bootstrapped: ${{ steps.data_source.outputs.snapshot_bootstrapped }}
       artifact_name: ${{ steps.production_data_artifact.outputs.name }}
 
     steps:
@@ -40,16 +44,26 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Resolve deployed Pages configuration
+        id: pages
+        if: github.event_name == 'push'
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+
       - name: Select production data source
         id: data_source
         env:
           EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
           CURRENT_SHA: ${{ github.sha }}
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
           set -euo pipefail
 
           refresh=true
+          needs_persistence=true
+          snapshot_reused=false
+          snapshot_bootstrapped=false
           reason="${EVENT_NAME} requires a full refresh"
 
           if [[ "$EVENT_NAME" == "push" ]]; then
@@ -61,9 +75,9 @@ jobs:
               changed_files="$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")"
               while IFS= read -r path; do
                 case "$path" in
-                  tools/scraper/*|\
-                  .github/workflows/deploy-pages.yml|\
-                  .github/scripts/validate-production-data.py|\
+                  tools/scraper/tests/**)
+                    ;;
+                  tools/scraper/**|\
                   apps/web/src/app/core/models/tierlist.model.ts|\
                   apps/web/src/app/core/services/tierlist.service.ts)
                     data_sensitive=true
@@ -75,6 +89,7 @@ jobs:
             fi
 
             if [[ "$data_sensitive" == "false" ]]; then
+              snapshot_valid=false
               set +e
               git ls-remote --exit-code --heads origin production-data > "${RUNNER_TEMP}/production-data-ref"
               lookup_status=$?
@@ -94,7 +109,10 @@ jobs:
                     rm -rf "$SOLO_OUTPUT_ROOT"
                     mkdir -p "$SOLO_OUTPUT_ROOT"
                     cp -a "$snapshot_root/data/." "$SOLO_OUTPUT_ROOT/"
+                    snapshot_valid=true
                     refresh=false
+                    needs_persistence=false
+                    snapshot_reused=true
                     reason="the validated production-data snapshot is reusable"
                   else
                     reason="the production-data snapshot is invalid"
@@ -107,13 +125,50 @@ jobs:
               else
                 reason="the production-data branch could not be queried"
               fi
+
+              if [[ "$snapshot_valid" == "false" ]]; then
+                if [[ -n "$PAGES_BASE_URL" ]]; then
+                  pages_root="${RUNNER_TEMP}/pages-production-data"
+                  if python3 .github/scripts/recover-pages-data.py \
+                    --base-url "$PAGES_BASE_URL" \
+                    --output-root "$pages_root" \
+                    --regions $DATA_REGIONS \
+                    --tiers $DATA_TIERS \
+                    --windows $DATA_WINDOWS \
+                    --lanes $DATA_LANES && \
+                    python3 .github/scripts/validate-production-data.py \
+                    --root "$pages_root" \
+                    --regions $DATA_REGIONS \
+                    --tiers $DATA_TIERS \
+                    --windows $DATA_WINDOWS \
+                    --lanes $DATA_LANES; then
+                    rm -rf "$SOLO_OUTPUT_ROOT"
+                    mkdir -p "$SOLO_OUTPUT_ROOT"
+                    cp -a "$pages_root/." "$SOLO_OUTPUT_ROOT/"
+                    refresh=false
+                    needs_persistence=true
+                    snapshot_bootstrapped=true
+                    reason="the validated deployed Pages dataset will bootstrap production-data"
+                  else
+                    reason="$reason; deployed Pages recovery was unavailable or invalid"
+                  fi
+                else
+                  reason="$reason; the deployed Pages base URL could not be resolved"
+                fi
+              fi
             fi
           fi
 
           echo "refresh=$refresh" >> "$GITHUB_OUTPUT"
+          echo "needs_persistence=$needs_persistence" >> "$GITHUB_OUTPUT"
+          echo "snapshot_reused=$snapshot_reused" >> "$GITHUB_OUTPUT"
+          echo "snapshot_bootstrapped=$snapshot_bootstrapped" >> "$GITHUB_OUTPUT"
           {
             echo "## Production data selection"
             echo "- **Full refresh:** \`$refresh\`"
+            echo "- **Existing snapshot reused:** \`$snapshot_reused\`"
+            echo "- **Pages snapshot bootstrapped:** \`$snapshot_bootstrapped\`"
+            echo "- **Persistence required:** \`$needs_persistence\`"
             echo "- **Reason:** $reason"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -305,7 +360,7 @@ jobs:
   persist-production-data:
     runs-on: ubuntu-latest
     needs: prepare-data
-    if: needs.prepare-data.outputs.refreshed == 'true'
+    if: needs.prepare-data.outputs.needs_persistence == 'true'
     permissions:
       contents: write
 

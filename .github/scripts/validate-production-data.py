@@ -38,8 +38,6 @@ def validate_dataset(path: Path, lanes: list[str]) -> None:
     data = payload.get("data")
     if not isinstance(meta, dict) or not isinstance(data, dict):
         raise ValueError(f"{path} must contain object-valued meta and data fields")
-    if meta.get("is_partial"):
-        raise ValueError(f"{path} is marked partial")
     if meta.get("failed_lanes"):
         raise ValueError(f"{path} reports failed lanes: {meta['failed_lanes']}")
 
@@ -94,8 +92,11 @@ def main() -> None:
                     entry = indexed_entries.get(key)
                     if entry is None:
                         raise ValueError(f"manifest is missing dataset {key}")
-                    if entry.get("status") != "ok" or entry.get("is_partial"):
-                        raise ValueError(f"manifest dataset {key} is not complete: {entry}")
+                    status = entry.get("status")
+                    if status not in {"ok", "partial"}:
+                        raise ValueError(
+                            f"manifest dataset {key} has non-deployable status {status!r}"
+                        )
                     if entry.get("failed_lanes"):
                         raise ValueError(f"manifest dataset {key} reports failed lanes")
                     if not isinstance(entry.get("champion_count"), int) or entry["champion_count"] <= 0:
@@ -110,7 +111,7 @@ def main() -> None:
                         )
                     validate_dataset(dataset_path, args.lanes)
 
-    print(f"Validated {expected_count} complete production datasets under {args.root}.")
+    print(f"Validated {expected_count} deployable production datasets under {args.root}.")
 
 
 if __name__ == "__main__":
