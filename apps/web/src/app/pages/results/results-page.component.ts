@@ -9,6 +9,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { map } from 'rxjs';
 
 import { ChampionCardComponent } from '../../components/champion-card/champion-card.component';
+import { EasyClashLineupComponent } from '../../components/easy-clash-lineup/easy-clash-lineup.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
@@ -41,6 +42,10 @@ import {
   WindowKey,
 } from '../../core/models/tierlist.model';
 import { TierlistService } from '../../core/services/tierlist.service';
+import {
+  buildEasyClashLineup,
+  EasyClashLineupResult,
+} from '../../core/utils/easy-clash-lineup';
 
 @Component({
   selector: 'app-results-page',
@@ -53,6 +58,7 @@ import { TierlistService } from '../../core/services/tierlist.service';
     LaneTabsComponent,
     FilterBarComponent,
     ChampionCardComponent,
+    EasyClashLineupComponent,
     RecommendationSpotlightComponent,
     RecommendedBansComponent,
     InfoTooltipComponent,
@@ -85,6 +91,8 @@ export class ResultsPageComponent implements OnInit {
   spotlightChampion: Champion | null = null;
   spotlightRank: number | null = null;
   recommendedBans: Champion[] = [];
+  easyClashLineup: EasyClashLineupResult | null = null;
+  easyClashLineupExpanded = false;
   difficultyFilter: DifficultyFilter = 'all';
 
   query: ResultsQuery = { ...DEFAULT_RESULTS_QUERY };
@@ -219,6 +227,7 @@ export class ResultsPageComponent implements OnInit {
     this.spotlightChampion = null;
     this.spotlightRank = null;
     this.recommendedBans = [];
+    this.easyClashLineup = null;
     this.banPriorities.clear();
     this.laneCounts = {};
     this.errorMessage = '';
@@ -238,6 +247,9 @@ export class ResultsPageComponent implements OnInit {
           }
 
           this.dataset = dataset;
+          this.easyClashLineup = this.query.mode === 'teamplay'
+            ? buildEasyClashLineup(dataset)
+            : null;
           this.filtersOpen = false;
           this.availableLanes = this.laneOrder.filter((lane) => Array.isArray(dataset.data[lane]));
           this.laneCounts = this.laneOrder.reduce<Partial<Record<Lane, number>>>((counts, lane) => {

@@ -1,0 +1,77 @@
+<section class="easy-lineup" aria-labelledby="easy-lineup-heading">
+  <div class="easy-lineup__intro">
+    <div class="easy-lineup__title-group">
+      <span class="material-symbols-outlined easy-lineup__icon" aria-hidden="true">groups</span>
+      <div>
+        <p class="eyebrow">Team builder</p>
+        <h2 id="easy-lineup-heading">
+          {{ expanded ? 'Easy-to-Execute Lineup' : 'Easy Clash Team' }}
+        </h2>
+        <p>
+          Build a five-role lineup around strong Easy champions for your current Flex / Clash context.
+        </p>
+      </div>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      aria-controls="easy-lineup-details"
+      [attr.aria-expanded]="expanded"
+      (click)="toggleExpanded()"
+    >
+      {{ expanded ? 'Hide lineup' : 'Build an Easy Clash Team' }}
+    </button>
+  </div>
+
+  <div *ngIf="expanded" id="easy-lineup-details" class="easy-lineup__details">
+    <ng-container *ngIf="lineup.available; else unavailableState">
+      <p class="easy-lineup__explanation">
+        Uses strong Easy-difficulty recommendations while keeping champions unique across all five roles.
+      </p>
+
+      <div class="easy-lineup__grid" aria-label="Easy Clash team roles">
+        <article
+          *ngFor="let slot of lineup.slots; trackBy: trackByLane"
+          class="role-card"
+        >
+          <span class="role-card__lane">{{ laneLabels[slot.lane] }}</span>
+          <div class="role-card__champion">
+            <img
+              [src]="slot.champion.icon_url || fallbackIcon"
+              [alt]="slot.champion.name + ' champion portrait'"
+              loading="lazy"
+            >
+            <div>
+              <h3>{{ slot.champion.name }}</h3>
+              <span>Teamplay #{{ slot.teamplayRank }}</span>
+            </div>
+          </div>
+          <div class="role-card__signals">
+            <span class="role-card__difficulty">Easy</span>
+            <span
+              *ngIf="slot.champion.flex_clash_score !== null && slot.champion.flex_clash_score !== undefined"
+            >
+              Draft score {{ slot.champion.flex_clash_score * 100 | number: '1.0-0' }}
+            </span>
+          </div>
+        </article>
+      </div>
+
+      <p class="easy-lineup__limitation">
+        This version does not yet optimize damage balance, crowd control, engage, or matchup synergy.
+      </p>
+    </ng-container>
+
+    <ng-template #unavailableState>
+      <div class="easy-lineup__unavailable" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        <div>
+          <strong>A complete five-role Easy lineup is not available for this context.</strong>
+          <p>{{ unavailableMessage }} Try another region, rank, or window.</p>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</section>
