@@ -88,18 +88,27 @@ Both scheduled runs and every manual dispatch generate fresh Solo and Teamplay
 datasets for the full configured matrix, including `current`, `7d`, and `14d`,
 then build and deploy the SPA to GitHub Pages. A normal `main` push instead
 restores the last fully validated dataset from the dedicated `production-data`
-branch before building. Changes to the scraper, dataset model/loader, validator,
-or production workflow conservatively force a fresh generation.
+branch before building. Changes to the scraper or frontend dataset model/loader
+conservatively force a fresh generation; deployment-workflow and validator-only
+changes do not inherently change recommendation data.
 
 `production-data` is an operational state branch containing only the deployable
 dataset under `data/`; generated data remains gitignored on `main`. Fresh output
 is validated before that branch is updated, and the build waits for persistence
-to succeed. If the branch is missing or its snapshot fails validation, a `main`
-push automatically falls back to full generation and bootstraps/replaces the
-snapshot only after validation succeeds. To request fresh production statistics
-at any time, manually run **Deploy Web to GitHub Pages**; manual runs refresh by
-default. All production runs share the `pages` concurrency group with
-cancellation of in-progress runs disabled.
+to succeed. A warning-level `partial` dataset remains deployable when every
+expected file and lane is present, champion counts are positive, and
+`failed_lanes` is empty. An `error` status, any failed lane, or structural
+incompleteness is never deployable.
+
+If `production-data` is missing or invalid during a non-data-sensitive `main`
+push, the workflow first downloads the expected matrix from the currently
+deployed Pages URL, validates it, and persists it to seed or repair the snapshot
+branch. Only an unavailable or invalid Pages recovery falls back to fresh
+generation. Pages bootstrap and ordinary snapshot reuse do not create Difficulty
+history observations. To request fresh production statistics at any time,
+manually run **Deploy Web to GitHub Pages**; manual runs refresh by default. All
+production runs share the `pages` concurrency group with cancellation of
+in-progress runs disabled.
 
 Generation loads existing Difficulty history for scoring. Only the **00:23 UTC
 scheduled run** persists daily observations on `difficulty-history`, using a
@@ -122,7 +131,10 @@ gdown. If all fail, production may use a checksum-verified cache whose original
 download is no older than 48 hours. Only a successfully validated live download
 refreshes that cache or its `downloaded_at`; selecting cached content never
 renews its age. An expired cache or historical snapshot fails production before
-new Teamplay data or a Pages artifact is published. The downloader retains its
+new Teamplay data or a Pages artifact is published. Scheduled and manual full
+refreshes always enforce this rule. Frontend-only deployments can continue from
+the last-known-good snapshot during a temporary Oracle outage without treating
+that snapshot as fresh Oracle data. The downloader retains its
 snapshot fallback for diagnostics and manual validation, but production does
 not provide one.
 
