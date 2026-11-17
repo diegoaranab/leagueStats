@@ -1,7 +1,7 @@
 {
   "meta": {
     "source": "loltee_scraper",
-    "generated_at_utc": "2026-11-17T08:53:59.325781+00:00"
+    "generated_at_utc": "2026-11-17T21:53:35.978360+00:00"
   },
   "supported": {
     "regions": [
@@ -44,7 +44,7 @@
       "window": "current",
       "path": "/data/na/iron/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:11:59.520422+00:00",
+      "generated_at_utc": "2026-11-17T21:07:39.694479+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -57,20 +57,7 @@
       "window": "7d",
       "path": "/data/na/iron/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:12:31.269889+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 82
-    },
-    {
-      "mode": "solo",
-      "region": "na",
-      "tier": "iron",
-      "window": "14d",
-      "path": "/data/na/iron/14d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:13:07.372727+00:00",
+      "generated_at_utc": "2026-11-17T21:08:12.430123+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -79,15 +66,28 @@
     {
       "mode": "solo",
       "region": "na",
+      "tier": "iron",
+      "window": "14d",
+      "path": "/data/na/iron/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:08:48.315724+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 82
+    },
+    {
+      "mode": "solo",
+      "region": "na",
       "tier": "bronze",
       "window": "current",
       "path": "/data/na/bronze/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:13:49.209396+00:00",
+      "generated_at_utc": "2026-11-17T21:09:30.426274+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 92
+      "champion_count": 95
     },
     {
       "mode": "solo",
@@ -96,11 +96,11 @@
       "window": "7d",
       "path": "/data/na/bronze/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:14:25.956376+00:00",
+      "generated_at_utc": "2026-11-17T21:10:07.340294+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 90
+      "champion_count": 88
     },
     {
       "mode": "solo",
@@ -109,11 +109,11 @@
       "window": "14d",
       "path": "/data/na/bronze/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:15:07.743652+00:00",
+      "generated_at_utc": "2026-11-17T21:10:49.042125+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 91
+      "champion_count": 93
     },
     {
       "mode": "solo",
@@ -122,11 +122,11 @@
       "window": "current",
       "path": "/data/na/silver/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:15:49.621230+00:00",
+      "generated_at_utc": "2026-11-17T21:11:31.339575+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 99
+      "champion_count": 100
     },
     {
       "mode": "solo",
@@ -135,11 +135,11 @@
       "window": "7d",
       "path": "/data/na/silver/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:16:28.526171+00:00",
+      "generated_at_utc": "2026-11-17T21:12:11.821477+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 98
+      "champion_count": 100
     },
     {
       "mode": "solo",
@@ -148,11 +148,11 @@
       "window": "14d",
       "path": "/data/na/silver/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:17:10.372381+00:00",
+      "generated_at_utc": "2026-11-17T21:12:54.733995+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 98
+      "champion_count": 99
     },
     {
       "mode": "solo",
@@ -161,7 +161,7 @@
       "window": "current",
       "path": "/data/na/gold/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:17:51.973935+00:00",
+      "generated_at_utc": "2026-11-17T21:13:37.284829+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -174,11 +174,11 @@
       "window": "7d",
       "path": "/data/na/gold/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:18:31.530833+00:00",
+      "generated_at_utc": "2026-11-17T21:14:18.595040+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 108
+      "champion_count": 107
     },
     {
       "mode": "solo",
@@ -187,7 +187,33 @@
       "window": "14d",
       "path": "/data/na/gold/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:19:13.400037+00:00",
+      "generated_at_utc": "2026-11-17T21:15:04.311530+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 114
+    },
+    {
+      "mode": "solo",
+      "region": "na",
+      "tier": "platinum",
+      "window": "current",
+      "path": "/data/na/platinum/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:15:45.124142+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 129
+    },
+    {
+      "mode": "solo",
+      "region": "na",
+      "tier": "platinum",
+      "window": "7d",
+      "path": "/data/na/platinum/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:16:24.703592+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -197,10 +223,10 @@
       "mode": "solo",
       "region": "na",
       "tier": "platinum",
-      "window": "current",
-      "path": "/data/na/platinum/current.json",
+      "window": "14d",
+      "path": "/data/na/platinum/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:19:53.858242+00:00",
+      "generated_at_utc": "2026-11-17T21:17:06.521294+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -209,24 +235,11 @@
     {
       "mode": "solo",
       "region": "na",
-      "tier": "platinum",
-      "window": "7d",
-      "path": "/data/na/platinum/7d.json",
+      "tier": "emerald",
+      "window": "current",
+      "path": "/data/na/emerald/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:20:32.673841+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 112
-    },
-    {
-      "mode": "solo",
-      "region": "na",
-      "tier": "platinum",
-      "window": "14d",
-      "path": "/data/na/platinum/14d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:21:13.186745+00:00",
+      "generated_at_utc": "2026-11-17T21:17:46.452791+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -236,27 +249,14 @@
       "mode": "solo",
       "region": "na",
       "tier": "emerald",
-      "window": "current",
-      "path": "/data/na/emerald/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:21:52.113739+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 124
-    },
-    {
-      "mode": "solo",
-      "region": "na",
-      "tier": "emerald",
       "window": "7d",
       "path": "/data/na/emerald/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:22:30.350676+00:00",
+      "generated_at_utc": "2026-11-17T21:18:23.970610+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 116
+      "champion_count": 109
     },
     {
       "mode": "solo",
@@ -265,11 +265,11 @@
       "window": "14d",
       "path": "/data/na/emerald/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:23:09.168559+00:00",
+      "generated_at_utc": "2026-11-17T21:19:03.787377+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 124
+      "champion_count": 126
     },
     {
       "mode": "solo",
@@ -278,7 +278,7 @@
       "window": "current",
       "path": "/data/na/diamond/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:23:45.778971+00:00",
+      "generated_at_utc": "2026-11-17T21:19:42.785358+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -291,11 +291,11 @@
       "window": "7d",
       "path": "/data/na/diamond/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:24:20.618272+00:00",
+      "generated_at_utc": "2026-11-17T21:20:19.443448+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 106
+      "champion_count": 103
     },
     {
       "mode": "solo",
@@ -304,11 +304,11 @@
       "window": "14d",
       "path": "/data/na/diamond/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:24:58.778537+00:00",
+      "generated_at_utc": "2026-11-17T21:20:59.144347+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 127
+      "champion_count": 128
     },
     {
       "mode": "solo",
@@ -317,11 +317,11 @@
       "window": "current",
       "path": "/data/na/master/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:25:34.082012+00:00",
+      "generated_at_utc": "2026-11-17T21:21:35.059468+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 126
+      "champion_count": 128
     },
     {
       "mode": "solo",
@@ -330,7 +330,7 @@
       "window": "7d",
       "path": "/data/na/master/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:26:05.676159+00:00",
+      "generated_at_utc": "2026-11-17T21:22:07.642479+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -343,11 +343,11 @@
       "window": "14d",
       "path": "/data/na/master/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:26:40.892408+00:00",
+      "generated_at_utc": "2026-11-17T21:22:45.012434+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 123
+      "champion_count": 128
     },
     {
       "mode": "solo",
@@ -356,11 +356,11 @@
       "window": "current",
       "path": "/data/lan/iron/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:27:10.467123+00:00",
+      "generated_at_utc": "2026-11-17T21:23:15.253084+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 80
+      "champion_count": 81
     },
     {
       "mode": "solo",
@@ -369,11 +369,11 @@
       "window": "7d",
       "path": "/data/lan/iron/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:27:37.177448+00:00",
+      "generated_at_utc": "2026-11-17T21:23:43.021721+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 76
+      "champion_count": 74
     },
     {
       "mode": "solo",
@@ -382,33 +382,7 @@
       "window": "14d",
       "path": "/data/lan/iron/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:28:07.480745+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 80
-    },
-    {
-      "mode": "solo",
-      "region": "lan",
-      "tier": "bronze",
-      "window": "current",
-      "path": "/data/lan/bronze/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:28:43.351153+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 86
-    },
-    {
-      "mode": "solo",
-      "region": "lan",
-      "tier": "bronze",
-      "window": "7d",
-      "path": "/data/lan/bronze/7d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:29:15.797757+00:00",
+      "generated_at_utc": "2026-11-17T21:24:13.376917+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -418,10 +392,36 @@
       "mode": "solo",
       "region": "lan",
       "tier": "bronze",
+      "window": "current",
+      "path": "/data/lan/bronze/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:24:50.205292+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 91
+    },
+    {
+      "mode": "solo",
+      "region": "lan",
+      "tier": "bronze",
+      "window": "7d",
+      "path": "/data/lan/bronze/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:25:30.352955+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 85
+    },
+    {
+      "mode": "solo",
+      "region": "lan",
+      "tier": "bronze",
       "window": "14d",
       "path": "/data/lan/bronze/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:29:51.785841+00:00",
+      "generated_at_utc": "2026-11-17T21:26:09.013714+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -434,11 +434,11 @@
       "window": "current",
       "path": "/data/lan/silver/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:30:28.394760+00:00",
+      "generated_at_utc": "2026-11-17T21:26:47.384276+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 89
+      "champion_count": 87
     },
     {
       "mode": "solo",
@@ -447,11 +447,11 @@
       "window": "7d",
       "path": "/data/lan/silver/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:31:02.203742+00:00",
+      "generated_at_utc": "2026-11-17T21:27:22.193843+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 92
+      "champion_count": 90
     },
     {
       "mode": "solo",
@@ -460,11 +460,11 @@
       "window": "14d",
       "path": "/data/lan/silver/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:31:38.786694+00:00",
+      "generated_at_utc": "2026-11-17T21:28:00.712388+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 85
+      "champion_count": 88
     },
     {
       "mode": "solo",
@@ -473,11 +473,11 @@
       "window": "current",
       "path": "/data/lan/gold/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:32:17.598301+00:00",
+      "generated_at_utc": "2026-11-17T21:28:41.364096+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 105
+      "champion_count": 102
     },
     {
       "mode": "solo",
@@ -486,11 +486,11 @@
       "window": "7d",
       "path": "/data/lan/gold/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:32:51.438581+00:00",
+      "generated_at_utc": "2026-11-17T21:29:17.214414+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 94
+      "champion_count": 99
     },
     {
       "mode": "solo",
@@ -499,11 +499,11 @@
       "window": "14d",
       "path": "/data/lan/gold/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:33:30.973679+00:00",
+      "generated_at_utc": "2026-11-17T21:29:57.336931+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 105
+      "champion_count": 101
     },
     {
       "mode": "solo",
@@ -512,7 +512,7 @@
       "window": "current",
       "path": "/data/lan/platinum/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:34:09.043593+00:00",
+      "generated_at_utc": "2026-11-17T21:30:36.413348+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -525,11 +525,11 @@
       "window": "7d",
       "path": "/data/lan/platinum/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:34:45.482647+00:00",
+      "generated_at_utc": "2026-11-17T21:31:11.927026+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 101
+      "champion_count": 97
     },
     {
       "mode": "solo",
@@ -538,7 +538,20 @@
       "window": "14d",
       "path": "/data/lan/platinum/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:35:23.530221+00:00",
+      "generated_at_utc": "2026-11-17T21:31:54.305348+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 103
+    },
+    {
+      "mode": "solo",
+      "region": "lan",
+      "tier": "emerald",
+      "window": "current",
+      "path": "/data/lan/emerald/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:32:31.507119+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -548,27 +561,14 @@
       "mode": "solo",
       "region": "lan",
       "tier": "emerald",
-      "window": "current",
-      "path": "/data/lan/emerald/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:35:59.444315+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 108
-    },
-    {
-      "mode": "solo",
-      "region": "lan",
-      "tier": "emerald",
       "window": "7d",
       "path": "/data/lan/emerald/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:36:33.357521+00:00",
+      "generated_at_utc": "2026-11-17T21:33:08.403034+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 100
+      "champion_count": 97
     },
     {
       "mode": "solo",
@@ -577,20 +577,7 @@
       "window": "14d",
       "path": "/data/lan/emerald/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:37:09.470311+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 109
-    },
-    {
-      "mode": "solo",
-      "region": "lan",
-      "tier": "diamond",
-      "window": "current",
-      "path": "/data/lan/diamond/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:37:42.573046+00:00",
+      "generated_at_utc": "2026-11-17T21:33:45.628831+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -600,14 +587,27 @@
       "mode": "solo",
       "region": "lan",
       "tier": "diamond",
-      "window": "7d",
-      "path": "/data/lan/diamond/7d.json",
+      "window": "current",
+      "path": "/data/lan/diamond/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:38:12.804333+00:00",
+      "generated_at_utc": "2026-11-17T21:34:19.485181+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 96
+      "champion_count": 108
+    },
+    {
+      "mode": "solo",
+      "region": "lan",
+      "tier": "diamond",
+      "window": "7d",
+      "path": "/data/lan/diamond/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:34:50.735216+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 94
     },
     {
       "mode": "solo",
@@ -616,11 +616,11 @@
       "window": "14d",
       "path": "/data/lan/diamond/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:38:46.534520+00:00",
+      "generated_at_utc": "2026-11-17T21:35:28.864235+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 106
+      "champion_count": 105
     },
     {
       "mode": "solo",
@@ -629,11 +629,11 @@
       "window": "current",
       "path": "/data/lan/master/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:39:17.738465+00:00",
+      "generated_at_utc": "2026-11-17T21:36:00.467759+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 101
+      "champion_count": 100
     },
     {
       "mode": "solo",
@@ -642,11 +642,11 @@
       "window": "7d",
       "path": "/data/lan/master/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:39:46.054890+00:00",
+      "generated_at_utc": "2026-11-17T21:36:29.297199+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 85
+      "champion_count": 81
     },
     {
       "mode": "solo",
@@ -655,11 +655,11 @@
       "window": "14d",
       "path": "/data/lan/master/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:40:17.308676+00:00",
+      "generated_at_utc": "2026-11-17T21:37:01.120382+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 103
+      "champion_count": 100
     },
     {
       "mode": "solo",
@@ -668,11 +668,11 @@
       "window": "current",
       "path": "/data/las/iron/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:40:46.990317+00:00",
+      "generated_at_utc": "2026-11-17T21:37:33.284941+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 80
+      "champion_count": 81
     },
     {
       "mode": "solo",
@@ -681,11 +681,11 @@
       "window": "7d",
       "path": "/data/las/iron/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:41:14.587042+00:00",
+      "generated_at_utc": "2026-11-17T21:38:29.809964+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 75
+      "champion_count": 71
     },
     {
       "mode": "solo",
@@ -694,11 +694,11 @@
       "window": "14d",
       "path": "/data/las/iron/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:41:44.355724+00:00",
+      "generated_at_utc": "2026-11-17T21:39:02.818940+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 80
+      "champion_count": 81
     },
     {
       "mode": "solo",
@@ -707,7 +707,20 @@
       "window": "current",
       "path": "/data/las/bronze/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:42:19.796909+00:00",
+      "generated_at_utc": "2026-11-17T21:39:39.589144+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 85
+    },
+    {
+      "mode": "solo",
+      "region": "las",
+      "tier": "bronze",
+      "window": "7d",
+      "path": "/data/las/bronze/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:40:12.403092+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -717,27 +730,14 @@
       "mode": "solo",
       "region": "las",
       "tier": "bronze",
-      "window": "7d",
-      "path": "/data/las/bronze/7d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:42:51.460295+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 85
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "bronze",
       "window": "14d",
       "path": "/data/las/bronze/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:43:28.351668+00:00",
+      "generated_at_utc": "2026-11-17T21:40:49.151790+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 87
+      "champion_count": 84
     },
     {
       "mode": "solo",
@@ -746,20 +746,7 @@
       "window": "current",
       "path": "/data/las/silver/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:44:05.162882+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 96
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "silver",
-      "window": "7d",
-      "path": "/data/las/silver/7d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:44:39.176620+00:00",
+      "generated_at_utc": "2026-11-17T21:41:27.060353+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -769,62 +756,10 @@
       "mode": "solo",
       "region": "las",
       "tier": "silver",
-      "window": "14d",
-      "path": "/data/las/silver/14d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:45:16.148694+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 94
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "gold",
-      "window": "current",
-      "path": "/data/las/gold/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:45:53.701207+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 101
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "gold",
       "window": "7d",
-      "path": "/data/las/gold/7d.json",
+      "path": "/data/las/silver/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:46:28.291729+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 101
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "gold",
-      "window": "14d",
-      "path": "/data/las/gold/14d.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:47:05.806980+00:00",
-      "is_partial": false,
-      "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 94
-    },
-    {
-      "mode": "solo",
-      "region": "las",
-      "tier": "platinum",
-      "window": "current",
-      "path": "/data/las/platinum/current.json",
-      "status": "ok",
-      "generated_at_utc": "2026-11-17T08:47:43.419588+00:00",
+      "generated_at_utc": "2026-11-17T21:42:02.822507+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -833,11 +768,76 @@
     {
       "mode": "solo",
       "region": "las",
+      "tier": "silver",
+      "window": "14d",
+      "path": "/data/las/silver/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:42:40.670539+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 91
+    },
+    {
+      "mode": "solo",
+      "region": "las",
+      "tier": "gold",
+      "window": "current",
+      "path": "/data/las/gold/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:43:21.434357+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 98
+    },
+    {
+      "mode": "solo",
+      "region": "las",
+      "tier": "gold",
+      "window": "7d",
+      "path": "/data/las/gold/7d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:43:56.954140+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 98
+    },
+    {
+      "mode": "solo",
+      "region": "las",
+      "tier": "gold",
+      "window": "14d",
+      "path": "/data/las/gold/14d.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:44:35.125559+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 99
+    },
+    {
+      "mode": "solo",
+      "region": "las",
+      "tier": "platinum",
+      "window": "current",
+      "path": "/data/las/platinum/current.json",
+      "status": "ok",
+      "generated_at_utc": "2026-11-17T21:45:14.140284+00:00",
+      "is_partial": false,
+      "failed_lanes": [],
+      "warnings": [],
+      "champion_count": 100
+    },
+    {
+      "mode": "solo",
+      "region": "las",
       "tier": "platinum",
       "window": "7d",
       "path": "/data/las/platinum/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:48:18.781347+00:00",
+      "generated_at_utc": "2026-11-17T21:45:49.856429+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -850,11 +850,11 @@
       "window": "14d",
       "path": "/data/las/platinum/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:48:56.341650+00:00",
+      "generated_at_utc": "2026-11-17T21:46:29.317122+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 102
+      "champion_count": 100
     },
     {
       "mode": "solo",
@@ -863,11 +863,11 @@
       "window": "current",
       "path": "/data/las/emerald/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:49:32.327855+00:00",
+      "generated_at_utc": "2026-11-17T21:47:09.331901+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 113
+      "champion_count": 112
     },
     {
       "mode": "solo",
@@ -876,11 +876,11 @@
       "window": "7d",
       "path": "/data/las/emerald/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:50:06.925903+00:00",
+      "generated_at_utc": "2026-11-17T21:47:44.452521+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 97
+      "champion_count": 99
     },
     {
       "mode": "solo",
@@ -889,11 +889,11 @@
       "window": "14d",
       "path": "/data/las/emerald/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:50:43.177910+00:00",
+      "generated_at_utc": "2026-11-17T21:48:24.201907+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 110
+      "champion_count": 111
     },
     {
       "mode": "solo",
@@ -902,7 +902,7 @@
       "window": "current",
       "path": "/data/las/diamond/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:51:16.624449+00:00",
+      "generated_at_utc": "2026-11-17T21:49:20.630298+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -915,11 +915,13 @@
       "window": "7d",
       "path": "/data/las/diamond/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:51:47.177766+00:00",
+      "generated_at_utc": "2026-11-17T21:51:02.461235+00:00",
       "is_partial": false,
       "failed_lanes": [],
-      "warnings": [],
-      "champion_count": 92
+      "warnings": [
+        "Lane bottom succeeded on retry attempt 2/3."
+      ],
+      "champion_count": 90
     },
     {
       "mode": "solo",
@@ -928,11 +930,11 @@
       "window": "14d",
       "path": "/data/las/diamond/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:52:20.224136+00:00",
+      "generated_at_utc": "2026-11-17T21:51:37.142193+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 109
+      "champion_count": 108
     },
     {
       "mode": "solo",
@@ -941,7 +943,7 @@
       "window": "current",
       "path": "/data/las/master/current.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:52:52.932747+00:00",
+      "generated_at_utc": "2026-11-17T21:52:09.927633+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
@@ -954,11 +956,11 @@
       "window": "7d",
       "path": "/data/las/master/7d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:53:22.543154+00:00",
+      "generated_at_utc": "2026-11-17T21:52:57.624791+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 91
+      "champion_count": 90
     },
     {
       "mode": "solo",
@@ -967,11 +969,11 @@
       "window": "14d",
       "path": "/data/las/master/14d.json",
       "status": "ok",
-      "generated_at_utc": "2026-11-17T08:53:55.065364+00:00",
+      "generated_at_utc": "2026-11-17T21:53:31.172026+00:00",
       "is_partial": false,
       "failed_lanes": [],
       "warnings": [],
-      "champion_count": 102
+      "champion_count": 100
     },
     {
       "mode": "teamplay",
@@ -980,39 +982,7 @@
       "window": "current",
       "path": "/data/teamplay/na/iron/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.176737+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 35
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "iron",
-      "window": "7d",
-      "path": "/data/teamplay/na/iron/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.178952+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 34
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "iron",
-      "window": "14d",
-      "path": "/data/teamplay/na/iron/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.180840+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.754296+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1024,18 +994,50 @@
     {
       "mode": "teamplay",
       "region": "na",
-      "tier": "bronze",
-      "window": "current",
-      "path": "/data/teamplay/na/bronze/current.json",
+      "tier": "iron",
+      "window": "7d",
+      "path": "/data/teamplay/na/iron/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.182696+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.757286+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 29
+      "champion_count": 33
+    },
+    {
+      "mode": "teamplay",
+      "region": "na",
+      "tier": "iron",
+      "window": "14d",
+      "path": "/data/teamplay/na/iron/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.759870+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 38
+    },
+    {
+      "mode": "teamplay",
+      "region": "na",
+      "tier": "bronze",
+      "window": "current",
+      "path": "/data/teamplay/na/bronze/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.762705+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 32
     },
     {
       "mode": "teamplay",
@@ -1044,7 +1046,7 @@
       "window": "7d",
       "path": "/data/teamplay/na/bronze/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.184459+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.765354+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1060,7 +1062,7 @@
       "window": "14d",
       "path": "/data/teamplay/na/bronze/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.186140+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.767977+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1076,39 +1078,7 @@
       "window": "current",
       "path": "/data/teamplay/na/silver/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.187859+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 30
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "silver",
-      "window": "7d",
-      "path": "/data/teamplay/na/silver/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.189672+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 34
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "silver",
-      "window": "14d",
-      "path": "/data/teamplay/na/silver/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.191524+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.770615+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1120,18 +1090,50 @@
     {
       "mode": "teamplay",
       "region": "na",
-      "tier": "gold",
-      "window": "current",
-      "path": "/data/teamplay/na/gold/current.json",
+      "tier": "silver",
+      "window": "7d",
+      "path": "/data/teamplay/na/silver/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.193308+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.773288+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 41
+      "champion_count": 31
+    },
+    {
+      "mode": "teamplay",
+      "region": "na",
+      "tier": "silver",
+      "window": "14d",
+      "path": "/data/teamplay/na/silver/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.775990+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 28
+    },
+    {
+      "mode": "teamplay",
+      "region": "na",
+      "tier": "gold",
+      "window": "current",
+      "path": "/data/teamplay/na/gold/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.778683+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 42
     },
     {
       "mode": "teamplay",
@@ -1140,7 +1142,7 @@
       "window": "7d",
       "path": "/data/teamplay/na/gold/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.195498+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.781992+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1156,14 +1158,14 @@
       "window": "14d",
       "path": "/data/teamplay/na/gold/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.197650+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.785291+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 41
+      "champion_count": 43
     },
     {
       "mode": "teamplay",
@@ -1172,14 +1174,14 @@
       "window": "current",
       "path": "/data/teamplay/na/platinum/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.199903+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.788827+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 47
+      "champion_count": 45
     },
     {
       "mode": "teamplay",
@@ -1188,7 +1190,7 @@
       "window": "7d",
       "path": "/data/teamplay/na/platinum/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.202342+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.792448+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1204,14 +1206,14 @@
       "window": "14d",
       "path": "/data/teamplay/na/platinum/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.204585+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.795889+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 42
+      "champion_count": 46
     },
     {
       "mode": "teamplay",
@@ -1220,7 +1222,7 @@
       "window": "current",
       "path": "/data/teamplay/na/emerald/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.206841+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.799532+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1236,14 +1238,14 @@
       "window": "7d",
       "path": "/data/teamplay/na/emerald/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.209313+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.803233+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 48
+      "champion_count": 45
     },
     {
       "mode": "teamplay",
@@ -1252,14 +1254,14 @@
       "window": "14d",
       "path": "/data/teamplay/na/emerald/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.211659+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.806820+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 50
+      "champion_count": 52
     },
     {
       "mode": "teamplay",
@@ -1268,14 +1270,14 @@
       "window": "current",
       "path": "/data/teamplay/na/diamond/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.214171+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.810557+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 54
+      "champion_count": 51
     },
     {
       "mode": "teamplay",
@@ -1284,14 +1286,14 @@
       "window": "7d",
       "path": "/data/teamplay/na/diamond/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.216721+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.814221+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 47
+      "champion_count": 44
     },
     {
       "mode": "teamplay",
@@ -1300,39 +1302,7 @@
       "window": "14d",
       "path": "/data/teamplay/na/diamond/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.218994+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 55
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "master",
-      "window": "current",
-      "path": "/data/teamplay/na/master/current.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.221637+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 58
-    },
-    {
-      "mode": "teamplay",
-      "region": "na",
-      "tier": "master",
-      "window": "7d",
-      "path": "/data/teamplay/na/master/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.224282+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.817569+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1345,10 +1315,10 @@
       "mode": "teamplay",
       "region": "na",
       "tier": "master",
-      "window": "14d",
-      "path": "/data/teamplay/na/master/14d.json",
+      "window": "current",
+      "path": "/data/teamplay/na/master/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.226674+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.821394+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1359,12 +1329,76 @@
     },
     {
       "mode": "teamplay",
+      "region": "na",
+      "tier": "master",
+      "window": "7d",
+      "path": "/data/teamplay/na/master/7d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.825285+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 48
+    },
+    {
+      "mode": "teamplay",
+      "region": "na",
+      "tier": "master",
+      "window": "14d",
+      "path": "/data/teamplay/na/master/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.828885+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 57
+    },
+    {
+      "mode": "teamplay",
       "region": "lan",
       "tier": "iron",
       "window": "current",
       "path": "/data/teamplay/lan/iron/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.229107+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.832627+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 39
+    },
+    {
+      "mode": "teamplay",
+      "region": "lan",
+      "tier": "iron",
+      "window": "7d",
+      "path": "/data/teamplay/lan/iron/7d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.835359+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 37
+    },
+    {
+      "mode": "teamplay",
+      "region": "lan",
+      "tier": "iron",
+      "window": "14d",
+      "path": "/data/teamplay/lan/iron/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.837972+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1376,50 +1410,18 @@
     {
       "mode": "teamplay",
       "region": "lan",
-      "tier": "iron",
-      "window": "7d",
-      "path": "/data/teamplay/lan/iron/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.231058+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 36
-    },
-    {
-      "mode": "teamplay",
-      "region": "lan",
-      "tier": "iron",
-      "window": "14d",
-      "path": "/data/teamplay/lan/iron/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.232790+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 36
-    },
-    {
-      "mode": "teamplay",
-      "region": "lan",
       "tier": "bronze",
       "window": "current",
       "path": "/data/teamplay/lan/bronze/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.234540+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.840740+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 35
+      "champion_count": 37
     },
     {
       "mode": "teamplay",
@@ -1428,14 +1430,14 @@
       "window": "7d",
       "path": "/data/teamplay/lan/bronze/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.236323+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.843560+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 29
+      "champion_count": 37
     },
     {
       "mode": "teamplay",
@@ -1444,14 +1446,14 @@
       "window": "14d",
       "path": "/data/teamplay/lan/bronze/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.237947+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.846324+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 36
+      "champion_count": 37
     },
     {
       "mode": "teamplay",
@@ -1460,14 +1462,14 @@
       "window": "current",
       "path": "/data/teamplay/lan/silver/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.239743+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.849144+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 33
+      "champion_count": 31
     },
     {
       "mode": "teamplay",
@@ -1476,7 +1478,7 @@
       "window": "7d",
       "path": "/data/teamplay/lan/silver/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.241493+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.851629+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1492,14 +1494,14 @@
       "window": "14d",
       "path": "/data/teamplay/lan/silver/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.243261+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.854257+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 28
+      "champion_count": 32
     },
     {
       "mode": "teamplay",
@@ -1508,14 +1510,14 @@
       "window": "current",
       "path": "/data/teamplay/lan/gold/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.244854+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.856879+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 41
+      "champion_count": 39
     },
     {
       "mode": "teamplay",
@@ -1524,14 +1526,14 @@
       "window": "7d",
       "path": "/data/teamplay/lan/gold/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.246876+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.859941+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 36
+      "champion_count": 40
     },
     {
       "mode": "teamplay",
@@ -1540,7 +1542,7 @@
       "window": "14d",
       "path": "/data/teamplay/lan/gold/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.248780+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.863015+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1556,23 +1558,7 @@
       "window": "current",
       "path": "/data/teamplay/lan/platinum/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.250806+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 40
-    },
-    {
-      "mode": "teamplay",
-      "region": "lan",
-      "tier": "platinum",
-      "window": "7d",
-      "path": "/data/teamplay/lan/platinum/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.252848+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.866104+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1585,10 +1571,26 @@
       "mode": "teamplay",
       "region": "lan",
       "tier": "platinum",
+      "window": "7d",
+      "path": "/data/teamplay/lan/platinum/7d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.869102+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 38
+    },
+    {
+      "mode": "teamplay",
+      "region": "lan",
+      "tier": "platinum",
       "window": "14d",
       "path": "/data/teamplay/lan/platinum/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.254895+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.871929+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1604,7 +1606,7 @@
       "window": "current",
       "path": "/data/teamplay/lan/emerald/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.256937+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.874973+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1620,14 +1622,14 @@
       "window": "7d",
       "path": "/data/teamplay/lan/emerald/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.259069+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.878272+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 43
+      "champion_count": 40
     },
     {
       "mode": "teamplay",
@@ -1636,14 +1638,14 @@
       "window": "14d",
       "path": "/data/teamplay/lan/emerald/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.261124+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.881339+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 46
+      "champion_count": 45
     },
     {
       "mode": "teamplay",
@@ -1652,7 +1654,7 @@
       "window": "current",
       "path": "/data/teamplay/lan/diamond/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.263510+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.884811+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1668,7 +1670,7 @@
       "window": "7d",
       "path": "/data/teamplay/lan/diamond/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.267146+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.888315+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1684,7 +1686,7 @@
       "window": "14d",
       "path": "/data/teamplay/lan/diamond/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.269872+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.891654+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1700,14 +1702,14 @@
       "window": "current",
       "path": "/data/teamplay/lan/master/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.272039+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.895034+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 46
+      "champion_count": 44
     },
     {
       "mode": "teamplay",
@@ -1716,55 +1718,7 @@
       "window": "7d",
       "path": "/data/teamplay/lan/master/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.274153+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 43
-    },
-    {
-      "mode": "teamplay",
-      "region": "lan",
-      "tier": "master",
-      "window": "14d",
-      "path": "/data/teamplay/lan/master/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.276097+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 49
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "iron",
-      "window": "current",
-      "path": "/data/teamplay/las/iron/current.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.278250+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 35
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "iron",
-      "window": "7d",
-      "path": "/data/teamplay/las/iron/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.280005+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.898213+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1775,19 +1729,67 @@
     },
     {
       "mode": "teamplay",
-      "region": "las",
-      "tier": "iron",
+      "region": "lan",
+      "tier": "master",
       "window": "14d",
-      "path": "/data/teamplay/las/iron/14d.json",
+      "path": "/data/teamplay/lan/master/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.281707+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.900975+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 38
+      "champion_count": 45
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "iron",
+      "window": "current",
+      "path": "/data/teamplay/las/iron/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.904165+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 34
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "iron",
+      "window": "7d",
+      "path": "/data/teamplay/las/iron/7d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.906917+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 36
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "iron",
+      "window": "14d",
+      "path": "/data/teamplay/las/iron/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.909503+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 36
     },
     {
       "mode": "teamplay",
@@ -1796,7 +1798,7 @@
       "window": "current",
       "path": "/data/teamplay/las/bronze/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.283479+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.912191+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1812,14 +1814,14 @@
       "window": "7d",
       "path": "/data/teamplay/las/bronze/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.285291+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.914916+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 37
+      "champion_count": 35
     },
     {
       "mode": "teamplay",
@@ -1828,14 +1830,14 @@
       "window": "14d",
       "path": "/data/teamplay/las/bronze/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.287073+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.917763+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 36
+      "champion_count": 35
     },
     {
       "mode": "teamplay",
@@ -1844,39 +1846,7 @@
       "window": "current",
       "path": "/data/teamplay/las/silver/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.288826+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 38
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "silver",
-      "window": "7d",
-      "path": "/data/teamplay/las/silver/7d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.290685+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 36
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "silver",
-      "window": "14d",
-      "path": "/data/teamplay/las/silver/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.292512+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.920471+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1888,43 +1858,11 @@
     {
       "mode": "teamplay",
       "region": "las",
-      "tier": "gold",
-      "window": "current",
-      "path": "/data/teamplay/las/gold/current.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.294333+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 40
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "gold",
+      "tier": "silver",
       "window": "7d",
-      "path": "/data/teamplay/las/gold/7d.json",
+      "path": "/data/teamplay/las/silver/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.296368+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 42
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
-      "tier": "gold",
-      "window": "14d",
-      "path": "/data/teamplay/las/gold/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.298387+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.923265+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1936,11 +1874,27 @@
     {
       "mode": "teamplay",
       "region": "las",
-      "tier": "platinum",
-      "window": "current",
-      "path": "/data/teamplay/las/platinum/current.json",
+      "tier": "silver",
+      "window": "14d",
+      "path": "/data/teamplay/las/silver/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.300248+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.926287+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 32
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "gold",
+      "window": "current",
+      "path": "/data/teamplay/las/gold/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.928930+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1948,6 +1902,54 @@
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
       "champion_count": 39
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "gold",
+      "window": "7d",
+      "path": "/data/teamplay/las/gold/7d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.931922+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 43
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "gold",
+      "window": "14d",
+      "path": "/data/teamplay/las/gold/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.935033+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 40
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "platinum",
+      "window": "current",
+      "path": "/data/teamplay/las/platinum/current.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.939082+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 40
     },
     {
       "mode": "teamplay",
@@ -1956,7 +1958,23 @@
       "window": "7d",
       "path": "/data/teamplay/las/platinum/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.302207+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.942153+00:00",
+      "is_partial": true,
+      "failed_lanes": [],
+      "warnings": [
+        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
+        "Oracle professional data came from the validated production cache because live download sources were unavailable."
+      ],
+      "champion_count": 36
+    },
+    {
+      "mode": "teamplay",
+      "region": "las",
+      "tier": "platinum",
+      "window": "14d",
+      "path": "/data/teamplay/las/platinum/14d.json",
+      "status": "partial",
+      "generated_at_utc": "2026-11-17T21:53:35.945006+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -1968,27 +1986,11 @@
     {
       "mode": "teamplay",
       "region": "las",
-      "tier": "platinum",
-      "window": "14d",
-      "path": "/data/teamplay/las/platinum/14d.json",
-      "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.304121+00:00",
-      "is_partial": true,
-      "failed_lanes": [],
-      "warnings": [
-        "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
-        "Oracle professional data came from the validated production cache because live download sources were unavailable."
-      ],
-      "champion_count": 42
-    },
-    {
-      "mode": "teamplay",
-      "region": "las",
       "tier": "emerald",
       "window": "current",
       "path": "/data/teamplay/las/emerald/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.306190+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.947981+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -2004,14 +2006,14 @@
       "window": "7d",
       "path": "/data/teamplay/las/emerald/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.308443+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.951423+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 41
+      "champion_count": 39
     },
     {
       "mode": "teamplay",
@@ -2020,7 +2022,7 @@
       "window": "14d",
       "path": "/data/teamplay/las/emerald/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.310444+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.954585+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
@@ -2036,14 +2038,14 @@
       "window": "current",
       "path": "/data/teamplay/las/diamond/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.312676+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.958207+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 50
+      "champion_count": 51
     },
     {
       "mode": "teamplay",
@@ -2052,14 +2054,15 @@
       "window": "7d",
       "path": "/data/teamplay/las/diamond/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.314905+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.961637+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
+        "Lane bottom succeeded on retry attempt 2/3.",
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 46
+      "champion_count": 43
     },
     {
       "mode": "teamplay",
@@ -2068,14 +2071,14 @@
       "window": "14d",
       "path": "/data/teamplay/las/diamond/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.316984+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.964689+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 49
+      "champion_count": 52
     },
     {
       "mode": "teamplay",
@@ -2084,14 +2087,14 @@
       "window": "current",
       "path": "/data/teamplay/las/master/current.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.319221+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.968173+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 49
+      "champion_count": 47
     },
     {
       "mode": "teamplay",
@@ -2100,14 +2103,14 @@
       "window": "7d",
       "path": "/data/teamplay/las/master/7d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.321413+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.971692+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 42
+      "champion_count": 44
     },
     {
       "mode": "teamplay",
@@ -2116,14 +2119,14 @@
       "window": "14d",
       "path": "/data/teamplay/las/master/14d.json",
       "status": "partial",
-      "generated_at_utc": "2026-11-17T08:53:59.323484+00:00",
+      "generated_at_utc": "2026-11-17T21:53:35.974861+00:00",
       "is_partial": true,
       "failed_lanes": [],
       "warnings": [
         "Oracle competitive slice includes rows where datacompleteness != 'complete'.",
         "Oracle professional data came from the validated production cache because live download sources were unavailable."
       ],
-      "champion_count": 47
+      "champion_count": 48
     }
   ]
 }
