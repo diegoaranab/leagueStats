@@ -369,10 +369,12 @@ class OracleDownloader:
                     if candidate == cache:
                         metadata_path = candidate.with_suffix(candidate.suffix + ".metadata.json")
                         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                        if not isinstance(metadata, dict):
+                            continue
                         if metadata.get("sha256") != report.sha256:
                             continue
                     return report.sha256
-                except (OSError, ValueError, CsvValidationError):
+                except (OSError, UnicodeError, ValueError, CsvValidationError):
                     continue
         return None
 

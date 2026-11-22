@@ -168,6 +168,33 @@ class OracleDownloadTests(unittest.TestCase):
                 self.assertEqual(result.state, DownloadState.FAILED)
                 self.assertFalse(is_production_current(result))
 
+    def test_malformed_prior_cache_metadata_does_not_block_authenticated_live(self):
+        metadata_path = self.cache.with_suffix(".csv.metadata.json")
+        malformed_values = {
+            "non_object": b"[]",
+            "invalid_json": b"{not json",
+            "invalid_utf8": b"\xff\xfe",
+        }
+        for mode, contents in malformed_values.items():
+            with self.subTest(mode=mode):
+                self.cache.write_bytes(self.csv.read_bytes())
+                metadata_path.write_bytes(contents)
+                result = self.resolve(self.live)
+                self.assertEqual(
+                    (result.state, result.source),
+                    (DownloadState.FRESH, "google-drive-api-oauth"),
+                )
+
+    def test_malformed_cache_metadata_is_rejected_as_fallback(self):
+        self.cache.write_bytes(self.csv.read_bytes())
+        metadata_path = self.cache.with_suffix(".csv.metadata.json")
+        metadata_path.write_text("[]", encoding="utf-8")
+
+        result = self.resolve(self.failed)
+
+        self.assertEqual(result.state, DownloadState.FAILED)
+        self.assertFalse(is_production_current(result))
+
     def test_invalid_live_preserves_good_output_and_cache(self):
         self.resolve(self.live)
         previous = self.output.read_bytes()
