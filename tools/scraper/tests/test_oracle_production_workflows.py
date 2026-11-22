@@ -35,10 +35,21 @@ class OracleProductionWorkflowTests(unittest.TestCase):
                 self.assertIn("python -m loltee_scraper.oracle_download", commands)
                 self.assertIn("--require-production-current", commands)
                 self.assertIn("--oracle-metadata", commands)
-                self.assertNotIn("is_recent_for_bet_ai", text)
                 self.assertNotIn("snapshot", resolver_command.lower())
                 self.assertNotIn("curl ", resolver_command)
                 self.assertNotIn("fetched_at", resolver_command)
+                resolver = next(step for job in workflow["jobs"].values() for step in job.get("steps", []) if step.get("id") == "oracle_download")
+                for name in ("GOOGLE_DRIVE_CLIENT_ID", "GOOGLE_DRIVE_CLIENT_SECRET", "GOOGLE_DRIVE_REFRESH_TOKEN"):
+                    self.assertEqual(resolver["env"][name], "${{ secrets." + name + " }}")
+                    self.assertNotIn(name, workflow.get("env", {}))
+                    for job in workflow["jobs"].values():
+                        self.assertNotIn(name, job.get("env", {}))
+                        for step in job.get("steps", []):
+                            if step is not resolver:
+                                self.assertNotIn(name, step.get("env", {}))
+                for obsolete in ("drive.google.com/uc", "drive.usercontent.google.com", "gdown", "--snapshot"):
+                    self.assertNotIn(obsolete, resolver_command)
+                self.assertNotIn("tools/scraper[oracle-download]", text)
 
     def test_cache_is_saved_only_after_a_live_validated_download(self) -> None:
         for path in WORKFLOWS:

@@ -119,29 +119,13 @@ scoring. See [Difficulty v2 History](DIFFICULTY_HISTORY.md) for details.
 
 ## Oracle source resilience
 
-Production resolves Oracle's Elixir data through the hardened Python downloader:
+Production retrieves the official Oracle's Elixir CSV through the authenticated
+Google Drive API. If that fails, it uses a structurally validated, checksum-verified
+cache whose original download is at most 48 hours old; otherwise it fails before
+Teamplay generation. Only a validated live download refreshes the cache and its
+`downloaded_at`. Cache reuse never renews that timestamp.
 
-```text
-validated live download -> validated Actions cache (downloaded within 48 hours)
-                        -> fail before Teamplay generation
-```
-
-Live attempts use the direct Google Drive URL, an alternate endpoint, and
-gdown. If all fail, production may use a checksum-verified cache whose original
-download is no older than 48 hours. Only a successfully validated live download
-refreshes that cache or its `downloaded_at`; selecting cached content never
-renews its age. An expired cache or historical snapshot fails production before
-new Teamplay data or a Pages artifact is published. Scheduled and manual full
-refreshes always enforce this rule. Frontend-only deployments can continue from
-the last-known-good snapshot during a temporary Oracle outage without treating
-that snapshot as fresh Oracle data. The downloader retains its
-snapshot fallback for diagnostics and manual validation, but production does
-not provide one.
-
-Oracle metadata keeps two independent clocks. `oracle_downloaded_at` records
-when LeagueStats retrieved the exact CSV and determines cache eligibility;
-`oracle_last_match_at` records the newest professional match in the CSV and is
-displayed as context. A fresh download with no match in the last 24 hours is
-valid for LeagueStats. The downloader's separate Bet AI recency flag retains
-its 24-hour match-age meaning and is not used as the production acceptance rule.
+`oracle_downloaded_at` determines cache eligibility. `oracle_last_match_at`
+records the newest professional match and is observational: an authenticated,
+valid download remains current even if the latest match is older than 24 hours.
 Cached sources are identified through dataset `meta.oracle_source` and warnings.

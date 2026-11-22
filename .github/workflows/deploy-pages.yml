@@ -190,7 +190,7 @@ jobs:
         if: steps.data_source.outputs.refresh == 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install -e "tools/scraper[oracle-download]"
+          pip install -e tools/scraper
 
       - name: Install Playwright Chromium
         if: steps.data_source.outputs.refresh == 'true'
@@ -208,6 +208,10 @@ jobs:
       - name: Resolve Oracle's Elixir CSV
         if: steps.data_source.outputs.refresh == 'true'
         id: oracle_download
+        env:
+          GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
+          GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
+          GOOGLE_DRIVE_REFRESH_TOKEN: ${{ secrets.GOOGLE_DRIVE_REFRESH_TOKEN }}
         run: |
           mkdir -p "${RUNNER_TEMP}/oracle-download"
           python -m loltee_scraper.oracle_download \

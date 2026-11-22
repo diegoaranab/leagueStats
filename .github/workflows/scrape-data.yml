@@ -38,7 +38,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e "tools/scraper[oracle-download]"
+          pip install -e tools/scraper
 
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
@@ -53,6 +53,10 @@ jobs:
 
       - name: Resolve Oracle's Elixir CSV
         id: oracle_download
+        env:
+          GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
+          GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
+          GOOGLE_DRIVE_REFRESH_TOKEN: ${{ secrets.GOOGLE_DRIVE_REFRESH_TOKEN }}
         run: |
           mkdir -p "${RUNNER_TEMP}/oracle-download"
           python -m loltee_scraper.oracle_download \

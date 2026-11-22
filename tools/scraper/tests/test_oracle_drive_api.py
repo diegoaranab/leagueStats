@@ -100,7 +100,7 @@ class OracleDriveTests(unittest.TestCase):
 
     def test_oversized_stream(self):
         with self.assertRaisesRegex(drive.DiagnosticError, "exceeds download limit"):
-            self.execute(metadata={**self.metadata, "size": None}, max_bytes=100)
+            self.execute(metadata={**self.metadata, "size": "99"}, max_bytes=100)
         self.assertFalse(self.output.exists())
 
     def test_size_mismatch_and_workspace_type(self):
@@ -112,6 +112,32 @@ class OracleDriveTests(unittest.TestCase):
         with self.assertRaisesRegex(drive.DiagnosticError, "Unsafe"):
             self.execute(metadata={**self.metadata, "name": ACCESS})
         self.assertFalse(self.output.exists())
+
+    def test_production_resolver_runs_authenticated_integrity_and_csv_validation(self):
+        from loltee_scraper.oracle_download import OracleDownloader, DownloadState
+        downloader = OracleDownloader(attempts=1, min_bytes=1, cache_max_age_hours=48, now=lambda: NOW)
+        output, cache, meta = (self.root / name for name in ("output.csv", "cache.csv", "result.json"))
+        def run(metadata, data):
+            responses = [Response(json.dumps({"access_token": ACCESS, "token_type": "Bearer"}).encode()),
+                         Response(json.dumps(metadata).encode()), Response(data)]
+            with patch("urllib.request.build_opener") as build:
+                build.return_value.open.side_effect = responses
+                result = downloader.resolve(file_id=drive.FILE_ID, output_path=output, metadata_path=meta, cache_path=cache)
+                calls = build.return_value.open.call_args_list
+            return result, calls
+        result, calls = run(self.metadata, self.csv)
+        self.assertEqual((result.state, result.source), (DownloadState.FRESH, "google-drive-api-oauth"))
+        self.assertTrue(result.cache_updated and result.checksum_verified)
+        self.assertTrue(all(drive.FILE_ID in call.args[0].full_url for call in calls[1:]))
+        self.assertGreater(result.data_age_seconds, 24 * 3600)
+        for secret in (*CREDS.values(), ACCESS, "Bearer " + ACCESS):
+            self.assertNotIn(secret, meta.read_text())
+        original = output.read_bytes()
+        for bad in ({**self.metadata, "size": "1"}, {**self.metadata, "md5Checksum": "0" * 32}):
+            result, _ = run(bad, self.csv)
+            self.assertEqual(result.state, DownloadState.CACHED)
+            self.assertEqual(output.read_bytes(), original)
+            self.assertEqual(cache.read_bytes(), original)
 
     def test_diagnostic_metadata_contains_only_leaguestats_observations(self):
         result, _ = self.execute()

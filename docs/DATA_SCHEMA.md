@@ -68,7 +68,6 @@ The Oracle download and match timestamps are intentionally independent. Cache
 acceptance uses `oracle_download_age_seconds`; it does not require a professional
 match within the last 24 hours. `oracle_last_match_at` and
 `oracle_data_age_seconds` describe match coverage for observability and the UI.
-Bet AI-specific recency fields are not copied into Teamplay datasets.
 
 ## Champion Object
 
