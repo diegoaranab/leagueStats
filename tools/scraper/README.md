@@ -38,35 +38,16 @@ metadata and deterministic ordering. No full scrape is needed to test this featu
 
 ## Oracle CSV reliability validation
 
-`loltee-oracle-download` resolves the 2026 Oracle's Elixir CSV through the
-direct Google Drive URL, its alternate endpoint, and `gdown`, then falls back
-to a validated cache or a known snapshot. Install its optional dependency with:
+`loltee-oracle-download` retrieves the official 2026 CSV using authenticated
+Google Drive API access. On failure it uses a validated, checksum-verified cache
+whose original download is no older than the configured limit (48 hours in
+production); otherwise it fails. Install with `pip install -e tools/scraper`.
 
-```bash
-pip install -e "tools/scraper[oracle-download]"
-```
-
-Every candidate is downloaded to a temporary file and must pass schema, row,
-year, timestamp, size, and content validation before an atomic replacement.
-Cache metadata includes a SHA-256 checksum that is verified before reuse.
-
-The JSON metadata uses these states:
-
-- `FRESH`: a live source produced valid data, regardless of latest-match age.
-- `CACHED`: a checksum-verified cache whose original retrieval/download age is
-  within the configured cache-age limit.
-- `STALE`: a valid cache is over its configured age limit, or a diagnostic or
-  historical snapshot was selected.
-- `FAILED`: no usable source could be resolved.
-
-Retrieval/download age and latest-match/data age are independent. A freshly
-retrieved CSV can legitimately contain older matches, while a cached CSV can
-have a recent latest match even though the retrieval itself is stale.
-`is_recent_for_bet_ai` is retained only as a separate legacy signal that checks
-whether the latest match is within 24 hours; it is not the LeagueStats
-production acceptance gate. `content_changed` must also be inspected
-independently; a successful command does not by itself mean the upstream CSV
-was updated.
+Live downloads pass Drive size and MD5 checks and CSV validation before replacing
+the output or refreshing the cache. Cache reuse preserves the original download
+time. Result states are `FRESH`, `CACHED`, and `FAILED`. Download age controls
+cache eligibility; latest-match age is observational and does not gate production.
+`content_changed` reports whether the validated content differs from prior data.
 The isolated GitHub workflow `oracle-download-validation.yml` exposes this
 validation only through `workflow_dispatch` and does not generate or publish
 application data.

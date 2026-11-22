@@ -3,32 +3,22 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-import http.cookiejar
 import json
 import math
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
-import urllib.request
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Callable, Sequence
 
-try:
-    import resource
-except ImportError:  # pragma: no cover - Windows uses the polling guard below.
-    resource = None  # type: ignore[assignment]
+from loltee_scraper.oracle_drive_api import download_authenticated
 
 
-DEFAULT_USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
-)
 REQUIRED_COLUMNS = frozenset(
     {
         "gameid",
@@ -112,8 +102,6 @@ class DownloadResult:
     checksum_verified: bool
     content_changed: bool | None
     cache_updated: bool
-    bet_ai_max_data_age_hours: float
-    is_recent_for_bet_ai: bool
     attempts: tuple[AttemptReport, ...]
 
     def to_dict(self) -> dict[str, object]:
@@ -122,8 +110,6 @@ class DownloadResult:
         return payload
 
 
-HttpFetcher = Callable[[str, Path, float, int], None]
-GdownFetcher = Callable[[str, Path, float, int], None]
 
 
 def _utc_now() -> datetime:
@@ -316,9 +302,6 @@ class OracleDownloader:
         min_records: int = 12,
         min_valid_ratio: float = 0.95,
         cache_max_age_hours: float = 168.0,
-        bet_ai_max_data_age_hours: float = 24.0,
-        http_fetcher: HttpFetcher | None = None,
-        gdown_fetcher: GdownFetcher | None = None,
         sleeper: Callable[[float], None] = time.sleep,
         now: Callable[[], datetime] = _utc_now,
     ) -> None:
@@ -333,98 +316,8 @@ class OracleDownloader:
         self.min_records = min_records
         self.min_valid_ratio = min_valid_ratio
         self.cache_max_age_seconds = int(cache_max_age_hours * 3600)
-        self.bet_ai_max_data_age_hours = bet_ai_max_data_age_hours
-        self.bet_ai_max_data_age_seconds = int(bet_ai_max_data_age_hours * 3600)
         self.sleeper = sleeper
         self.now = now
-        self._opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
-        )
-        self.http_fetcher = http_fetcher or self._download_http
-        self.gdown_fetcher = gdown_fetcher or self._download_gdown
-
-    def _download_http(
-        self, url: str, destination: Path, timeout: float, max_bytes: int,
-    ) -> None:
-        request = urllib.request.Request(url, headers={"User-Agent": DEFAULT_USER_AGENT})
-        with self._opener.open(request, timeout=timeout) as response:
-            content_length = response.headers.get("Content-Length")
-            if content_length and int(content_length) > max_bytes:
-                raise DownloadError(
-                    f"response Content-Length exceeds {max_bytes} bytes"
-                )
-            total = 0
-            with destination.open("wb") as handle:
-                while chunk := response.read(1024 * 1024):
-                    total += len(chunk)
-                    if total > max_bytes:
-                        raise DownloadError(f"response exceeds {max_bytes} bytes")
-                    handle.write(chunk)
-
-    def _download_gdown(
-        self, url: str, destination: Path, timeout: float, max_bytes: int,
-    ) -> None:
-        def limit_child_file_size() -> None:
-            if resource is None:
-                return
-            _, hard_limit = resource.getrlimit(resource.RLIMIT_FSIZE)
-            enforced_limit = (
-                max_bytes
-                if hard_limit == resource.RLIM_INFINITY
-                else min(max_bytes, hard_limit)
-            )
-            resource.setrlimit(
-                resource.RLIMIT_FSIZE, (enforced_limit, enforced_limit),
-            )
-
-        process = subprocess.Popen(
-            [
-                sys.executable,
-                "-m",
-                "gdown",
-                url,
-                "--user-agent",
-                DEFAULT_USER_AGENT,
-                "-O",
-                str(destination),
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            preexec_fn=limit_child_file_size if resource is not None else None,
-        )
-        deadline = time.monotonic() + timeout
-        stdout = ""
-        stderr = ""
-        while True:
-            size_bytes = destination.stat().st_size if destination.exists() else 0
-            if size_bytes > max_bytes:
-                process.kill()
-                stdout, stderr = process.communicate()
-                raise DownloadError(
-                    f"gdown response exceeds the {max_bytes}-byte maximum"
-                )
-
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                process.kill()
-                stdout, stderr = process.communicate()
-                raise DownloadError(f"gdown exceeded the {timeout}-second timeout")
-            try:
-                stdout, stderr = process.communicate(timeout=min(0.1, remaining))
-                break
-            except subprocess.TimeoutExpired:
-                continue
-
-        size_bytes = destination.stat().st_size if destination.exists() else 0
-        if size_bytes > max_bytes or (process.returncode != 0 and size_bytes >= max_bytes):
-            raise DownloadError(
-                f"gdown response reached the {max_bytes}-byte maximum"
-            )
-        if process.returncode != 0:
-            detail = (stderr or stdout).strip()
-            raise DownloadError(f"gdown exited {process.returncode}: {detail[-500:]}")
-
     def _validate(self, path: Path, *, not_after: datetime) -> ValidationReport:
         return validate_oracle_csv(
             path,
@@ -451,18 +344,17 @@ class OracleDownloader:
         fetch: Callable[[Path], None],
         temp_parent: Path,
         attempts: list[AttemptReport],
-        not_after: datetime,
     ) -> tuple[Path, ValidationReport] | None:
         for attempt in range(1, self.attempts + 1):
             temporary = self._temporary_path(temp_parent, source)
             try:
                 fetch(temporary)
-                report = self._validate(temporary, not_after=not_after)
+                report = self._validate(temporary, not_after=self.now().astimezone(timezone.utc))
                 attempts.append(AttemptReport(source, attempt, "accepted", "valid CSV"))
                 return temporary, report
-            except Exception as error:  # Each source must fail closed and allow fallback.
+            except Exception:  # Do not expose remote errors or credentials.
                 attempts.append(
-                    AttemptReport(source, attempt, "rejected", f"{type(error).__name__}: {error}")
+                    AttemptReport(source, attempt, "rejected", "authenticated download or CSV validation failed")
                 )
                 temporary.unlink(missing_ok=True)
                 if attempt < self.attempts:
@@ -473,8 +365,14 @@ class OracleDownloader:
         for candidate in (output, cache):
             if candidate is not None and candidate.is_file():
                 try:
-                    return _sha256(candidate)
-                except OSError:
+                    report = self._validate(candidate, not_after=self.now().astimezone(timezone.utc))
+                    if candidate == cache:
+                        metadata_path = candidate.with_suffix(candidate.suffix + ".metadata.json")
+                        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                        if metadata.get("sha256") != report.sha256:
+                            continue
+                    return report.sha256
+                except (OSError, ValueError, CsvValidationError):
                     continue
         return None
 
@@ -498,12 +396,6 @@ class OracleDownloader:
         download_age = (
             _age_seconds(selected_at, downloaded_at) if downloaded_at else None
         )
-        recent = bool(
-            report
-            and data_age is not None
-            and data_age <= self.bet_ai_max_data_age_seconds
-            and state in {DownloadState.FRESH, DownloadState.CACHED}
-        )
         return DownloadResult(
             state=state,
             source=source,
@@ -522,8 +414,6 @@ class OracleDownloader:
             checksum_verified=checksum_verified,
             content_changed=content_changed,
             cache_updated=cache_updated,
-            bet_ai_max_data_age_hours=self.bet_ai_max_data_age_hours,
-            is_recent_for_bet_ai=recent,
             attempts=tuple(attempts),
         )
 
@@ -538,40 +428,15 @@ class OracleDownloader:
         output_path: Path,
         metadata_path: Path,
         cache_path: Path | None = None,
-        snapshot_path: Path | None = None,
-        snapshot_url: str | None = None,
     ) -> DownloadResult:
         selected_at = self.now().astimezone(timezone.utc)
         attempts: list[AttemptReport] = []
         output_path.parent.mkdir(parents=True, exist_ok=True)
         prior_checksum = self._prior_checksum(output_path, cache_path)
 
-        direct_url = f"https://drive.google.com/uc?id={file_id}&export=download&confirm=t"
-        alternate_url = (
-            "https://drive.usercontent.google.com/download"
-            f"?id={file_id}&export=download&confirm=t"
-        )
-        gdown_url = f"https://drive.google.com/uc?id={file_id}"
-        fresh_sources: Sequence[tuple[str, Callable[[Path], None]]] = (
-            (
-                "google-drive-direct",
-                lambda path: self.http_fetcher(
-                    direct_url, path, self.timeout_seconds, self.max_bytes,
-                ),
-            ),
-            (
-                "google-drive-alternate",
-                lambda path: self.http_fetcher(
-                    alternate_url, path, self.timeout_seconds, self.max_bytes,
-                ),
-            ),
-            (
-                "gdown",
-                lambda path: self.gdown_fetcher(
-                    gdown_url, path, self.timeout_seconds, self.max_bytes,
-                ),
-            ),
-        )
+        fresh_sources = (("google-drive-api-oauth", lambda path: download_authenticated(
+            file_id, path, timeout=self.timeout_seconds, max_bytes=self.max_bytes,
+        )),)
 
         for source, fetch in fresh_sources:
             accepted = self._try_source(
@@ -579,11 +444,11 @@ class OracleDownloader:
                 fetch=fetch,
                 temp_parent=output_path.parent,
                 attempts=attempts,
-                not_after=selected_at,
             )
             if accepted is None:
                 continue
             temporary, report = accepted
+            selected_at = self.now().astimezone(timezone.utc)
             try:
                 os.replace(temporary, output_path)
             finally:
@@ -610,6 +475,7 @@ class OracleDownloader:
                 )
             return result
 
+        selected_at = self.now().astimezone(timezone.utc)
         if cache_path is not None and cache_path.is_file():
             try:
                 report = self._validate(cache_path, not_after=selected_at)
@@ -625,12 +491,16 @@ class OracleDownloader:
                     raise CsvValidationError(
                         "cache checksum does not match its metadata"
                     )
+                if not checksum_verified:
+                    raise CsvValidationError("cache checksum missing")
                 downloaded_raw = cache_metadata.get("downloaded_at")
                 downloaded_at = (
                     _parse_datetime(downloaded_raw)
                     if isinstance(downloaded_raw, str)
-                    else datetime.fromtimestamp(cache_path.stat().st_mtime, timezone.utc)
+                    else None
                 )
+                if downloaded_at is None:
+                    raise CsvValidationError("cache download timestamp missing")
                 for field in ("selected_at", "last_match_at"):
                     value = cache_metadata.get(field)
                     if isinstance(value, str):
@@ -640,7 +510,9 @@ class OracleDownloader:
                     checksum_verified
                     and download_age <= self.cache_max_age_seconds
                 )
-                state = DownloadState.CACHED if cache_is_recent else DownloadState.STALE
+                if not cache_is_recent:
+                    raise CsvValidationError("cache expired")
+                state = DownloadState.CACHED
                 _atomic_copy(cache_path, output_path)
                 attempts.append(
                     AttemptReport(
@@ -664,49 +536,8 @@ class OracleDownloader:
                     attempts=attempts,
                 )
                 return self._write_result(result, metadata_path)
-            except Exception as error:
-                attempts.append(
-                    AttemptReport(
-                        "cache", 1, "rejected", f"{type(error).__name__}: {error}"
-                    )
-                )
-
-        snapshot_fetch: Callable[[Path], None] | None = None
-        if snapshot_path is not None:
-            snapshot_fetch = lambda path: shutil.copyfile(snapshot_path, path)
-        elif snapshot_url:
-            snapshot_fetch = lambda path: self.http_fetcher(
-                snapshot_url, path, self.timeout_seconds, self.max_bytes,
-            )
-
-        if snapshot_fetch is not None:
-            accepted = self._try_source(
-                source="snapshot",
-                fetch=snapshot_fetch,
-                temp_parent=output_path.parent,
-                attempts=attempts,
-                not_after=selected_at,
-            )
-            if accepted is not None:
-                temporary, report = accepted
-                try:
-                    os.replace(temporary, output_path)
-                finally:
-                    temporary.unlink(missing_ok=True)
-                result = self._base_result(
-                    state=DownloadState.STALE,
-                    source="snapshot",
-                    output=output_path,
-                    metadata=metadata_path,
-                    downloaded_at=selected_at if snapshot_url else None,
-                    selected_at=selected_at,
-                    report=report,
-                    checksum_verified=True,
-                    content_changed=prior_checksum != report.sha256,
-                    cache_updated=False,
-                    attempts=attempts,
-                )
-                return self._write_result(result, metadata_path)
+            except Exception:
+                attempts.append(AttemptReport("cache", 1, "rejected", "invalid or expired cache"))
 
         result = self._base_result(
             state=DownloadState.FAILED,
@@ -742,21 +573,12 @@ def _write_github_outputs(result: DownloadResult) -> None:
         handle.write(
             f"data_age_seconds={result.data_age_seconds if result.data_age_seconds is not None else ''}\n"
         )
-        handle.write(
-            f"is_recent_for_bet_ai={str(result.is_recent_for_bet_ai).lower()}\n"
-        )
 
 
 def is_production_current(result: DownloadResult) -> bool:
-    """Return whether LeagueStats may publish Teamplay data from this result.
-
-    This policy deliberately uses retrieval/cache age (encoded by state), not
-    the age of the newest match. Snapshots remain diagnostic-only.
-    """
-    return (
-        result.state in {DownloadState.FRESH, DownloadState.CACHED}
-        and result.source != "snapshot"
-    )
+    """Accept only authenticated live data or a validated current cache."""
+    return ((result.state == DownloadState.FRESH and result.source == "google-drive-api-oauth")
+            or (result.state == DownloadState.CACHED and result.source == "cache"))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -767,9 +589,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--metadata", required=True, type=Path)
     parser.add_argument("--cache", type=Path)
-    snapshot = parser.add_mutually_exclusive_group()
-    snapshot.add_argument("--snapshot-path", type=Path)
-    snapshot.add_argument("--snapshot-url")
     parser.add_argument("--expected-year", type=int, default=2026)
     parser.add_argument("--attempts", type=int, default=3)
     parser.add_argument("--backoff-seconds", type=float, default=2.0)
@@ -778,7 +597,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-bytes", type=int, default=1_000_000_000)
     parser.add_argument("--min-records", type=int, default=12)
     parser.add_argument("--cache-max-age-hours", type=float, default=168.0)
-    parser.add_argument("--bet-ai-max-data-age-hours", type=float, default=24.0)
     parser.add_argument(
         "--require-production-current",
         action="store_true",
@@ -801,15 +619,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_bytes=args.max_bytes,
         min_records=args.min_records,
         cache_max_age_hours=args.cache_max_age_hours,
-        bet_ai_max_data_age_hours=args.bet_ai_max_data_age_hours,
     )
     result = downloader.resolve(
         file_id=args.file_id,
         output_path=args.output,
         metadata_path=args.metadata,
         cache_path=args.cache,
-        snapshot_path=args.snapshot_path,
-        snapshot_url=args.snapshot_url,
     )
     _write_github_outputs(result)
     print(json.dumps(result.to_dict(), indent=2, sort_keys=True))

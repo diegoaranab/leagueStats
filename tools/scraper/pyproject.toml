@@ -14,9 +14,6 @@ dependencies = [
   "PyYAML>=6.0.1",
 ]
 
-[project.optional-dependencies]
-oracle-download = ["gdown==6.1.0"]
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 

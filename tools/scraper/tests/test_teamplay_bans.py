@@ -39,7 +39,6 @@ class TeamplayBanTests(unittest.TestCase):
             "download_age_seconds": 86400,
             "data_age_seconds": 212400,
             "content_changed": False,
-            "is_recent_for_bet_ai": False,
         }
 
         result = build_teamplay_dataset(
@@ -63,7 +62,6 @@ class TeamplayBanTests(unittest.TestCase):
         self.assertEqual(result["meta"]["oracle_download_age_seconds"], 86400)
         self.assertEqual(result["meta"]["oracle_data_age_seconds"], 212400)
         self.assertFalse(result["meta"]["oracle_content_changed"])
-        self.assertNotIn("is_recent_for_bet_ai", result["meta"])
 
     def test_exact_formula_and_pick_scores_unchanged(self):
         c = champion()

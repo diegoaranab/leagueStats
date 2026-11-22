@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import csv
 import json
-import subprocess
 import tempfile
+import sys
 import unittest
-import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+
+import loltee_scraper
+loltee_scraper.__path__.insert(0, str(Path(__file__).resolve().parents[1] / "src/loltee_scraper"))
 
 from loltee_scraper.oracle_download import (
     DownloadError,
@@ -103,354 +105,84 @@ def replace_row_date(path: Path, *, row_index: int, match_at: datetime) -> None:
         writer.writerows(rows)
 
 
-class FakeSources:
-    def __init__(self) -> None:
-        self.http_responses: list[bytes | Path | Exception] = []
-        self.gdown_responses: list[bytes | Path | Exception] = []
-        self.http_calls: list[str] = []
-        self.gdown_calls: list[str] = []
-
-    @staticmethod
-    def _respond(response: bytes | Path | Exception, destination: Path) -> None:
-        if isinstance(response, Exception):
-            raise response
-        if isinstance(response, Path):
-            destination.write_bytes(response.read_bytes())
-        else:
-            destination.write_bytes(response)
-
-    def http(self, url: str, destination: Path, timeout: float, max_bytes: int) -> None:
-        del timeout, max_bytes
-        self.http_calls.append(url)
-        self._respond(self.http_responses.pop(0), destination)
-
-    def gdown(self, url: str, destination: Path, timeout: float, max_bytes: int) -> None:
-        del timeout, max_bytes
-        self.gdown_calls.append(url)
-        self._respond(self.gdown_responses.pop(0), destination)
-
-
 class OracleDownloadTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_directory = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp_directory.name)
-        self.valid_csv = self.root / "valid.csv"
-        write_csv(self.valid_csv, match_at=NOW - timedelta(hours=2))
-        self.sources = FakeSources()
-        self.sleeps: list[float] = []
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.csv = self.root / "valid.csv"
+        write_csv(self.csv, match_at=NOW - timedelta(hours=25))
+        self.output = self.root / "output.csv"
+        self.cache = self.root / "cache.csv"
+        self.metadata = self.root / "metadata.json"
 
-    def tearDown(self) -> None:
-        self.temp_directory.cleanup()
+    def resolve(self, fetch, now=NOW):
+        downloader = OracleDownloader(attempts=1, min_bytes=1, cache_max_age_hours=48, now=lambda: now)
+        with patch("loltee_scraper.oracle_download.download_authenticated", side_effect=fetch):
+            return downloader.resolve(file_id="official-id", output_path=self.output,
+                                      metadata_path=self.metadata, cache_path=self.cache)
 
-    def downloader(self, **overrides: object) -> OracleDownloader:
-        options: dict[str, object] = {
-            "attempts": 1,
-            "backoff_seconds": 0.25,
-            "timeout_seconds": 5,
-            "min_bytes": 1,
-            "min_records": 12,
-            "http_fetcher": self.sources.http,
-            "gdown_fetcher": self.sources.gdown,
-            "sleeper": self.sleeps.append,
-            "now": lambda: NOW,
-        }
-        options.update(overrides)
-        return OracleDownloader(**options)  # type: ignore[arg-type]
+    def live(self, file_id, path, **kwargs):
+        self.assertEqual(file_id, "official-id")
+        path.write_bytes(self.csv.read_bytes())
+        return {"md5_verified": True}
 
-    def resolve(self, downloader: OracleDownloader, **overrides: object):
-        options: dict[str, object] = {
-            "file_id": "test-file",
-            "output_path": self.root / "output.csv",
-            "metadata_path": self.root / "metadata.json",
-        }
-        options.update(overrides)
-        return downloader.resolve(**options)  # type: ignore[arg-type]
+    def failed(self, *args, **kwargs):
+        raise RuntimeError("synthetic-client-secret synthetic-access-token")
 
-    def fail_fresh_sources(self, error: Exception | None = None) -> None:
-        failure = error or urllib.error.HTTPError(
-            "https://drive.google.com", 403, "quota", {}, None,
-        )
-        self.sources.http_responses.extend([failure, failure])
-        self.sources.gdown_responses.append(failure)
-
-    def test_successful_direct_download_is_validated_and_has_metadata(self) -> None:
-        self.sources.http_responses.append(self.valid_csv)
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FRESH)
-        self.assertEqual(result.source, "google-drive-direct")
-        self.assertTrue(result.is_recent_for_bet_ai)
-        self.assertTrue(result.content_changed)
-        self.assertEqual(result.row_count, 24)
-        self.assertEqual(result.valid_record_count, 24)
-        self.assertEqual(result.game_count, 2)
-        self.assertEqual(result.downloaded_at, "2026-10-14T12:00:00Z")
-        self.assertEqual(result.last_match_at, "2026-10-14T10:00:00Z")
+    def test_fresh_and_old_match(self):
+        result = self.resolve(self.live)
+        self.assertEqual((result.state, result.source), (DownloadState.FRESH, "google-drive-api-oauth"))
+        self.assertTrue(result.cache_updated and result.checksum_verified and result.content_changed)
         self.assertEqual(result.download_age_seconds, 0)
-        self.assertEqual(result.data_age_seconds, 7200)
-        self.assertEqual(len(result.sha256 or ""), 64)
-        self.assertEqual((self.root / "output.csv").read_bytes(), self.valid_csv.read_bytes())
-        stored = json.loads((self.root / "metadata.json").read_text(encoding="utf-8"))
-        self.assertEqual(stored["state"], "FRESH")
-        self.assertEqual(stored["sha256"], result.sha256)
-        self.assertNotEqual(stored["downloaded_at"], stored["last_match_at"])
-        self.assertNotEqual(
-            stored["download_age_seconds"], stored["data_age_seconds"],
-        )
+        self.assertEqual(result.data_age_seconds, 25 * 3600)
+        self.assertTrue(is_production_current(result))
+        self.assertEqual(self.cache.read_bytes(), self.csv.read_bytes())
+        self.assertFalse(self.resolve(self.live).content_changed)
 
-    def test_html_quota_pages_and_http_errors_fall_through_to_gdown(self) -> None:
-        self.sources.http_responses.extend(
-            [
-                b"<!doctype html><title>Google Drive - Quota exceeded</title>",
-                urllib.error.HTTPError("alternate", 429, "quota", {}, None),
-            ]
-        )
-        self.sources.gdown_responses.append(self.valid_csv)
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FRESH)
-        self.assertEqual(result.source, "gdown")
-        self.assertIn("HTML", result.attempts[0].detail)
-        self.assertIn("HTTPError", result.attempts[1].detail)
-        self.assertEqual(len(self.sources.http_calls), 2)
-        self.assertEqual(len(self.sources.gdown_calls), 1)
-
-    def test_alternate_google_drive_endpoint_can_succeed(self) -> None:
-        self.sources.http_responses.extend(
-            [ConnectionError("direct endpoint blocked"), self.valid_csv]
-        )
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FRESH)
-        self.assertEqual(result.source, "google-drive-alternate")
-        self.assertIn("drive.usercontent.google.com", self.sources.http_calls[1])
-        self.assertEqual(self.sources.gdown_calls, [])
-
-    def test_exhausted_retries_use_exponential_backoff_and_fail(self) -> None:
-        failure = TimeoutError("network timeout")
-        self.sources.http_responses.extend([failure] * 6)
-        self.sources.gdown_responses.extend([failure] * 3)
-
-        result = self.resolve(self.downloader(attempts=3))
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        self.assertEqual(len(result.attempts), 9)
-        self.assertEqual(self.sleeps, [0.25, 0.5] * 3)
-        self.assertFalse((self.root / "output.csv").exists())
-        self.assertEqual(
-            json.loads((self.root / "metadata.json").read_text())["state"],
-            "FAILED",
-        )
-
-    def test_one_future_csv_record_rejects_the_entire_download(self) -> None:
-        future_csv = self.root / "future.csv"
-        future_csv.write_bytes(self.valid_csv.read_bytes())
-        replace_row_date(
-            future_csv, row_index=5, match_at=NOW + timedelta(seconds=1),
-        )
-        self.sources.http_responses.extend(
-            [future_csv, ConnectionError("alternate unavailable")]
-        )
-        self.sources.gdown_responses.append(ConnectionError("gdown unavailable"))
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        self.assertIn("future match timestamp", result.attempts[0].detail)
-        self.assertFalse((self.root / "output.csv").exists())
-
-    def test_recent_cache_is_used_after_all_downloads_fail(self) -> None:
-        cache = self.root / "cache.csv"
-        self.sources.http_responses.append(self.valid_csv)
-        first = self.resolve(self.downloader(), cache_path=cache)
-        self.assertTrue(first.cache_updated)
-        first_output = self.root / "output.csv"
-        first_output.unlink()
-        self.fail_fresh_sources()
-
-        result = self.resolve(self.downloader(), cache_path=cache)
-
-        self.assertEqual(result.state, DownloadState.CACHED)
-        self.assertEqual(result.source, "cache")
-        self.assertTrue(result.checksum_verified)
-        self.assertFalse(result.content_changed)
-        self.assertTrue(result.is_recent_for_bet_ai)
-        self.assertEqual(first.sha256, result.sha256)
-
-    def test_cached_reuse_preserves_original_download_timestamp(self) -> None:
-        cache = self.root / "cache.csv"
-        self.sources.http_responses.append(self.valid_csv)
-        first = self.resolve(self.downloader(), cache_path=cache)
-        cache_metadata_path = cache.with_suffix(".csv.metadata.json")
-        original_metadata = cache_metadata_path.read_bytes()
-        self.fail_fresh_sources()
-
-        result = self.resolve(
-            self.downloader(now=lambda: NOW + timedelta(hours=12)),
-            cache_path=cache,
-        )
-
-        self.assertEqual(result.state, DownloadState.CACHED)
+    def test_failure_uses_valid_cache_without_renewing_age_or_leaking_secrets(self):
+        first = self.resolve(self.live)
+        cache_meta = self.cache.with_suffix(".csv.metadata.json")
+        before = cache_meta.read_bytes()
+        result = self.resolve(self.failed, NOW + timedelta(hours=12))
+        self.assertEqual((result.state, result.source), (DownloadState.CACHED, "cache"))
         self.assertEqual(result.downloaded_at, first.downloaded_at)
         self.assertEqual(result.download_age_seconds, 12 * 3600)
         self.assertFalse(result.cache_updated)
-        self.assertEqual(cache_metadata_path.read_bytes(), original_metadata)
+        self.assertEqual(cache_meta.read_bytes(), before)
+        self.assertNotIn("synthetic", json.dumps(result.to_dict()))
+        self.assertNotIn("synthetic", self.metadata.read_text())
 
-    def test_old_cache_is_explicitly_stale(self) -> None:
-        cache = self.root / "cache.csv"
-        self.sources.http_responses.append(self.valid_csv)
-        self.resolve(self.downloader(), cache_path=cache)
-        cache_metadata_path = cache.with_suffix(".csv.metadata.json")
-        cache_metadata = json.loads(cache_metadata_path.read_text(encoding="utf-8"))
-        cache_metadata["downloaded_at"] = "2026-10-10T12:00:00Z"
-        cache_metadata_path.write_text(json.dumps(cache_metadata), encoding="utf-8")
-        self.fail_fresh_sources()
+    def test_expired_corrupt_and_future_cache_fail_closed(self):
+        for mode in ("expired", "corrupt", "future", "missing_checksum"):
+            with self.subTest(mode=mode):
+                self.resolve(self.live)
+                meta_path = self.cache.with_suffix(".csv.metadata.json")
+                meta = json.loads(meta_path.read_text())
+                if mode == "expired": meta["downloaded_at"] = "2026-10-12T11:59:59Z"
+                if mode == "future": meta["downloaded_at"] = "2026-10-14T12:00:01Z"
+                if mode == "missing_checksum": meta.pop("sha256")
+                meta_path.write_text(json.dumps(meta))
+                if mode == "corrupt": self.cache.write_bytes(self.cache.read_bytes() + b"x")
+                result = self.resolve(self.failed)
+                self.assertEqual(result.state, DownloadState.FAILED)
+                self.assertFalse(is_production_current(result))
 
-        result = self.resolve(
-            self.downloader(cache_max_age_hours=24), cache_path=cache,
-        )
+    def test_invalid_live_preserves_good_output_and_cache(self):
+        self.resolve(self.live)
+        previous = self.output.read_bytes()
+        def invalid(file_id, path, **kwargs):
+            path.write_bytes(b"invalid")
+        result = self.resolve(invalid)
+        self.assertEqual(result.state, DownloadState.CACHED)
+        self.assertEqual(self.output.read_bytes(), previous)
+        self.assertEqual(self.cache.read_bytes(), previous)
 
-        self.assertEqual(result.state, DownloadState.STALE)
-        self.assertEqual(result.download_age_seconds, 4 * 24 * 3600)
-        self.assertFalse(result.is_recent_for_bet_ai)
-        self.assertFalse(is_production_current(result))
-
-    def test_future_cache_download_timestamp_is_rejected(self) -> None:
-        cache = self.root / "cache.csv"
-        self.sources.http_responses.append(self.valid_csv)
-        self.resolve(self.downloader(), cache_path=cache)
-        cache_metadata_path = cache.with_suffix(".csv.metadata.json")
-        cache_metadata = json.loads(cache_metadata_path.read_text(encoding="utf-8"))
-        cache_metadata["downloaded_at"] = "2026-10-14T12:00:01Z"
-        cache_metadata_path.write_text(json.dumps(cache_metadata), encoding="utf-8")
-        self.fail_fresh_sources()
-
-        result = self.resolve(self.downloader(), cache_path=cache)
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        cache_attempt = next(item for item in result.attempts if item.source == "cache")
-        self.assertIn("later than selection time", cache_attempt.detail)
-
-    def test_corrupt_cache_checksum_is_rejected(self) -> None:
-        cache = self.root / "cache.csv"
-        self.sources.http_responses.append(self.valid_csv)
-        self.resolve(self.downloader(), cache_path=cache)
-        cache.write_bytes(cache.read_bytes() + b"\n")
-        self.fail_fresh_sources()
-
-        result = self.resolve(self.downloader(), cache_path=cache)
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        cache_attempt = next(item for item in result.attempts if item.source == "cache")
-        self.assertIn("checksum", cache_attempt.detail)
-
-    def test_snapshot_follows_corrupt_cache_and_is_marked_stale(self) -> None:
-        cache = self.root / "cache.csv"
-        cache.write_text("not,csv\n", encoding="utf-8")
-        snapshot = self.root / "snapshot.csv"
-        write_csv(snapshot, match_at=NOW - timedelta(days=30))
-        self.fail_fresh_sources()
-
-        result = self.resolve(
-            self.downloader(), cache_path=cache, snapshot_path=snapshot,
-        )
-
-        self.assertEqual(result.state, DownloadState.STALE)
-        self.assertEqual(result.source, "snapshot")
-        self.assertEqual(result.data_age_seconds, 30 * 24 * 3600)
-        self.assertFalse(result.is_recent_for_bet_ai)
-        self.assertFalse(is_production_current(result))
-
-    def test_fresh_download_with_old_latest_match_is_valid_for_league_stats(self) -> None:
-        stale_download = self.root / "stale.csv"
-        write_csv(stale_download, match_at=NOW - timedelta(hours=25))
-        self.sources.http_responses.append(stale_download)
-
-        result = self.resolve(
-            self.downloader(bet_ai_max_data_age_hours=24),
-        )
-
-        self.assertEqual(result.state, DownloadState.FRESH)
-        self.assertEqual(result.source, "google-drive-direct")
-        self.assertFalse(result.is_recent_for_bet_ai)
-        self.assertTrue(is_production_current(result))
-        self.assertEqual(result.download_age_seconds, 0)
-        self.assertEqual(result.data_age_seconds, 25 * 3600)
-
-    def test_identical_download_is_successful_but_not_updated(self) -> None:
-        output = self.root / "output.csv"
-        output.write_bytes(self.valid_csv.read_bytes())
-        self.sources.http_responses.append(self.valid_csv)
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FRESH)
-        self.assertFalse(result.content_changed)
-
-    def test_invalid_download_never_replaces_existing_output(self) -> None:
-        output = self.root / "output.csv"
-        original = b"previous known-good contents"
-        output.write_bytes(original)
-        self.sources.http_responses.extend([b"<html>blocked</html>"] * 2)
-        self.sources.gdown_responses.append(b"<html>blocked</html>")
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        self.assertEqual(output.read_bytes(), original)
-
-    def test_no_valid_source_reports_failed_with_attempt_details(self) -> None:
-        self.fail_fresh_sources(ConnectionError("offline"))
-
-        result = self.resolve(self.downloader())
-
-        self.assertEqual(result.state, DownloadState.FAILED)
-        self.assertEqual(result.source, "none")
-        self.assertIsNone(result.sha256)
-        self.assertEqual(
-            [attempt.source for attempt in result.attempts],
-            ["google-drive-direct", "google-drive-alternate", "gdown"],
-        )
-
-    def test_gdown_is_killed_as_soon_as_it_exceeds_max_bytes(self) -> None:
-        destination = self.root / "oversized.csv"
-
-        class OversizedProcess:
-            returncode: int | None = None
-
-            def __init__(self) -> None:
-                self.killed = False
-                self.calls = 0
-
-            def communicate(self, timeout: float | None = None):
-                self.calls += 1
-                if self.calls == 1:
-                    destination.write_bytes(b"x" * 11)
-                    raise subprocess.TimeoutExpired("gdown", timeout)
-                return "", ""
-
-            def kill(self) -> None:
-                self.killed = True
-                self.returncode = -9
-
-        process = OversizedProcess()
-        downloader = OracleDownloader(attempts=1)
-
-        with patch(
-            "loltee_scraper.oracle_download.subprocess.Popen",
-            return_value=process,
-        ) as popen:
-            with self.assertRaisesRegex(DownloadError, "10-byte maximum"):
-                downloader._download_gdown(
-                    "https://drive.google.com/test", destination, 5, 10,
-                )
-
-        self.assertTrue(process.killed)
-        self.assertEqual(destination.stat().st_size, 11)
-        self.assertIsNotNone(popen.call_args.kwargs["preexec_fn"])
+    def test_no_obsolete_source_or_cli(self):
+        source = Path(__file__).resolve().parents[1] / "src/loltee_scraper/oracle_download.py"
+        text = source.read_text()
+        for obsolete in ("drive.google.com/uc", "drive.usercontent.google.com", "gdown", "snapshot"):
+            self.assertNotIn(obsolete, text)
 
 
 if __name__ == "__main__":
