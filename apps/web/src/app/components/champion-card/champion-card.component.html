@@ -1,4 +1,5 @@
 <article class="champion-card" [class.champion-card--canonical]="canonical" [id]="canonical ? 'canonical-pick' : null">
+  <div class="card-primary">
   <div class="card-top">
     <div class="rank">
       <span>Rank</span>
@@ -91,9 +92,19 @@
     </div>
   }
 
-  <details class="card-details">
-    <summary>More details</summary>
+  <button
+    class="card-details"
+    type="button"
+    [attr.aria-expanded]="detailsOpen"
+    [attr.aria-controls]="detailsPanelId"
+    (click)="detailsOpen = !detailsOpen"
+  >
+    More details
+    <span aria-hidden="true">{{ detailsOpen ? '−' : '+' }}</span>
+  </button>
+  </div>
 
+  <div class="details-panel" [id]="detailsPanelId" [hidden]="!detailsOpen">
     @if (mode === 'solo') {
       <div class="secondary-row">
         <div>
@@ -142,5 +153,5 @@
         View source build
       </a>
     }
-  </details>
+  </div>
 </article>

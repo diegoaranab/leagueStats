@@ -99,7 +99,7 @@ def run():
                     strip(expected(mode, lane))
                     expect(page.locator('app-champion-card h3').first).to_have_text(expected(mode, lane)[0])
                 card = page.locator('app-champion-card').first
-                card.locator('summary').click()
+                card.get_by_role('button', name='More details').click()
                 expect(card.locator('.secondary-row div').filter(has_text='Ban priority')).to_contain_text('#1')
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, mode, 'overflow')
                 assert page.locator('.ban-item').count() == 3

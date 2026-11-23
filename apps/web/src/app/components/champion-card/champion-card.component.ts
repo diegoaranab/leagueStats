@@ -13,6 +13,10 @@ import { Champion, SortOption } from '../../core/models/tierlist.model';
   styleUrl: './champion-card.component.css',
 })
 export class ChampionCardComponent {
+  private static nextDetailsPanelId = 0;
+  readonly detailsPanelId = `champion-details-${ChampionCardComponent.nextDetailsPanelId++}`;
+  detailsOpen = false;
+
   @Input({ required: true }) champion!: Champion;
   @Input() mode: ProductMode = 'solo';
   @Input() canonical = false;
