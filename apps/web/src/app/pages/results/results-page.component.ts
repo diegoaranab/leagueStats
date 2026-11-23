@@ -1,8 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy, afterNextRender, ElementRef } from '@angular/core';
+import { CommonModule, ViewportScroller } from '@angular/common';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy, afterNextRender, ElementRef, Injector } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router, RouterLink, Scroll } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -74,6 +74,11 @@ export class ResultsPageComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly injector = inject(Injector);
+  private readonly viewportScroller = inject(ViewportScroller);
+  private historyNavigationId: number | null = null;
+  private historyPosition: [number, number] | null = null;
+  private datasetRendered = false;
 
   readonly isCompact = toSignal(
     this.breakpointObserver.observe('(max-width: 1080px)').pipe(map((state) => state.matches)),
@@ -105,7 +110,18 @@ export class ResultsPageComponent implements OnInit {
     private readonly tierlistService: TierlistService,
     private readonly element: ElementRef<HTMLElement>,
   ) {
-    const trigger = this.router.currentNavigation()?.trigger;
+    const navigation = this.router.currentNavigation();
+    const trigger = navigation?.trigger;
+    this.historyNavigationId = trigger === 'popstate' ? navigation!.id : null;
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationStart && event.id !== this.historyNavigationId) {
+        this.historyNavigationId = null;
+        this.historyPosition = null;
+      } else if (event instanceof Scroll && event.routerEvent.id === this.historyNavigationId && event.position) {
+        this.historyPosition = event.position;
+        this.restoreHistoryPosition();
+      }
+    });
     afterNextRender(() => {
       if (trigger !== 'popstate') {
         this.element.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
@@ -262,6 +278,12 @@ export class ResultsPageComponent implements OnInit {
           }
           this.isLoading = false;
           this.refreshView();
+          if (this.historyNavigationId !== null) {
+            afterNextRender(() => {
+              this.datasetRendered = true;
+              this.restoreHistoryPosition();
+            }, { injector: this.injector });
+          }
         },
         error: () => {
           if (this.datasetKey !== requestKey) {
@@ -333,6 +355,14 @@ export class ResultsPageComponent implements OnInit {
     }
 
     this.champions = next;
+  }
+
+  private restoreHistoryPosition(): void {
+    if (this.datasetRendered && this.historyPosition) {
+      this.viewportScroller.scrollToPosition(this.historyPosition);
+      this.historyPosition = null;
+      this.historyNavigationId = null;
+    }
   }
 
   private selectSpotlight(laneChampions: Champion[]): void {
