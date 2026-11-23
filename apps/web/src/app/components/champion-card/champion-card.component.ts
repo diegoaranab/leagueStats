@@ -1,5 +1,5 @@
 import { CommonModule, NgStyle } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 
@@ -10,6 +10,7 @@ import { Champion } from '../../core/models/tierlist.model';
   selector: 'app-champion-card',
   imports: [CommonModule, NgStyle, MatButtonModule, MatCardModule],
   templateUrl: './champion-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './champion-card.component.css',
 })
 export class ChampionCardComponent {

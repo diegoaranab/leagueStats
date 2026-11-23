@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { ProductMode } from '../../core/models/selection.model';
 import { Champion } from '../../core/models/tierlist.model';
@@ -8,6 +8,7 @@ import { Champion } from '../../core/models/tierlist.model';
   selector: 'app-recommended-bans',
   imports: [],
   templateUrl: './recommended-bans.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './recommended-bans.component.css',
 })
 export class RecommendedBansComponent {

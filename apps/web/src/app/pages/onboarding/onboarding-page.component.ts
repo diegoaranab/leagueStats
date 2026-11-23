@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,6 +33,7 @@ import {
     ModeSelectorComponent
 ],
   templateUrl: './onboarding-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './onboarding-page.component.css',
 })
 export class OnboardingPageComponent {

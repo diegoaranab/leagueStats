@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
@@ -9,6 +9,7 @@ import { LANE_OPTIONS, Lane } from '../../core/models/tierlist.model';
   selector: 'app-lane-tabs',
   imports: [MatButtonToggleModule],
   templateUrl: './lane-tabs.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './lane-tabs.component.css',
 })
 export class LaneTabsComponent {
