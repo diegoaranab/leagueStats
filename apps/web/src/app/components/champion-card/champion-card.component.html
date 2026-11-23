@@ -10,48 +10,49 @@
       [src]="champion.icon_url || fallbackIcon"
       [alt]="champion.name"
       loading="lazy"
-    >
+      >
 
     <div class="identity">
       <span class="lane-label">{{ laneLabels[champion.lane] }}</span>
       <h3>{{ champion.name }}</h3>
       <div class="headline-tags">
         <span class="tier-label">Tier {{ champion.tier }}</span>
-        <span
-          *ngIf="champion.difficulty"
-          class="difficulty-label"
-          [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
-        >
-          {{ champion.difficulty | titlecase }}
-        </span>
+        @if (champion.difficulty) {
+          <span
+            class="difficulty-label"
+            [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
+            >
+            {{ champion.difficulty | titlecase }}
+          </span>
+        }
       </div>
     </div>
   </div>
 
-  <div class="stat-grid" *ngIf="mode === 'solo'; else teamplayStats">
-    <div class="stat">
-      <span>Win rate</span>
-      <strong>{{ formatPercent(champion.win_rate) }}</strong>
+  @if (mode === 'solo') {
+    <div class="stat-grid">
+      <div class="stat">
+        <span>Win rate</span>
+        <strong>{{ formatPercent(champion.win_rate) }}</strong>
+      </div>
+      <div class="stat">
+        <span>Pick rate</span>
+        <strong>{{ formatPercent(champion.pick_rate) }}</strong>
+      </div>
+      <div class="stat">
+        <span>Best win est.</span>
+        <strong>{{ formatPercent(champion.best_win_est) }}</strong>
+      </div>
     </div>
-    <div class="stat">
-      <span>Pick rate</span>
-      <strong>{{ formatPercent(champion.pick_rate) }}</strong>
-    </div>
-    <div class="stat">
-      <span>Best win est.</span>
-      <strong>{{ formatPercent(champion.best_win_est) }}</strong>
-    </div>
-  </div>
-
-  <ng-template #teamplayStats>
+  } @else {
     <div class="stat-grid">
       <div class="stat">
         <span>Draft score</span>
         <strong>
           {{
-            champion.flex_clash_score === null || champion.flex_clash_score === undefined
-              ? '--'
-              : ((champion.flex_clash_score * 100) | number: '1.0-0')
+          champion.flex_clash_score === null || champion.flex_clash_score === undefined
+          ? '--'
+          : ((champion.flex_clash_score * 100) | number: '1.0-0')
           }}
         </strong>
       </div>
@@ -64,38 +65,42 @@
         <strong>{{ champion.pro_ban_count ?? '--' }}</strong>
       </div>
     </div>
-  </ng-template>
+  }
 
-  <div class="badge-row" *ngIf="mode === 'teamplay' && visibleBadges.length">
-    <span
-      *ngFor="let badge of visibleBadges"
-      class="signal-badge"
-      [class.signal-badge--gold]="isGoldBadge(badge)"
-      [class.signal-badge--blue]="isBlueBadge(badge)"
-    >
-      {{ badge }}
-    </span>
-  </div>
+
+  @if (mode === 'teamplay' && visibleBadges.length) {
+    <div class="badge-row">
+      @for (badge of visibleBadges; track badge) {
+        <span
+          class="signal-badge"
+          [class.signal-badge--gold]="isGoldBadge(badge)"
+          [class.signal-badge--blue]="isBlueBadge(badge)"
+          >
+          {{ badge }}
+        </span>
+      }
+    </div>
+  }
 
   <details class="card-details">
     <summary>More details</summary>
 
-    <div class="secondary-row" *ngIf="mode === 'solo'; else teamplaySecondary">
-      <div>
-        <span>Ban priority</span>
-        <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong>
+    @if (mode === 'solo') {
+      <div class="secondary-row">
+        <div>
+          <span>Ban priority</span>
+          <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong>
+        </div>
+        <div>
+          <span>Mastery gap</span>
+          <strong>{{ formatPercent(champion.mastery_gap_pct) }}</strong>
+        </div>
+        <div>
+          <span>Lane delta</span>
+          <strong>{{ formatNumber(champion.delta) }}</strong>
+        </div>
       </div>
-      <div>
-        <span>Mastery gap</span>
-        <strong>{{ formatPercent(champion.mastery_gap_pct) }}</strong>
-      </div>
-      <div>
-        <span>Lane delta</span>
-        <strong>{{ formatNumber(champion.delta) }}</strong>
-      </div>
-    </div>
-
-    <ng-template #teamplaySecondary>
+    } @else {
       <div class="secondary-row">
         <div>
           <span>Ban priority</span>
@@ -114,17 +119,19 @@
           <strong>{{ formatPercent(champion.win_rate) }}</strong>
         </div>
       </div>
-    </ng-template>
+    }
 
-    <a
-      *ngIf="champion.champion_url"
-      mat-stroked-button
-      color="primary"
-      [href]="champion.champion_url"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View source build
-    </a>
+
+    @if (champion.champion_url) {
+      <a
+        mat-stroked-button
+        color="primary"
+        [href]="champion.champion_url"
+        target="_blank"
+        rel="noopener noreferrer"
+        >
+        View source build
+      </a>
+    }
   </details>
 </mat-card>

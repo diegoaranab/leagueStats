@@ -4,7 +4,7 @@
     mode="over"
     [opened]="filtersOpen"
     (closedStart)="filtersOpen = false"
-  >
+    >
     <app-filter-bar
       [mode]="query.mode"
       [region]="query.region"
@@ -38,42 +38,56 @@
         </div>
 
         <div class="results-header__actions">
-          <button *ngIf="isCompact()" mat-stroked-button type="button" (click)="openFilters()">
-            <span class="material-symbols-outlined button-icon">tune</span>
-            Filters
-          </button>
+          @if (isCompact()) {
+            <button mat-stroked-button type="button" (click)="openFilters()">
+              <span class="material-symbols-outlined button-icon">tune</span>
+              Filters
+            </button>
+          }
           <a mat-flat-button color="primary" routerLink="/">Change setup</a>
         </div>
       </div>
 
-      <div class="dataset-line" *ngIf="datasetMeta">
-        <span class="freshness" [class.freshness--warning]="hasDatasetWarning">
-          <span class="freshness__dot" aria-hidden="true"></span>
-          {{ hasDatasetWarning ? 'Data needs attention' : 'Dataset ready' }}
-        </span>
-        <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span>
-        <span *ngIf="query.mode === 'teamplay' && datasetMeta.leagues_used?.length">
-          {{ datasetMeta.leagues_used?.join(' · ') }}
-        </span>
-        <span *ngIf="query.mode === 'teamplay' && datasetMeta.patches_used?.length">
-          Patches {{ datasetMeta.patches_used?.join(', ') }}
-        </span>
-        <span *ngIf="query.mode === 'teamplay' && datasetMeta.oracle_last_match_at">
-          Pro data through {{ datasetMeta.oracle_last_match_at | date: 'mediumDate': 'UTC' }}<ng-container *ngIf="datasetMeta.oracle_source === 'cache'"> · cached source</ng-container>
-        </span>
+      @if (datasetMeta) {
+        <div class="dataset-line">
+          <span class="freshness" [class.freshness--warning]="hasDatasetWarning">
+            <span class="freshness__dot" aria-hidden="true"></span>
+            {{ hasDatasetWarning ? 'Data needs attention' : 'Dataset ready' }}
+          </span>
+          <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span>
+          @if (query.mode === 'teamplay' && datasetMeta.leagues_used?.length) {
+            <span>
+              {{ datasetMeta.leagues_used?.join(' · ') }}
+            </span>
+          }
+          @if (query.mode === 'teamplay' && datasetMeta.patches_used?.length) {
+            <span>
+              Patches {{ datasetMeta.patches_used?.join(', ') }}
+            </span>
+          }
+          @if (query.mode === 'teamplay' && datasetMeta.oracle_last_match_at) {
+            <span>
+              Pro data through {{ datasetMeta.oracle_last_match_at | date: 'mediumDate': 'UTC' }}@if (datasetMeta.oracle_source === 'cache') {
+              &ngsp;· cached source
+            }
+          </span>
+        }
       </div>
+    }
 
-      <div class="warning-banner" *ngIf="datasetMeta && hasDatasetWarning">
+    @if (datasetMeta && hasDatasetWarning) {
+      <div class="warning-banner">
         <span class="material-symbols-outlined">warning</span>
         <div>
           <strong>Data quality note</strong>
           <span>{{ warningMessage }}</span>
         </div>
       </div>
-    </section>
+    }
+  </section>
 
+  @if (!isCompact()) {
     <app-filter-bar
-      *ngIf="!isCompact()"
       [mode]="query.mode"
       [region]="query.region"
       [tier]="query.tier"
@@ -87,57 +101,68 @@
       (sortChange)="onSortChange($event)"
       (difficultyChange)="onDifficultyChange($event)"
     ></app-filter-bar>
+  }
 
-    <section class="lane-section" aria-labelledby="lane-heading">
-      <div class="lane-section__header">
-        <h2 id="lane-heading">Choose a lane</h2>
-        <app-info-tooltip></app-info-tooltip>
-      </div>
+  <section class="lane-section" aria-labelledby="lane-heading">
+    <div class="lane-section__header">
+      <h2 id="lane-heading">Choose a lane</h2>
+      <app-info-tooltip></app-info-tooltip>
+    </div>
 
-      <app-lane-tabs
-        [lanes]="availableLanes"
-        [selectedLane]="query.lane"
-        [laneCounts]="laneCounts"
-        (laneChange)="onLaneChange($event)"
-      ></app-lane-tabs>
-    </section>
+    <app-lane-tabs
+      [lanes]="availableLanes"
+      [selectedLane]="query.lane"
+      [laneCounts]="laneCounts"
+      (laneChange)="onLaneChange($event)"
+    ></app-lane-tabs>
+  </section>
 
-    <div class="state" *ngIf="isLoading">
+  @if (isLoading) {
+    <div class="state">
       <mat-spinner diameter="42"></mat-spinner>
     </div>
+  }
 
-    <div class="state error" *ngIf="!isLoading && errorMessage">
+  @if (!isLoading && errorMessage) {
+    <div class="state error">
       {{ errorMessage }}
     </div>
+  }
 
+  @if (!isLoading && !errorMessage && spotlightChampion && spotlightRank !== null) {
     <app-recommendation-spotlight
-      *ngIf="!isLoading && !errorMessage && spotlightChampion && spotlightRank !== null"
       [champion]="spotlightChampion"
       [canonicalRank]="spotlightRank"
       [mode]="query.mode"
       [difficultyFilter]="difficultyFilter"
     ></app-recommendation-spotlight>
+  }
 
+  @if (!isLoading && !errorMessage && query.mode === 'teamplay' && easyClashLineup) {
     <app-easy-clash-lineup
-      *ngIf="!isLoading && !errorMessage && query.mode === 'teamplay' && easyClashLineup"
       [lineup]="easyClashLineup"
       [expanded]="easyClashLineupExpanded"
       (expandedChange)="easyClashLineupExpanded = $event"
     ></app-easy-clash-lineup>
+  }
 
+  @if (!isLoading && !errorMessage) {
     <app-recommended-bans
-      *ngIf="!isLoading && !errorMessage"
       [champions]="recommendedBans"
       [mode]="query.mode"
     ></app-recommended-bans>
+  }
 
-    <section class="grid" aria-label="Champion recommendations" *ngIf="!isLoading && !errorMessage">
-      <app-champion-card
-        *ngFor="let champion of champions; trackBy: trackByChampion"
-        [champion]="champion"
-        [mode]="query.mode"
-        [banPriority]="banPriorityFor(champion)"
-      ></app-champion-card>
+  @if (!isLoading && !errorMessage) {
+    <section class="grid" aria-label="Champion recommendations">
+      @for (champion of champions; track trackByChampion($index, champion)) {
+        <app-champion-card
+          [champion]="champion"
+          [mode]="query.mode"
+          [banPriority]="banPriorityFor(champion)"
+        ></app-champion-card>
+      }
     </section>
-  </mat-drawer-content>
+  }
+</mat-drawer-content>
 </mat-drawer-container>
