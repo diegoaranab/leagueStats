@@ -26,27 +26,33 @@
         <mat-form-field appearance="outline">
           <mat-label>Region</mat-label>
           <mat-select formControlName="region">
-            <mat-option *ngFor="let region of regionOptions" [value]="region">
-              {{ regionLabels[region] }}
-            </mat-option>
+            @for (region of regionOptions; track region) {
+              <mat-option [value]="region">
+                {{ regionLabels[region] }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Rank</mat-label>
           <mat-select formControlName="tier">
-            <mat-option *ngFor="let tier of tierOptions" [value]="tier">
-              {{ tierLabels[tier] }}
-            </mat-option>
+            @for (tier of tierOptions; track tier) {
+              <mat-option [value]="tier">
+                {{ tierLabels[tier] }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Window</mat-label>
           <mat-select formControlName="window">
-            <mat-option *ngFor="let window of windowOptions" [value]="window">
-              {{ windowLabels[window] }}
-            </mat-option>
+            @for (window of windowOptions; track window) {
+              <mat-option [value]="window">
+                {{ windowLabels[window] }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>

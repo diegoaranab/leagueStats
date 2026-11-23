@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,12 +18,11 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
 @Component({
   selector: 'app-filter-bar',
   imports: [
-    CommonModule,
     MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
-    ModeSelectorComponent,
-  ],
+    ModeSelectorComponent
+],
   templateUrl: './filter-bar.component.html',
   styleUrl: './filter-bar.component.css',
 })

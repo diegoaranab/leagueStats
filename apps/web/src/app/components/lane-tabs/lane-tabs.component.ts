@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { NgFor } from '@angular/common';
+
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { LANE_LABELS } from '../../core/models/selection.model';
@@ -7,7 +7,7 @@ import { LANE_OPTIONS, Lane } from '../../core/models/tierlist.model';
 
 @Component({
   selector: 'app-lane-tabs',
-  imports: [NgFor, MatButtonToggleModule],
+  imports: [MatButtonToggleModule],
   templateUrl: './lane-tabs.component.html',
   styleUrl: './lane-tabs.component.css',
 })

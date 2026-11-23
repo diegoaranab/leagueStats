@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { MODE_DETAILS, PRODUCT_MODE_OPTIONS, ProductMode } from '../../core/models/selection.model';
 
 @Component({
   selector: 'app-mode-selector',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mode-selector.component.html',
   styleUrl: './mode-selector.component.css',
 })

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,13 +26,12 @@ import {
 @Component({
   selector: 'app-onboarding-page',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
-    ModeSelectorComponent,
-  ],
+    ModeSelectorComponent
+],
   templateUrl: './onboarding-page.component.html',
   styleUrl: './onboarding-page.component.css',
 })
