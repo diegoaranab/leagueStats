@@ -6,7 +6,7 @@
 
 .results-shell__drawer {
   width: min(92vw, 380px);
-  background: #0a111a;
+  background: var(--surface-primary);
 }
 
 .results-shell__content {
@@ -70,6 +70,16 @@
   align-items: center;
 }
 
+.results-header__actions a,
+.results-header__actions button {
+  height: auto;
+  min-height: 44px;
+  white-space: normal;
+  line-height: 1.25;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .button-icon {
   margin-right: 0.25rem;
   font-size: 1.1rem;
@@ -78,7 +88,7 @@
 
 .freshness {
   gap: 0.4rem;
-  color: #bfe8d2;
+  color: var(--positive);
   font-weight: 600;
 }
 
@@ -86,16 +96,16 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #72d6a0;
+  background: var(--positive);
   box-shadow: 0 0 0 3px rgba(114, 214, 160, 0.12);
 }
 
 .freshness--warning {
-  color: #f2d792;
+  color: var(--warning);
 }
 
 .freshness--warning .freshness__dot {
-  background: #d9ad52;
+  background: var(--warning);
   box-shadow: 0 0 0 3px rgba(217, 173, 82, 0.14);
 }
 
@@ -104,8 +114,8 @@
   gap: 0.7rem;
   align-items: start;
   padding: 0.75rem 0.85rem;
-  border-left: 3px solid rgba(217, 173, 82, 0.8);
-  background: rgba(197, 163, 92, 0.08);
+  border-left: 3px solid var(--warning);
+  background: rgba(255, 198, 118, 0.08);
 }
 
 .warning-banner .material-symbols-outlined {
@@ -145,13 +155,13 @@
   font-size: 1.15rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-  gap: 0.8rem;
-  min-width: 0;
-  max-width: 100%;
-}
+.picks { min-width: 0; }
+.picks-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
+.canonical-jump { color: var(--text-primary); background: var(--surface-canonical); border: 1px solid var(--control-border); border-radius: 8px; padding: 10px 14px; min-height: 44px; font: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; }
+.canonical-jump:hover { background: var(--surface-selected); }
+.canonical-jump:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.picks-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--divider); }
+.picks-list li { min-width: 0; }
 
 .state {
   min-height: 180px;

@@ -129,40 +129,36 @@
     </div>
   }
 
-  @if (!isLoading && !errorMessage && spotlightChampion && spotlightRank !== null) {
-    <app-recommendation-spotlight
-      [champion]="spotlightChampion"
-      [canonicalRank]="spotlightRank"
-      [mode]="query.mode"
-      [difficultyFilter]="difficultyFilter"
-    ></app-recommendation-spotlight>
-  }
-
-  @if (!isLoading && !errorMessage && query.mode === 'teamplay' && easyClashLineup) {
-    <app-easy-clash-lineup
-      [lineup]="easyClashLineup"
-      [expanded]="easyClashLineupExpanded"
-      (expandedChange)="easyClashLineupExpanded = $event"
-    ></app-easy-clash-lineup>
-  }
-
   @if (!isLoading && !errorMessage) {
-    <app-recommended-bans
-      [champions]="recommendedBans"
-      [mode]="query.mode"
-    ></app-recommended-bans>
-  }
-
-  @if (!isLoading && !errorMessage) {
-    <section class="grid" aria-label="Champion recommendations">
-      @for (champion of champions; track trackByChampion($index, champion)) {
-        <app-champion-card
-          [champion]="champion"
-          [mode]="query.mode"
-          [banPriority]="banPriorityFor(champion)"
-        ></app-champion-card>
-      }
+    <section class="picks" aria-labelledby="picks-heading">
+      <div class="picks-heading">
+        <h2 id="picks-heading">Ranked picks</h2>
+        @if (spotlightChampion && query.sort !== 'tier') {
+          <button type="button" class="canonical-jump" (click)="jumpToCanonical()">Jump to recommended pick</button>
+        }
+      </div>
+      <ul class="picks-list">
+        @for (champion of champions; track trackByChampion($index, champion)) {
+          <li>
+            <app-champion-card
+              [champion]="champion"
+              [mode]="query.mode"
+              [sort]="query.sort"
+              [canonical]="champion === spotlightChampion"
+              [banPriority]="banPriorityFor(champion)"
+            ></app-champion-card>
+          </li>
+        }
+      </ul>
     </section>
+    <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
+    @if (query.mode === 'teamplay' && easyClashLineup) {
+      <app-easy-clash-lineup
+        [lineup]="easyClashLineup"
+        [expanded]="easyClashLineupExpanded"
+        (expandedChange)="easyClashLineupExpanded = $event"
+      ></app-easy-clash-lineup>
+    }
   }
 </mat-drawer-content>
 </mat-drawer-container>

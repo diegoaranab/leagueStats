@@ -58,8 +58,8 @@
 }
 
 .ban-item--first {
-  border-color: rgba(197, 163, 92, 0.32);
-  background: rgba(197, 163, 92, 0.07);
+  border-color: var(--divider);
+  background: var(--surface-canonical);
 }
 
 .ban-item__icon {
@@ -76,7 +76,7 @@
 .ban-item__portrait {
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(197, 163, 92, 0.22);
+  border: 1px solid var(--divider);
   border-radius: 10px;
   object-fit: cover;
 }
