@@ -114,8 +114,8 @@ export class ResultsPageComponent implements OnInit {
     const trigger = navigation?.trigger;
     this.historyNavigationId = trigger === 'popstate' ? navigation!.id : null;
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event instanceof NavigationStart && event.id !== this.historyNavigationId) {
-        this.historyNavigationId = null;
+      if (event instanceof NavigationStart) {
+        this.historyNavigationId = event.navigationTrigger === 'popstate' ? event.id : null;
         this.historyPosition = null;
       } else if (event instanceof Scroll && event.routerEvent.id === this.historyNavigationId && event.position) {
         this.historyPosition = event.position;
@@ -234,6 +234,7 @@ export class ResultsPageComponent implements OnInit {
   }
 
   private loadDataset(nextKey: string): void {
+    this.datasetRendered = false;
     this.datasetKey = nextKey;
     this.dataset = null;
     this.champions = [];
@@ -247,6 +248,7 @@ export class ResultsPageComponent implements OnInit {
     this.isLoading = true;
 
     const requestKey = nextKey;
+    const historyNavigationId = this.historyNavigationId;
     const dataset$ = this.query.mode === 'teamplay'
       ? this.tierlistService.getTeamplayDataset(this.query.region, this.query.tier, this.query.window)
       : this.tierlistService.getDataset(this.query.region, this.query.tier, this.query.window);
@@ -278,8 +280,11 @@ export class ResultsPageComponent implements OnInit {
           }
           this.isLoading = false;
           this.refreshView();
-          if (this.historyNavigationId !== null) {
+          if (historyNavigationId !== null) {
             afterNextRender(() => {
+              if (this.datasetKey !== requestKey || this.historyNavigationId !== historyNavigationId) {
+                return;
+              }
               this.datasetRendered = true;
               this.restoreHistoryPosition();
             }, { injector: this.injector });

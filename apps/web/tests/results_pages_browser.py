@@ -111,6 +111,41 @@ def run():
                     release_dataset.set()
                     expect(page.locator('app-champion-card')).to_have_count(40)
                     page.wait_for_function('(y) => Math.abs(window.scrollY - y) < 20', arg=saved_y)
+
+                # Query-param navigation reuses ResultsPageComponent. A popstate
+                # back to this region starts a fresh dataset request while the
+                # router's normal scroll event runs against the short loading view.
+                page.goto(base + '/results/?mode=solo&region=na&tier=gold&window=7d&lane=top')
+                expect(page.locator('app-champion-card')).to_have_count(40)
+                page.evaluate("window.__resultsShell = document.querySelector('.results-shell')")
+                region = page.locator('app-filter-bar:visible').get_by_role('combobox', name='Region')
+                region.click()
+                page.get_by_role('option', name='Latin America North').click()
+                expect(page).to_have_url(re.compile(r'region=lan'))
+                expect(page.locator('app-champion-card')).to_have_count(40)
+                assert page.evaluate("window.__resultsShell === document.querySelector('.results-shell')")
+                assert urlparse(page.url).path.rstrip('/') == '/leagueStats/results'
+                page.evaluate('window.scrollTo(0, document.documentElement.scrollHeight * 0.7)')
+                saved_y = page.evaluate('window.scrollY')
+                assert saved_y > 1000, saved_y
+
+                page.go_back(wait_until='commit')
+                expect(page).to_have_url(re.compile(r'region=na'))
+                expect(page.locator('app-champion-card')).to_have_count(40)
+                assert page.evaluate("window.__resultsShell === document.querySelector('.results-shell')")
+
+                delay_dataset.set()
+                dataset_requested.clear()
+                release_dataset.clear()
+                page.go_forward(wait_until='commit')
+                assert dataset_requested.wait(timeout=10), 'Forward dataset was not withheld'
+                expect(page).to_have_url(re.compile(r'region=lan'))
+                page.evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
+                assert page.evaluate('document.documentElement.scrollHeight - innerHeight') < saved_y
+                assert page.evaluate("window.__resultsShell === document.querySelector('.results-shell')")
+                release_dataset.set()
+                expect(page.locator('app-champion-card')).to_have_count(40)
+                page.wait_for_function('(y) => Math.abs(window.scrollY - y) < 20', arg=saved_y)
                 browser.close()
         finally:
             server.shutdown()
