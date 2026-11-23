@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { MODE_DETAILS, PRODUCT_MODE_OPTIONS, ProductMode } from '../../core/models/selection.model';
 
@@ -7,6 +7,7 @@ import { MODE_DETAILS, PRODUCT_MODE_OPTIONS, ProductMode } from '../../core/mode
   selector: 'app-mode-selector',
   imports: [],
   templateUrl: './mode-selector.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mode-selector.component.css',
 })
 export class ModeSelectorComponent {

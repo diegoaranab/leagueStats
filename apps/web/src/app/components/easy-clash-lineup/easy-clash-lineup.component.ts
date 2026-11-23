@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 import { LANE_LABELS } from '../../core/models/selection.model';
@@ -12,6 +12,7 @@ import {
   selector: 'app-easy-clash-lineup',
   imports: [CommonModule, MatButtonModule],
   templateUrl: './easy-clash-lineup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './easy-clash-lineup.component.css',
 })
 export class EasyClashLineupComponent {

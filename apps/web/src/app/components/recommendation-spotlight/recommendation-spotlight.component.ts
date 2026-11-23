@@ -1,5 +1,5 @@
 import { CommonModule, NgStyle } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 import { LANE_LABELS, ProductMode } from '../../core/models/selection.model';
@@ -9,6 +9,7 @@ import { Champion, DifficultyFilter } from '../../core/models/tierlist.model';
   selector: 'app-recommendation-spotlight',
   imports: [CommonModule, NgStyle, MatButtonModule],
   templateUrl: './recommendation-spotlight.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './recommendation-spotlight.component.css',
 })
 export class RecommendationSpotlightComponent {

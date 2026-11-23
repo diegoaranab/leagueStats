@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -64,6 +64,7 @@ import {
     InfoTooltipComponent,
   ],
   templateUrl: './results-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './results-page.component.css',
 })
 export class ResultsPageComponent implements OnInit {

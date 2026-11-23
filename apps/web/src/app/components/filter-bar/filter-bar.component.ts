@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -24,6 +24,7 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
     ModeSelectorComponent
 ],
   templateUrl: './filter-bar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './filter-bar.component.css',
 })
 export class FilterBarComponent {
