@@ -13,7 +13,6 @@ import { EasyClashLineupComponent } from '../../components/easy-clash-lineup/eas
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
-import { RecommendationSpotlightComponent } from '../../components/recommendation-spotlight/recommendation-spotlight.component';
 import { RecommendedBansComponent } from '../../components/recommended-bans/recommended-bans.component';
 import {
   DEFAULT_RESULTS_QUERY,
@@ -56,7 +55,6 @@ import {
     FilterBarComponent,
     ChampionCardComponent,
     EasyClashLineupComponent,
-    RecommendationSpotlightComponent,
     RecommendedBansComponent,
     InfoTooltipComponent,
   ],
@@ -197,6 +195,10 @@ export class ResultsPageComponent implements OnInit {
 
   trackByChampion(_index: number, champion: Champion): string {
     return champion.name;
+  }
+
+  jumpToCanonical(): void {
+    this.element.nativeElement.querySelector<HTMLElement>('#canonical-pick')?.scrollIntoView({ block: 'center' });
   }
 
   banPriorityFor(champion: Champion): number | null {

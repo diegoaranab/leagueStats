@@ -1,7 +1,7 @@
-<mat-card class="champion-card" [class.champion-card--teamplay]="mode === 'teamplay'">
+<article class="champion-card" [class.champion-card--canonical]="canonical" [id]="canonical ? 'canonical-pick' : null">
   <div class="card-top">
     <div class="rank">
-      <span>{{ mode === 'teamplay' ? 'Team' : 'Rank' }}</span>
+      <span>Rank</span>
       <strong>#{{ primaryRank }}</strong>
     </div>
 
@@ -13,14 +13,13 @@
       >
 
     <div class="identity">
-      <span class="lane-label">{{ laneLabels[champion.lane] }}</span>
+      @if (canonical) { <span class="canonical-label">Recommended pick</span> }
       <h3>{{ champion.name }}</h3>
       <div class="headline-tags">
         <span class="tier-label">Tier {{ champion.tier }}</span>
         @if (champion.difficulty) {
           <span
             class="difficulty-label"
-            [ngStyle]="{ '--difficulty-color': champion.difficulty_color || '#6fbfe8' }"
             >
             {{ champion.difficulty | titlecase }}
           </span>
@@ -67,6 +66,16 @@
     </div>
   }
 
+
+  @if (sort === 'ban_priority') {
+    <div class="sort-evidence"><span>Ban priority</span> <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong></div>
+  }
+  @if (mode === 'teamplay' && (sort === 'win_rate' || sort === 'pick_rate')) {
+    <div class="sort-evidence">
+      <span>{{ sort === 'win_rate' ? 'Win rate' : 'Pick rate' }}</span>
+      <strong>{{ formatPercent(sort === 'win_rate' ? champion.win_rate : champion.pick_rate) }}</strong>
+    </div>
+  }
 
   @if (mode === 'teamplay' && visibleBadges.length) {
     <div class="badge-row">
@@ -134,4 +143,4 @@
       </a>
     }
   </details>
-</mat-card>
+</article>

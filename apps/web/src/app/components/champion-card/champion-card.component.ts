@@ -1,14 +1,13 @@
-import { CommonModule, NgStyle } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 
 import { LANE_LABELS, ProductMode } from '../../core/models/selection.model';
-import { Champion } from '../../core/models/tierlist.model';
+import { Champion, SortOption } from '../../core/models/tierlist.model';
 
 @Component({
   selector: 'app-champion-card',
-  imports: [CommonModule, NgStyle, MatButtonModule, MatCardModule],
+  imports: [CommonModule, MatButtonModule],
   templateUrl: './champion-card.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './champion-card.component.css',
@@ -16,6 +15,8 @@ import { Champion } from '../../core/models/tierlist.model';
 export class ChampionCardComponent {
   @Input({ required: true }) champion!: Champion;
   @Input() mode: ProductMode = 'solo';
+  @Input() canonical = false;
+  @Input() sort: SortOption = 'tier';
   @Input() banPriority: number | null = null;
 
   readonly fallbackIcon = 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Aatrox.png';

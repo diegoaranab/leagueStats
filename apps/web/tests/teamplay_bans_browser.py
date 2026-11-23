@@ -69,13 +69,25 @@ def run():
             if compact and page.get_by_role('button', name='Close filters').is_visible():
                 page.get_by_role('button', name='Close filters').click()
 
-        for width, height in [(390, 844), (430, 932), (768, 1024), (1366, 768)]:
+        for width, height in [(320, 568), (390, 844), (844, 390), (1366, 768), (1920, 1080)]:
             page.set_viewport_size(dict(width=width, height=height))
             for mode in ["teamplay", "solo"]:
                 page.goto(f"{BASE}/results?mode={mode}&region=na&tier=gold&window=7d&lane=top&sort=ban_priority")
                 strip(expected(mode))
+                expect(page.locator('app-recommendation-spotlight')).to_have_count(0)
+                canonical = page.locator('.picks-list .champion-card--canonical')
+                expect(canonical).to_have_count(1)
+                expect(canonical.locator('.canonical-label')).to_have_text('Recommended pick')
+                canonical_name = canonical.locator('h3').inner_text()
+                expect(page.locator('.picks-list app-champion-card h3').filter(has_text=canonical_name)).to_have_count(1)
+                expect(page.locator('.picks-list .sort-evidence').first).to_contain_text('Ban priority')
+                assert page.evaluate("document.querySelector('.picks').compareDocumentPosition(document.querySelector('app-recommended-bans')) & Node.DOCUMENT_POSITION_FOLLOWING")
+                if mode == 'teamplay':
+                    assert page.evaluate("document.querySelector('.picks').compareDocumentPosition(document.querySelector('app-easy-clash-lineup')) & Node.DOCUMENT_POSITION_FOLLOWING")
                 expect(page.locator('app-champion-card h3').first).to_have_text(expected(mode)[0])
                 select('Sort by', 'Win rate')
+                expect(page.locator('.picks-list .champion-card--canonical h3')).to_have_text(canonical_name)
+                expect(page.locator('.picks-list .stat').filter(has_text='Win rate').first).to_be_visible() if mode == 'solo' else expect(page.locator('.picks-list .sort-evidence').first).to_contain_text('Win rate')
                 strip(expected(mode))
                 select('Difficulty', 'Easy')
                 strip(expected(mode))

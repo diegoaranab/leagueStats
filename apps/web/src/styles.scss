@@ -11,7 +11,7 @@ html {
     ),
     typography: (
       plain-family: ('Space Grotesk', 'Segoe UI', sans-serif),
-      brand-family: ('Cinzel', 'Georgia', serif),
+      brand-family: ('Space Grotesk', 'Segoe UI', sans-serif),
       bold-weight: 700,
       medium-weight: 500,
       regular-weight: 400,
@@ -20,38 +20,38 @@ html {
   ));
 
   @include mat.theme-overrides((
-    primary: #c5a35c,
-    on-primary: #170f04,
-    primary-container: #392a0d,
-    on-primary-container: #f4e3b6,
-    secondary: #6fbfe8,
-    on-secondary: #03141d,
-    secondary-container: #143244,
-    on-secondary-container: #d6efff,
-    tertiary: #82b8f5,
-    on-tertiary: #041727,
-    tertiary-container: #16324a,
-    on-tertiary-container: #d8e9ff,
-    background: #050b12,
-    on-background: #eef3ff,
-    surface: #0a111a,
-    surface-dim: #050b12,
-    surface-bright: #1d2838,
-    surface-container-lowest: #07101a,
-    surface-container-low: #0d1622,
-    surface-container: #121d2b,
-    surface-container-high: #172434,
-    surface-container-highest: #1d2c40,
-    on-surface: #eef3ff,
-    on-surface-variant: #aab7cc,
-    surface-variant: #253245,
-    outline: #40536f,
-    outline-variant: #273445,
-    error: #ff8d82,
+    primary: #96dfc4,
+    on-primary: #10241e,
+    primary-container: #203830,
+    on-primary-container: #f1f3ee,
+    secondary: #a9bbc5,
+    on-secondary: #101820,
+    secondary-container: #192733,
+    on-secondary-container: #f1f3ee,
+    tertiary: #add9ff,
+    on-tertiary: #101820,
+    tertiary-container: #192733,
+    on-tertiary-container: #f1f3ee,
+    background: #101820,
+    on-background: #f1f3ee,
+    surface: #151f28,
+    surface-dim: #101820,
+    surface-bright: #192733,
+    surface-container-lowest: #101820,
+    surface-container-low: #151f28,
+    surface-container: #151f28,
+    surface-container-high: #192733,
+    surface-container-highest: #20303c,
+    on-surface: #f1f3ee,
+    on-surface-variant: #a9bbc5,
+    surface-variant: #192733,
+    outline: #687f8d,
+    outline-variant: #344654,
+    error: #ffaba8,
     on-error: #3c0704,
     error-container: #5f1f1a,
     on-error-container: #ffd9d5,
-    surface-tint: #c5a35c,
+    surface-tint: #96dfc4,
     scrim: #000000,
     shadow: #000000,
     corner-small: 10px,
@@ -62,17 +62,31 @@ html {
 }
 
 :root {
-  --font-display: 'Cinzel', 'Georgia', serif;
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --canvas: #101820;
+  --surface-primary: #151f28;
+  --surface-canonical: #192733;
+  --text-primary: #f1f3ee;
+  --text-secondary: #a9bbc5;
+  --action: #96dfc4;
+  --on-action: #10241e;
+  --selected: #203830;
+  --focus: #add9ff;
+  --positive: #b2d9cc;
+  --warning: #ffc676;
+  --error: #ffaba8;
+  --divider: #344654;
+  --control-border: #687f8d;
   --font-body: 'Space Grotesk', 'Segoe UI', sans-serif;
   --page-max-width: 1380px;
   --content-max-width: 1200px;
-  --surface-panel: linear-gradient(180deg, rgba(18, 29, 43, 0.94), rgba(10, 17, 26, 0.94));
-  --surface-panel-strong: linear-gradient(180deg, rgba(24, 36, 52, 0.96), rgba(11, 17, 28, 0.98));
-  --surface-glass: rgba(9, 15, 23, 0.78);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(197, 163, 92, 0.28);
-  --shadow-soft: 0 18px 44px rgba(0, 0, 0, 0.34);
-  --shadow-heavy: 0 28px 80px rgba(0, 0, 0, 0.48);
+  --surface-panel: var(--surface-primary);
+  --surface-panel-strong: var(--surface-canonical);
+  --surface-glass: var(--surface-primary);
+  --border-subtle: var(--divider);
+  --border-strong: var(--control-border);
+  --shadow-soft: none;
+  --shadow-heavy: 0 16px 40px rgba(0, 0, 0, .35);
 }
 
 * {
@@ -88,24 +102,10 @@ body {
 body {
   font-family: var(--font-body);
   color: var(--mat-sys-on-surface);
-  background:
-    radial-gradient(circle at 12% 14%, rgba(111, 191, 232, 0.12), transparent 34%),
-    radial-gradient(circle at 85% 12%, rgba(197, 163, 92, 0.14), transparent 28%),
-    radial-gradient(circle at 50% 100%, rgba(48, 81, 128, 0.2), transparent 36%),
-    linear-gradient(180deg, #07101a 0%, #04070d 100%);
+  background: var(--canvas);
   letter-spacing: 0.01em;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 30%),
-    linear-gradient(0deg, rgba(5, 11, 18, 0), rgba(5, 11, 18, 0.45));
-  pointer-events: none;
-  z-index: -1;
-}
 
 button,
 input,
@@ -207,7 +207,7 @@ p {
 }
 
 .mat-mdc-unelevated-button.mat-primary {
-  box-shadow: 0 12px 26px rgba(197, 163, 92, 0.22);
+  box-shadow: none;
 }
 
 .mat-mdc-progress-spinner {
@@ -222,14 +222,14 @@ p {
 .mat-mdc-select-panel {
   border: 1px solid var(--border-subtle);
   border-radius: 18px !important;
-  background: rgba(13, 22, 34, 0.96) !important;
+  background: var(--surface-canonical) !important;
   backdrop-filter: blur(18px);
 }
 
 .mdc-text-field--outlined {
-  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
+  --mdc-outlined-text-field-outline-color: var(--control-border);
   --mdc-outlined-text-field-focus-outline-color: var(--mat-sys-primary);
-  --mdc-outlined-text-field-hover-outline-color: rgba(111, 191, 232, 0.42);
+  --mdc-outlined-text-field-hover-outline-color: var(--control-border);
   --mdc-outlined-text-field-label-text-color: var(--mat-sys-on-surface-variant);
   --mdc-outlined-text-field-input-text-color: var(--mat-sys-on-surface);
   --mat-form-field-state-layer-color: rgba(255, 255, 255, 0.02);
@@ -242,7 +242,7 @@ p {
 }
 
 :focus-visible {
-  outline: 2px solid rgba(111, 191, 232, 0.85);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -254,7 +254,7 @@ p {
 ::-webkit-scrollbar-thumb {
   border-radius: 999px;
   border: 2px solid transparent;
-  background: rgba(111, 191, 232, 0.24);
+  background: rgba(169, 187, 197, 0.24);
   background-clip: padding-box;
 }
 
