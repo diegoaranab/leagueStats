@@ -484,6 +484,10 @@ jobs:
 
           echo "path=$(dirname "$output_path")" >> "$GITHUB_OUTPUT"
 
+      - name: Create static Results entry
+        working-directory: apps/web
+        run: node scripts/create-route-entries.mjs "${{ steps.output.outputs.path }}"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

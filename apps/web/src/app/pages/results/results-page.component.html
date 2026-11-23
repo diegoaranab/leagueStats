@@ -28,7 +28,7 @@
       <div class="results-header__main">
         <div class="results-header__copy">
           <p class="eyebrow">{{ currentMode.shortLabel }} recommendations</p>
-          <h1>{{ laneHeadline }}</h1>
+          <h1 tabindex="-1">{{ laneHeadline }}</h1>
           <p class="context-line">
             <span>{{ regionShortLabels[query.region] }}</span>
             <span>{{ tierLabels[query.tier] }}</span>
@@ -44,7 +44,7 @@
               Filters
             </button>
           }
-          <a mat-flat-button color="primary" routerLink="/">Change setup</a>
+          <a mat-flat-button color="primary" routerLink="/" [queryParams]="query">Change setup</a>
         </div>
       </div>
 

@@ -1,7 +1,9 @@
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { readResultsQuery } from '../../core/models/results-query';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -53,7 +55,13 @@ export class OnboardingPageComponent {
   constructor(
     private readonly formBuilder: NonNullableFormBuilder,
     private readonly router: Router,
-  ) {}
+    private readonly route: ActivatedRoute,
+  ) {
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(params => {
+      const { mode, tier, region, window } = readResultsQuery(params);
+      this.form.setValue({ mode, tier, region, window });
+    });
+  }
 
   submit(): void {
     if (this.form.invalid) {
@@ -63,12 +71,11 @@ export class OnboardingPageComponent {
     const { mode, tier, region, window } = this.form.getRawValue();
     this.router.navigate(['/results'], {
       queryParams: {
+        ...readResultsQuery(this.route.snapshot.queryParamMap),
         mode,
         tier,
         region,
         window,
-        lane: DEFAULT_RESULTS_QUERY.lane,
-        sort: DEFAULT_RESULTS_QUERY.sort,
       },
     });
   }

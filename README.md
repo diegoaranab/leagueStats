@@ -74,3 +74,20 @@ Solo files use `{region}/{tier}/{window}.json`, Teamplay files use
 - [Data Schema](docs/DATA_SCHEMA.md): dataset fields and Teamplay scoring
 - [Difficulty v2 History](docs/DIFFICULTY_HISTORY.md): persistence and smoothing
 - [Roadmap](docs/ROADMAP.md): implemented capabilities and future candidates
+
+### Results links on GitHub Pages
+
+Results links use `/leagueStats/results` with the `mode`, `region`, `tier`,
+`window`, `lane`, `sort`, and `difficulty` query parameters. Pages redirects the
+path to `/leagueStats/results/` while retaining the query. The deployment build
+copies the generated Angular shell into that directory, so both paths serve the
+same application and assets. Change setup carries the selection in the URL;
+submitting the form retains the remaining Results filters. Fresh Results
+navigation focuses the heading and starts at the top. Browser history restores
+its recorded scroll position and selection from the URL.
+
+To check a Pages-style artifact locally, build with `--base-href /leagueStats/`,
+run `node scripts/create-route-entries.mjs dist/web/browser` from `apps/web`,
+and run `apps/web/tests/results_pages_browser.py` with the scraper's Python and
+Playwright dependencies available. The test uses a static server without SPA
+fallback and intercepts fixture datasets.

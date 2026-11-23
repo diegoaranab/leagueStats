@@ -1,8 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, ViewportScroller } from '@angular/common';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy, afterNextRender, ElementRef, Injector } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router, RouterLink, Scroll } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,7 +19,6 @@ import {
   DEFAULT_RESULTS_QUERY,
   LANE_LABELS,
   MODE_DETAILS,
-  PRODUCT_MODE_OPTIONS,
   ProductMode,
   REGION_SHORT_LABELS,
   ResultsQuery,
@@ -32,15 +31,13 @@ import {
   LANE_OPTIONS,
   Lane,
   LEGACY_TIER_ALIASES,
-  normalizeTier,
-  REGION_OPTIONS,
   Region,
   SortOption,
   Tier,
   TierlistDataset,
-  WINDOW_OPTIONS,
   WindowKey,
 } from '../../core/models/tierlist.model';
+import { readResultsQuery } from '../../core/models/results-query';
 import { TierlistService } from '../../core/services/tierlist.service';
 import {
   buildEasyClashLineup,
@@ -77,6 +74,11 @@ export class ResultsPageComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly injector = inject(Injector);
+  private readonly viewportScroller = inject(ViewportScroller);
+  private historyNavigationId: number | null = null;
+  private historyPosition: [number, number] | null = null;
+  private datasetRendered = false;
 
   readonly isCompact = toSignal(
     this.breakpointObserver.observe('(max-width: 1080px)').pipe(map((state) => state.matches)),
@@ -94,7 +96,7 @@ export class ResultsPageComponent implements OnInit {
   recommendedBans: Champion[] = [];
   easyClashLineup: EasyClashLineupResult | null = null;
   easyClashLineupExpanded = false;
-  difficultyFilter: DifficultyFilter = 'all';
+  get difficultyFilter(): DifficultyFilter { return this.query.difficulty; }
 
   query: ResultsQuery = { ...DEFAULT_RESULTS_QUERY };
 
@@ -106,33 +108,42 @@ export class ResultsPageComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly tierlistService: TierlistService,
-  ) {}
+    private readonly element: ElementRef<HTMLElement>,
+  ) {
+    const navigation = this.router.currentNavigation();
+    const trigger = navigation?.trigger;
+    this.historyNavigationId = trigger === 'popstate' ? navigation!.id : null;
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.historyNavigationId = event.navigationTrigger === 'popstate' ? event.id : null;
+        this.historyPosition = null;
+      } else if (event instanceof Scroll && event.routerEvent.id === this.historyNavigationId && event.position) {
+        this.historyPosition = event.position;
+        this.restoreHistoryPosition();
+      }
+    });
+    afterNextRender(() => {
+      if (trigger !== 'popstate') {
+        this.element.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const mode = this.readParam(params.get('mode'), PRODUCT_MODE_OPTIONS, DEFAULT_RESULTS_QUERY.mode);
-        const region = this.readParam(params.get('region'), REGION_OPTIONS, DEFAULT_RESULTS_QUERY.region);
         const rawTier = params.get('tier');
-        const tier = normalizeTier(rawTier, DEFAULT_RESULTS_QUERY.tier);
-        const window = this.readParam(params.get('window'), WINDOW_OPTIONS, DEFAULT_RESULTS_QUERY.window);
-        const lane = this.readParam(params.get('lane'), LANE_OPTIONS, DEFAULT_RESULTS_QUERY.lane);
-        const sortOptions: readonly SortOption[] = ['tier', 'win_rate', 'pick_rate', 'difficulty', 'ban_priority'];
-        const sort = this.readParam<SortOption>(
-          params.get('sort'),
-          sortOptions,
-          DEFAULT_RESULTS_QUERY.sort,
-        );
+        this.query = readResultsQuery(params);
+        const { mode, region, tier, window } = this.query;
 
-        this.query = { mode, region, tier, window, lane, sort };
-
-        if (rawTier && LEGACY_TIER_ALIASES[rawTier]) {
+        if (rawTier && Object.hasOwn(LEGACY_TIER_ALIASES, rawTier)) {
           void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { tier },
             queryParamsHandling: 'merge',
             replaceUrl: true,
+            scroll: 'manual',
           });
         }
 
@@ -155,8 +166,9 @@ export class ResultsPageComponent implements OnInit {
   }
 
   onDifficultyChange(filter: DifficultyFilter): void {
-    this.difficultyFilter = filter;
-    this.refreshView();
+    if (filter !== null) {
+      this.updateQuery({ difficulty: filter });
+    }
   }
 
   onModeChange(mode: ProductMode): void {
@@ -222,6 +234,7 @@ export class ResultsPageComponent implements OnInit {
   }
 
   private loadDataset(nextKey: string): void {
+    this.datasetRendered = false;
     this.datasetKey = nextKey;
     this.dataset = null;
     this.champions = [];
@@ -235,6 +248,7 @@ export class ResultsPageComponent implements OnInit {
     this.isLoading = true;
 
     const requestKey = nextKey;
+    const historyNavigationId = this.historyNavigationId;
     const dataset$ = this.query.mode === 'teamplay'
       ? this.tierlistService.getTeamplayDataset(this.query.region, this.query.tier, this.query.window)
       : this.tierlistService.getDataset(this.query.region, this.query.tier, this.query.window);
@@ -266,6 +280,15 @@ export class ResultsPageComponent implements OnInit {
           }
           this.isLoading = false;
           this.refreshView();
+          if (historyNavigationId !== null) {
+            afterNextRender(() => {
+              if (this.datasetKey !== requestKey || this.historyNavigationId !== historyNavigationId) {
+                return;
+              }
+              this.datasetRendered = true;
+              this.restoreHistoryPosition();
+            }, { injector: this.injector });
+          }
         },
         error: () => {
           if (this.datasetKey !== requestKey) {
@@ -339,6 +362,14 @@ export class ResultsPageComponent implements OnInit {
     this.champions = next;
   }
 
+  private restoreHistoryPosition(): void {
+    if (this.datasetRendered && this.historyPosition) {
+      this.viewportScroller.scrollToPosition(this.historyPosition);
+      this.historyPosition = null;
+      this.historyNavigationId = null;
+    }
+  }
+
   private selectSpotlight(laneChampions: Champion[]): void {
     let strongestChampion: Champion | null = null;
     let strongestRank: number | null = null;
@@ -404,21 +435,8 @@ export class ResultsPageComponent implements OnInit {
       relativeTo: this.route,
       queryParams: update,
       queryParamsHandling: 'merge',
+      scroll: 'manual',
     });
   }
 
-  private readParam<T extends string>(
-    value: string | null,
-    allowed: readonly T[],
-    fallback: T,
-  ): T {
-    if (value && (allowed as readonly string[]).includes(value)) {
-      return value as T;
-    }
-    return fallback;
-  }
 }
-
-
-
-
