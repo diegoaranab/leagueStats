@@ -1,4 +1,4 @@
-import { Lane, Region, SortOption, Tier, WindowKey } from './tierlist.model';
+import { DifficultyFilter, Lane, Region, SortOption, Tier, WindowKey } from './tierlist.model';
 
 export const PRODUCT_MODE_OPTIONS = ['solo', 'teamplay'] as const;
 
@@ -11,6 +11,7 @@ export interface ResultsQuery {
   window: WindowKey;
   lane: Lane;
   sort: SortOption;
+  difficulty: Exclude<DifficultyFilter, null>;
 }
 
 export interface ModeDetail {
@@ -29,6 +30,7 @@ export const DEFAULT_RESULTS_QUERY: ResultsQuery = {
   window: '7d',
   lane: 'top',
   sort: 'tier',
+  difficulty: 'all',
 };
 
 export const MODE_DETAILS: Record<ProductMode, ModeDetail> = {

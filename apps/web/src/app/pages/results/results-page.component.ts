@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy, afterNextRender, ElementRef } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +19,6 @@ import {
   DEFAULT_RESULTS_QUERY,
   LANE_LABELS,
   MODE_DETAILS,
-  PRODUCT_MODE_OPTIONS,
   ProductMode,
   REGION_SHORT_LABELS,
   ResultsQuery,
@@ -32,15 +31,13 @@ import {
   LANE_OPTIONS,
   Lane,
   LEGACY_TIER_ALIASES,
-  normalizeTier,
-  REGION_OPTIONS,
   Region,
   SortOption,
   Tier,
   TierlistDataset,
-  WINDOW_OPTIONS,
   WindowKey,
 } from '../../core/models/tierlist.model';
+import { readResultsQuery } from '../../core/models/results-query';
 import { TierlistService } from '../../core/services/tierlist.service';
 import {
   buildEasyClashLineup,
@@ -94,7 +91,7 @@ export class ResultsPageComponent implements OnInit {
   recommendedBans: Champion[] = [];
   easyClashLineup: EasyClashLineupResult | null = null;
   easyClashLineupExpanded = false;
-  difficultyFilter: DifficultyFilter = 'all';
+  get difficultyFilter(): DifficultyFilter { return this.query.difficulty; }
 
   query: ResultsQuery = { ...DEFAULT_RESULTS_QUERY };
 
@@ -106,33 +103,31 @@ export class ResultsPageComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly tierlistService: TierlistService,
-  ) {}
+    private readonly element: ElementRef<HTMLElement>,
+  ) {
+    const trigger = this.router.currentNavigation()?.trigger;
+    afterNextRender(() => {
+      if (trigger !== 'popstate') {
+        this.element.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const mode = this.readParam(params.get('mode'), PRODUCT_MODE_OPTIONS, DEFAULT_RESULTS_QUERY.mode);
-        const region = this.readParam(params.get('region'), REGION_OPTIONS, DEFAULT_RESULTS_QUERY.region);
         const rawTier = params.get('tier');
-        const tier = normalizeTier(rawTier, DEFAULT_RESULTS_QUERY.tier);
-        const window = this.readParam(params.get('window'), WINDOW_OPTIONS, DEFAULT_RESULTS_QUERY.window);
-        const lane = this.readParam(params.get('lane'), LANE_OPTIONS, DEFAULT_RESULTS_QUERY.lane);
-        const sortOptions: readonly SortOption[] = ['tier', 'win_rate', 'pick_rate', 'difficulty', 'ban_priority'];
-        const sort = this.readParam<SortOption>(
-          params.get('sort'),
-          sortOptions,
-          DEFAULT_RESULTS_QUERY.sort,
-        );
+        this.query = readResultsQuery(params);
+        const { mode, region, tier, window } = this.query;
 
-        this.query = { mode, region, tier, window, lane, sort };
-
-        if (rawTier && LEGACY_TIER_ALIASES[rawTier]) {
+        if (rawTier && Object.hasOwn(LEGACY_TIER_ALIASES, rawTier)) {
           void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { tier },
             queryParamsHandling: 'merge',
             replaceUrl: true,
+            scroll: 'manual',
           });
         }
 
@@ -155,8 +150,9 @@ export class ResultsPageComponent implements OnInit {
   }
 
   onDifficultyChange(filter: DifficultyFilter): void {
-    this.difficultyFilter = filter;
-    this.refreshView();
+    if (filter !== null) {
+      this.updateQuery({ difficulty: filter });
+    }
   }
 
   onModeChange(mode: ProductMode): void {
@@ -404,21 +400,8 @@ export class ResultsPageComponent implements OnInit {
       relativeTo: this.route,
       queryParams: update,
       queryParamsHandling: 'merge',
+      scroll: 'manual',
     });
   }
 
-  private readParam<T extends string>(
-    value: string | null,
-    allowed: readonly T[],
-    fallback: T,
-  ): T {
-    if (value && (allowed as readonly string[]).includes(value)) {
-      return value as T;
-    }
-    return fallback;
-  }
 }
-
-
-
-
