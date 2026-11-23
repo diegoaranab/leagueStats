@@ -74,6 +74,7 @@ Solo files use `{region}/{tier}/{window}.json`, Teamplay files use
 - [Data Schema](docs/DATA_SCHEMA.md): dataset fields and Teamplay scoring
 - [Difficulty v2 History](docs/DIFFICULTY_HISTORY.md): persistence and smoothing
 - [Roadmap](docs/ROADMAP.md): implemented capabilities and future candidates
+- [Design System](docs/DESIGN_SYSTEM.md): approved visual, interaction and responsive design rules
 
 ### Results links on GitHub Pages
 
