@@ -43,6 +43,7 @@ def run():
         page = browser.new_page()
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
+        page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
 
         def serve(route):
             path = urlparse(route.request.url).path
@@ -96,6 +97,11 @@ def run():
         # Context controls load their corresponding full lane datasets.
         page.goto(f"{BASE}/results?mode=teamplay&region=na&tier=gold&window=7d&lane=top&sort=ban_priority")
         strip(expected('teamplay'))
+        tooltip_text = 'Difficulty is relative to the selected mode, rank, region, window, and lane pool.'
+        page.get_by_role('button', name=tooltip_text).hover()
+        tooltip = page.locator('.mat-mdc-tooltip')
+        expect(tooltip).to_be_visible()
+        expect(tooltip).to_have_text(tooltip_text)
         select('Region', 'Latin America North')
         strip(expected('teamplay', context='langoldweek'))
         select('Rank', 'Silver')
