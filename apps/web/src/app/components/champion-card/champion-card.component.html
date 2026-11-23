@@ -30,11 +30,11 @@
 
   @if (mode === 'solo') {
     <div class="stat-grid">
-      <div class="stat">
+      <div class="stat" [class.stat--active]="sort === 'win_rate'">
         <span>Win rate</span>
         <strong>{{ formatPercent(champion.win_rate) }}</strong>
       </div>
-      <div class="stat">
+      <div class="stat" [class.stat--active]="sort === 'pick_rate'">
         <span>Pick rate</span>
         <strong>{{ formatPercent(champion.pick_rate) }}</strong>
       </div>

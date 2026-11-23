@@ -70,6 +70,16 @@
   align-items: center;
 }
 
+.results-header__actions a,
+.results-header__actions button {
+  height: auto;
+  min-height: 44px;
+  white-space: normal;
+  line-height: 1.25;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .button-icon {
   margin-right: 0.25rem;
   font-size: 1.1rem;
@@ -147,7 +157,9 @@
 
 .picks { min-width: 0; }
 .picks-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
-.canonical-jump { color: var(--focus); text-decoration: underline; background: none; border: 0; padding: 12px 0; cursor: pointer; }
+.canonical-jump { color: var(--text-primary); background: var(--surface-canonical); border: 1px solid var(--control-border); border-radius: 8px; padding: 10px 14px; min-height: 44px; font: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; }
+.canonical-jump:hover { background: var(--surface-selected); }
+.canonical-jump:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 .picks-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--divider); }
 .picks-list li { min-width: 0; }
 
