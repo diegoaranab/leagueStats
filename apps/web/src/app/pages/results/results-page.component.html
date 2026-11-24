@@ -2,8 +2,13 @@
   <mat-drawer
     class="results-shell__drawer"
     mode="over"
+    role="dialog"
+    aria-label="Refine results"
     [opened]="filtersOpen"
+    [autoFocus]="false"
+    (opened)="focusFilters()"
     (closedStart)="filtersOpen = false"
+    (closed)="restoreFilterFocus()"
     >
     <app-filter-bar
       [mode]="query.mode"
@@ -30,17 +35,19 @@
           <p class="eyebrow">{{ currentMode.shortLabel }} recommendations</p>
           <h1 tabindex="-1">{{ laneHeadline }}</h1>
           <p class="context-line">
-            <span>{{ regionShortLabels[query.region] }}</span>
+            <span>{{ regionLabels[query.region] }}</span>
             <span>{{ tierLabels[query.tier] }}</span>
             <span>{{ windowLabels[query.window] }}</span>
+            <span>Sort: {{ sortLabels[query.sort] }}</span>
+            <span>Difficulty: {{ query.difficulty === 'all' ? 'All levels' : (query.difficulty | titlecase) }}</span>
             <span>{{ champions.length }} picks</span>
           </p>
         </div>
 
         <div class="results-header__actions">
           @if (isCompact()) {
-            <button mat-stroked-button type="button" (click)="openFilters()">
-              <span class="material-symbols-outlined button-icon">tune</span>
+            <button class="filters-trigger" mat-stroked-button type="button" (click)="openFilters()">
+              <span class="material-symbols-outlined button-icon" aria-hidden="true">tune</span>
               Filters
             </button>
           }
@@ -106,7 +113,6 @@
   <section class="lane-section" aria-labelledby="lane-heading">
     <div class="lane-section__header">
       <h2 id="lane-heading">Choose a lane</h2>
-      <app-info-tooltip></app-info-tooltip>
     </div>
 
     <app-lane-tabs

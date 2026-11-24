@@ -110,10 +110,8 @@ def run():
         page.goto(f"{BASE}/results?mode=teamplay&region=na&tier=gold&window=7d&lane=top&sort=ban_priority")
         strip(expected('teamplay'))
         tooltip_text = 'Difficulty is relative to the selected mode, rank, region, window, and lane pool.'
-        page.get_by_role('button', name=tooltip_text).hover()
-        tooltip = page.locator('.mat-mdc-tooltip')
-        expect(tooltip).to_be_visible()
-        expect(tooltip).to_have_text(tooltip_text)
+        page.get_by_role('button', name='About difficulty').click()
+        expect(page.get_by_text(tooltip_text)).to_be_visible()
         select('Region', 'Latin America North')
         strip(expected('teamplay', context='langoldweek'))
         select('Rank', 'Silver')

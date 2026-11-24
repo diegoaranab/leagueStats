@@ -28,6 +28,7 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
   styleUrl: './filter-bar.component.css',
 })
 export class FilterBarComponent {
+  showDifficultyHelp = false;
   @Input() mode: ProductMode = 'solo';
   @Input() region: Region = 'na';
   @Input() tier: Tier = 'diamond';
