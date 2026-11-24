@@ -221,3 +221,16 @@
     min-width: 0;
   }
 }
+
+.results-tasks { display: grid; gap: 0.9rem; min-width: 0; }
+.results-tasks--teamplay { gap: 1.5rem; }
+.draft { display: grid; align-content: start; gap: 1.25rem; min-width: 0; border-top: 1px solid var(--divider); padding-top: 1rem; }
+.draft__header { display: grid; justify-items: start; gap: .5rem; }
+.draft__header p { color: var(--text-secondary); line-height: 1.4; }
+#draft-heading, #picks-heading { scroll-margin-top: 5rem; }
+#draft-heading:focus-visible, #picks-heading:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+@media (min-width: 1200px) {
+  .results-tasks--teamplay { grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); gap: 30px; align-items: start; }
+  .results-tasks--teamplay .draft { border-top: 0; border-left: 1px solid var(--divider); padding: 0 0 0 20px; }
+  .task-jump { display: none; }
+}
