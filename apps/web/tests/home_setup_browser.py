@@ -52,20 +52,20 @@ def run():
                 expect(solo).to_have_attribute('aria-pressed', 'true')
                 expect(page.get_by_role('combobox', name='Region')).to_contain_text('North America')
                 expect(page.get_by_role('combobox', name='Rank')).to_contain_text('Diamond')
-                expect(page.get_by_role('combobox', name='Window')).to_contain_text('Last 7 Days')
+                expect(page.get_by_role('combobox', name='Window')).to_contain_text('Last 7 days')
                 solo.focus(); page.keyboard.press('Tab')
                 assert flex.evaluate('(e) => document.activeElement === e')
                 page.keyboard.press('Space')
                 expect(flex).to_have_attribute('aria-pressed', 'true')
                 assert urlparse(page.url).path.rstrip('/').endswith('leagueStats') if not external else True
                 page.screenshot(path='/tmp/home-flex-focus.png', full_page=True)
-                for name, value in [('Region', 'Latin America North'), ('Rank', 'Gold'), ('Window', 'Last 14 Days')]:
+                for name, value in [('Region', 'Latin America North'), ('Rank', 'Gold'), ('Window', 'Last 14 days')]:
                     page.get_by_role('combobox', name=name).click()
                     page.get_by_role('option', name=value, exact=True).click()
                     expect(page.get_by_role('combobox', name=name)).to_contain_text(value)
                 page.screenshot(path='/tmp/home-long-values.png', full_page=True)
                 page.get_by_role('button', name='View recommendations').click()
-                expect(page.locator('h1')).to_have_text('Top picks')
+                expect(page.locator('h1')).to_have_text('Flex / Clash')
                 assert page.evaluate('document.activeElement.tagName') == 'H1'
                 assert parse_qs(urlparse(page.url).query) == {'mode':['teamplay'], 'region':['lan'], 'tier':['gold'], 'window':['14d'], 'lane':['top'], 'sort':['tier'], 'difficulty':['all']}
                 page.goto(base + '/results/?mode=teamplay&region=lan&tier=gold&window=14d&lane=middle&sort=win_rate&difficulty=hard')
@@ -75,7 +75,8 @@ def run():
                 page.get_by_role('option', name='Latin America South').click()
                 page.get_by_role('button', name=re.compile('Solo Queue')).click()
                 page.get_by_role('button', name='View recommendations').click()
-                expect(page.locator('h1')).to_have_text('Mid picks')
+                expect(page.locator('h1')).to_have_text('Solo picks')
+                expect(page.get_by_role('radio', name=re.compile(r'^Mid'))).to_have_attribute('aria-checked', 'true')
                 assert parse_qs(urlparse(page.url).query) == {'mode':['solo'], 'region':['las'], 'tier':['gold'], 'window':['14d'], 'lane':['middle'], 'sort':['win_rate'], 'difficulty':['hard']}
                 page.goto(base + '/')
                 page.add_style_tag(content='html { font-size: 200% !important; }')
@@ -83,7 +84,7 @@ def run():
                 page.get_by_role('combobox', name='Region').click()
                 page.get_by_role('option', name='Latin America North').click()
                 page.get_by_role('combobox', name='Window').click()
-                page.get_by_role('option', name='Last 14 Days').click()
+                page.get_by_role('option', name='Last 14 days').click()
                 for name in ('Region', 'Window'):
                     value = page.get_by_role('combobox', name=name).locator('.mat-mdc-select-value-text')
                     assert value.evaluate('(e) => e.scrollWidth <= e.clientWidth + 1'), name

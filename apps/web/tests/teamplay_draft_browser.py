@@ -20,13 +20,13 @@ def run():
             assert page.evaluate("document.querySelector('.picks').compareDocumentPosition(document.querySelector('.draft')) & Node.DOCUMENT_POSITION_FOLLOWING")
             url = page.url
             page.screenshot(path=f'/tmp/draft-team-{width}x{height}-picks.png')
-            if width < 1200:
-                jump = page.get_by_role('button', name='Go to Draft')
+            if width <= 864:
+                jump = page.get_by_role('button', name='Draft tools (bans & lineup)')
                 expect(jump).to_be_visible()
                 jump.focus()
                 page.keyboard.press('Enter')
                 expect(page.locator('#draft-heading')).to_be_focused()
-                assert page.locator('#draft-heading').bounding_box()['y'] >= page.locator('.topbar').bounding_box()['height']
+                expect(page.locator('#draft-heading')).to_be_in_viewport()
                 assert page.url == url
                 page.screenshot(path=f'/tmp/draft-team-{width}x{height}-draft.png')
                 page.get_by_role('button', name='Return to Picks').focus()
@@ -40,7 +40,7 @@ def run():
                 assert picks_box['x'] + picks_box['width'] <= draft_box['x']
                 assert picks_box['width'] > draft_box['width']
                 assert draft_box['x'] + draft_box['width'] <= width
-            page.get_by_role('button', name='Build an Easy Clash Team').click()
+            page.get_by_role('button', name='Build lineup').click()
             expect(page.locator('.role-card')).to_have_count(5)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             page.screenshot(path=f'/tmp/draft-team-{width}x{height}-expanded.png')
@@ -48,7 +48,7 @@ def run():
             page.screenshot(path=f'/tmp/draft-team-{width}x{height}-lineup.png')
             page.goto(f'{BASE}/results?mode=solo&region=na&tier=gold&window=7d&lane=top&sort=ban_priority')
             expect(page.locator('.draft')).to_have_count(0)
-            expect(page.get_by_role('button', name='Go to Draft')).to_have_count(0)
+            expect(page.get_by_role('button', name='Draft tools (bans & lineup)')).to_have_count(0)
             if width in (390, 1366):
                 page.screenshot(path=f'/tmp/draft-solo-{width}x{height}.png')
             print(f'PASS {width}x{height}')
@@ -56,9 +56,9 @@ def run():
         page.goto(f'{BASE}/results?mode=teamplay&region=na&tier=gold&window=7d&lane=top&sort=ban_priority')
         page.evaluate("document.documentElement.style.fontSize = '200%'")
         page.screenshot(path='/tmp/draft-team-390x844-200percent-root-picks.png')
-        page.get_by_role('button', name='Go to Draft').click()
+        page.get_by_role('button', name='Draft tools (bans & lineup)').click()
         page.screenshot(path='/tmp/draft-team-390x844-200percent-root-draft.png')
-        page.get_by_role('button', name='Build an Easy Clash Team').click()
+        page.get_by_role('button', name='Build lineup').click()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.screenshot(path='/tmp/draft-team-390x844-200percent-root-expanded.png')
         print('PASS 200% root text')
@@ -96,7 +96,7 @@ def run():
         assert_rail_geometry('1200px at 200% root text')
         picks.screenshot(path='/tmp/draft-team-1200x1000-200percent-picks.png')
         draft.screenshot(path='/tmp/draft-team-1200x1000-200percent-draft.png')
-        page.get_by_role('button', name='Build an Easy Clash Team').click()
+        page.get_by_role('button', name='Build lineup').click()
         expect(page.locator('.role-card')).to_have_count(5)
         assert_rail_geometry('1200px at 200% root text, lineup expanded')
         draft.screenshot(path='/tmp/draft-team-1200x1000-200percent-expanded.png')

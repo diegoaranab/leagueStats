@@ -66,7 +66,7 @@ def run():
             assert heading.bounding_box()['y'] >= page.locator('.topbar').bounding_box()['height']
             page.screenshot(path='/tmp/results-controls-390-drawer-open.png', animations='disabled')
             expect(drawer.get_by_role('combobox', name='Region')).to_contain_text('Latin America North')
-            expect(drawer.get_by_role('combobox', name='Window')).to_contain_text('Last 14 Days')
+            expect(drawer.get_by_role('combobox', name='Window')).to_contain_text('Last 14 days')
 
             # Material/CDK focus trap must cycle only through the open drawer's actions.
             keyboard_targets = []
@@ -133,7 +133,7 @@ def run():
                 drawer.locator('button.mode-option').filter(has_text='Flex / Clash').click()
             expect(page).to_have_url(re.compile('mode=teamplay'))
             expect(page.locator('.draft')).to_be_visible()
-            controls = [('Region', 'Latin America South'), ('Rank', 'Diamond'), ('Window', 'Last 7 Days'), ('Sort by', 'Pick rate'), ('Difficulty', 'Easy')]
+            controls = [('Region', 'Latin America South'), ('Rank', 'Diamond'), ('Window', 'Last 7 days'), ('Sort by', 'Pick rate'), ('Difficulty', 'Easy')]
             for label, option in controls:
                 drawer.get_by_role('combobox', name=label).click()
                 if label in ('Region', 'Rank', 'Window'):
@@ -159,8 +159,8 @@ def run():
             expect(trigger).to_be_focused()
             expect(drawer).to_be_hidden()
             page.screenshot(path='/tmp/results-controls-390-drawer-closed.png', animations='disabled')
-            expect(page.locator('.context-line')).to_contain_text('Sort: Pick rate')
-            expect(page.locator('.context-line')).to_contain_text('Difficulty: Easy')
+            expect(page.locator('.ranking-filters').get_by_role('combobox', name='Sort by')).to_contain_text('Pick rate')
+            expect(page.locator('.ranking-filters').get_by_role('combobox', name='Difficulty')).to_contain_text('Easy')
             expect(page.get_by_role('radiogroup', name='Choose a lane')).to_be_visible()
             trigger.click()
             expect(heading).to_be_focused()
@@ -168,7 +168,8 @@ def run():
             expect(trigger).to_be_focused()
             trigger.click()
             expect(heading).to_be_focused()
-            page.locator('.mat-drawer-backdrop').click(position={'x': 370, 'y': 150})
+            backdrop = page.locator('.mat-drawer-backdrop')
+            backdrop.click(position={'x': backdrop.bounding_box()['width'] - 5, 'y': 150})
             expect(trigger).to_be_focused()
 
             for width, height in [(320,568),(390,844),(844,390),(1080,768),(1081,768),(1200,800),(1366,768),(1920,1080)]:
@@ -205,39 +206,29 @@ def run():
 
             page.set_viewport_size({'width': 1366, 'height': 768})
             page.wait_for_timeout(250)
-            old_layout = page.add_style_tag(content="""
-              .bar:not(.bar--drawer) { align-items: flex-start !important; flex-wrap: wrap !important; }
-              .bar:not(.bar--drawer) .filter-group { flex-basis: 310px !important; }
-              .control-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)) !important; gap: .65rem !important; flex: 1 1 760px !important; }
-              .control-grid mat-form-field { min-width: 0 !important; }
-              .difficulty-control { display: grid !important; grid-template-columns: 1fr !important; align-content: start !important; }
-              .difficulty-help { width: auto !important; height: auto !important; min-height: 44px !important; justify-self: start !important; }
-            """)
-            before = page.evaluate("""() => {
-              const filters = document.querySelector('.results-shell__content app-filter-bar');
-              const firstPick = document.querySelector('.champion-card');
-              return {filterHeight: Math.round(filters.getBoundingClientRect().height), firstRankedY: Math.round(firstPick.getBoundingClientRect().y)};
-            }""")
-            old_layout.evaluate('(el) => el.remove()')
-            metrics = page.evaluate("""() => {
-              const filters = document.querySelector('.results-shell__content app-filter-bar');
-              const firstPick = document.querySelector('.champion-card');
-              return {filterHeight: Math.round(filters.getBoundingClientRect().height), firstRankedY: Math.round(firstPick.getBoundingClientRect().y)};
-            }""")
-            print(f"1366x768 before correction: filter panel {before['filterHeight']}px; first ranked row y={before['firstRankedY']}px")
-            print(f"1366x768 after correction: filter panel {metrics['filterHeight']}px; first ranked row y={metrics['firstRankedY']}px")
+            filters = page.locator('.ranking-filters')
+            first_pick = page.locator('.champion-card').first
+            box = filters.bounding_box()
+            row = first_pick.bounding_box()
+            assert box['height'] <= 76 and box['y'] + box['height'] < row['y'] <= 430, (box, row)
+            assert page.locator('.results-shell__content app-filter-bar').count() == 0
+            expect(filters.get_by_role('combobox', name='Sort by')).to_contain_text('Win rate')
+            expect(filters.get_by_role('combobox', name='Difficulty')).to_contain_text('Hard')
             page.screenshot(path='/tmp/results-controls-1366-desktop.png', animations='disabled')
+
+            trigger.click()
+            expect(heading).to_be_focused()
             for label in ('Region', 'Window'):
-                control = page.locator('.results-shell__content app-filter-bar').get_by_role('combobox', name=label)
-                value = control.locator('.mat-mdc-select-value-text')
+                value = drawer.get_by_role('combobox', name=label).locator('.mat-mdc-select-value-text')
                 assert value.evaluate('(el) => el.scrollWidth <= el.clientWidth + 1')
                 assert value.evaluate('(el) => el.scrollHeight <= el.clientHeight + 1')
-
-            help_button = page.locator('.results-shell__content app-filter-bar').get_by_role('button', name='About difficulty')
-            help_button.click()
-            expect(page.locator('.results-shell__content app-filter-bar .difficulty-explanation')).to_be_visible()
+            help_button = drawer.get_by_role('button', name='About difficulty')
+            if help_button.get_attribute('aria-expanded') != 'true':
+                help_button.click()
+            expect(drawer.locator('.difficulty-explanation')).to_be_visible()
             page.screenshot(path='/tmp/results-controls-1366-help-expanded.png', animations='disabled')
-            help_button.click()
+            drawer.get_by_role('button', name='Close filters').click()
+            expect(trigger).to_be_focused()
             page.set_viewport_size({'width': 1920, 'height': 1080})
             page.screenshot(path='/tmp/results-controls-1920-desktop.png', animations='disabled')
             page.set_viewport_size({'width': 1081, 'height': 768})
@@ -248,7 +239,7 @@ def run():
             expect(heading).to_be_focused()
             page.set_viewport_size({'width': 1366, 'height': 768})
             expect(drawer).to_be_hidden()
-            expect(page.locator('h1')).to_be_focused()
+            expect(trigger).to_be_focused()
             browser.close()
     finally:
         if server:

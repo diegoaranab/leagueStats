@@ -1,0 +1,3 @@
+* -text
+VISUAL_DIRECTION.md whitespace=-blank-at-eol
+research/*.md whitespace=-blank-at-eof

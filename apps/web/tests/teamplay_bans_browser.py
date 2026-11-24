@@ -61,12 +61,13 @@ def run():
             expect(page.locator('.ban-item__name')).to_have_text(names)
 
         def select(label, option):
-            compact = page.viewport_size['width'] <= 1080
-            if compact:
-                page.get_by_role('button', name=re.compile(r'Filters')).click()
-            page.locator('app-filter-bar:visible').get_by_role('combobox', name=label, exact=True).click()
+            inline = label in ('Sort by', 'Difficulty')
+            if not inline:
+                page.get_by_role('button', name='Filters', exact=True).click()
+            controls = page.locator('.ranking-filters') if inline else page.get_by_role('dialog')
+            controls.get_by_role('combobox', name=label, exact=True).click()
             page.get_by_role('option', name=option, exact=True).click()
-            if compact and page.get_by_role('button', name='Close filters').is_visible():
+            if not inline:
                 page.get_by_role('button', name='Close filters').click()
 
         for width, height in [(320, 568), (390, 844), (844, 390), (1366, 768), (1920, 1080)]:
@@ -77,7 +78,7 @@ def run():
                 expect(page.locator('app-recommendation-spotlight')).to_have_count(0)
                 canonical = page.locator('.picks-list .champion-card--canonical')
                 expect(canonical).to_have_count(1)
-                expect(canonical.locator('.canonical-label')).to_have_text('Recommended pick')
+                expect(canonical.locator('.canonical-label')).to_have_text('Top recommendation')
                 canonical_name = canonical.locator('h3').inner_text()
                 expect(page.locator('.picks-list app-champion-card h3').filter(has_text=canonical_name)).to_have_count(1)
                 expect(page.locator('.picks-list .sort-evidence').first).to_contain_text('Ban priority')
@@ -110,16 +111,20 @@ def run():
         page.goto(f"{BASE}/results?mode=teamplay&region=na&tier=gold&window=7d&lane=top&sort=ban_priority")
         strip(expected('teamplay'))
         tooltip_text = 'Difficulty is relative to the selected mode, rank, region, window, and lane pool.'
+        page.get_by_role('button', name='Filters', exact=True).click()
         page.get_by_role('button', name='About difficulty').click()
         expect(page.get_by_text(tooltip_text)).to_be_visible()
+        page.get_by_role('button', name='Close filters').click()
         select('Region', 'Latin America North')
         strip(expected('teamplay', context='langoldweek'))
         select('Rank', 'Silver')
         strip(expected('teamplay', context='lansilverweek'))
-        select('Window', 'Last 14 Days')
+        select('Window', 'Last 14 days')
         strip(expected('teamplay', context='lansilverfortnight'))
         # Switch modes through the actual mode control, then restore Solo ban sorting.
+        page.get_by_role('button', name='Filters', exact=True).click()
         page.locator('app-filter-bar:visible app-mode-selector').get_by_role('button', name='Solo Queue', exact=False).click()
+        page.get_by_role('button', name='Close filters').click()
         strip(expected('solo', context='lansilverfortnight'))
         select('Sort by', 'Ban priority')
         expect(page.locator('app-champion-card h3').first).to_have_text(expected('solo', context='lansilverfortnight')[0])

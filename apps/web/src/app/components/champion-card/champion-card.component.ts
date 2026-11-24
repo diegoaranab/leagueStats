@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { RankedIconComponent } from '../ranked-icon/ranked-icon.component';
 
 import { LANE_LABELS, ProductMode } from '../../core/models/selection.model';
-import { Champion, SortOption } from '../../core/models/tierlist.model';
+import { Champion, Lane, SortOption } from '../../core/models/tierlist.model';
 
 @Component({
   selector: 'app-champion-card',
-  imports: [CommonModule, MatButtonModule],
+  imports: [CommonModule, RankedIconComponent],
   templateUrl: './champion-card.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './champion-card.component.css',
@@ -19,6 +19,7 @@ export class ChampionCardComponent {
 
   @Input({ required: true }) champion!: Champion;
   @Input() mode: ProductMode = 'solo';
+  @Input() lane: Lane = 'top';
   @Input() canonical = false;
   @Input() sort: SortOption = 'tier';
   @Input() banPriority: number | null = null;
@@ -28,10 +29,10 @@ export class ChampionCardComponent {
 
   get primaryRank(): number | string {
     if (this.mode === 'teamplay') {
-      return this.champion.teamplay_rank ?? this.champion.filtered_rank ?? this.champion.rank ?? '--';
+      return this.champion.teamplay_rank ?? this.champion.filtered_rank ?? this.champion.rank ?? '—';
     }
 
-    return this.champion.filtered_rank ?? this.champion.rank ?? '--';
+    return this.champion.filtered_rank ?? this.champion.rank ?? '—';
   }
 
   get visibleBadges(): string[] {
@@ -39,18 +40,11 @@ export class ChampionCardComponent {
   }
 
   formatPercent(value: number | null | undefined): string {
-    return value === null || value === undefined ? '--' : `${value.toFixed(1)}%`;
+    return value === null || value === undefined ? '—' : `${value.toFixed(1)}%`;
   }
 
   formatNumber(value: number | null | undefined): string {
-    return value === null || value === undefined ? '--' : value.toFixed(1);
+    return value === null || value === undefined ? '—' : value.toFixed(1);
   }
 
-  isGoldBadge(badge: string): boolean {
-    return badge === 'High Pro Presence' || badge === 'Draft Priority';
-  }
-
-  isBlueBadge(badge: string): boolean {
-    return badge === 'Flex Pick' || badge === 'Strong in Solo';
-  }
 }

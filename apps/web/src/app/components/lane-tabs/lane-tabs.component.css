@@ -1,73 +1,50 @@
-:host {
-  display: block;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.lane-scroll {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
+:host { display: block; }
 .lane-group {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  width: 100%;
-  gap: 0.4rem;
-  background: transparent;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-block: 8px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--divider);
+  border-radius: 0;
+  --mat-button-toggle-selected-state-background-color: transparent;
+  --mat-button-toggle-selected-state-text-color: var(--text-primary);
+  --mat-button-toggle-text-color: var(--text-secondary);
+  --mat-button-toggle-height: 44px;
 }
-
 .lane-group mat-button-toggle {
-  min-width: 0;
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  overflow: hidden;
+  border: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  font: 600 .9375rem/1.25 var(--font-body);
 }
-
-.lane-group mat-button-toggle ::ng-deep .mat-button-toggle-button-content {
-  padding: 0.55rem 0.75rem;
-  text-align: left;
-}
-
-.lane-copy {
-  display: inline-flex;
-  gap: 0.3rem;
-  align-items: baseline;
-}
-
-.lane-label {
-  font-size: 0.9rem;
+.lane-group mat-button-toggle.mat-button-toggle-checked {
+  box-shadow: inset 0 -3px var(--action);
+  color: var(--text-primary);
   font-weight: 700;
 }
-
-small {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.75rem;
-  line-height: 1.2;
+.lane-group .mat-button-toggle-checked app-ranked-icon { color: var(--action); }
+:host ::ng-deep .lane-group .mat-button-toggle-button {
+  min-height: 44px;
+  color: inherit;
+  font: inherit;
+  white-space: normal;
 }
+:host ::ng-deep .lane-group .mat-button-toggle-label-content {
+  display: block;
+  padding: 0 12px;
+  line-height: inherit;
+}
+:host ::ng-deep .lane-group button:focus-visible { outline-offset: -3px; }
+.lane-copy { display: inline-flex; align-items: center; column-gap: 8px; padding-block: 4px; }
 
-@media (max-width: 700px) {
-  .lane-group {
-    gap: 0.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
-  }
-
-  .lane-group mat-button-toggle {
-    min-height: 44px;
-  }
-
-  .lane-group mat-button-toggle ::ng-deep .mat-button-toggle-button-content {
-    padding: 0.7rem 0.2rem;
-    text-align: center;
-  }
-
-  .lane-copy {
-    width: 100%;
-    justify-content: center;
-  }
-
-  small {
-    display: none;
-  }
+@media (max-width: 38rem) {
+  .lane-group { gap: 2px; margin-block: 0 12px; }
+  .lane-group mat-button-toggle { font-size: .875rem; }
+  .lane-copy { column-gap: 4px; }
+  :host ::ng-deep .lane-group .mat-button-toggle-label-content { padding-inline: 6px; }
+  :host ::ng-deep .lane-copy .ranked-icon { width: .875rem; height: .875rem; }
+}
+@media (max-width: 22rem) {
+  .lane-copy app-ranked-icon { display: none; }
 }

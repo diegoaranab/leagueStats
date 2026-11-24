@@ -1,52 +1,63 @@
 <section class="onboarding-page">
-  <h1>Set up your picks</h1>
-  <section class="setup" aria-label="Recommendation setup">
-    <h2 id="queue-label">Queue</h2>
-    <app-mode-selector
-      [selectedMode]="form.controls.mode.value"
-      (modeChange)="form.controls.mode.setValue($event)"
-    ></app-mode-selector>
+  <div class="home-intro">
+    <h1>Know who to lock in.</h1>
+    <p>Find a strong champion for your queue and role, and see why.</p>
+  </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="setup-form">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="setup" aria-label="Recommendation setup">
+    <fieldset>
+      <legend>Queue</legend>
+      <app-mode-selector
+        [selectedMode]="form.controls.mode.value"
+        (modeChange)="form.controls.mode.setValue($event)"
+      ></app-mode-selector>
+    </fieldset>
 
-      <div class="selector-grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Region</mat-label>
-          <mat-select formControlName="region">
-            @for (region of regionOptions; track region) {
-              <mat-option [value]="region">
-                {{ regionLabels[region] }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Rank</mat-label>
-          <mat-select formControlName="tier">
-            @for (tier of tierOptions; track tier) {
-              <mat-option [value]="tier">
-                {{ tierLabels[tier] }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Window</mat-label>
-          <mat-select formControlName="window">
-            @for (window of windowOptions; track window) {
-              <mat-option [value]="window">
-                {{ windowLabels[window] }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+    <div class="selector-grid">
+      <div class="field">
+        <span id="setup-region">Region</span>
+        <mat-select aria-labelledby="setup-region" formControlName="region">
+          @for (region of regionOptions; track region) {
+            <mat-option [value]="region">{{ regionLabels[region] }}</mat-option>
+          }
+        </mat-select>
       </div>
+      <div class="field">
+        <span id="setup-rank">Rank</span>
+        <mat-select aria-labelledby="setup-rank" formControlName="tier">
+          @for (tier of tierOptions; track tier) {
+            <mat-option [value]="tier">{{ tierLabels[tier] }}</mat-option>
+          }
+        </mat-select>
+      </div>
+      <div class="field">
+        <span id="setup-window">Window</span>
+        <mat-select aria-labelledby="setup-window" formControlName="window">
+          @for (window of windowOptions; track window) {
+            <mat-option [value]="window">{{ windowLabels[window] }}</mat-option>
+          }
+        </mat-select>
+      </div>
+    </div>
 
-      <button mat-flat-button color="primary" type="submit" class="cta-button">
-        View recommendations
-      </button>
-    </form>
+    <button type="submit" class="cta-button">View recommendations</button>
+  </form>
+
+  <section class="home-sample" aria-labelledby="example-heading">
+    <div class="sample-title">
+      <h2 id="example-heading">Example rankings</h2>
+      <span>Solo Queue / Top</span>
+    </div>
+    <ol>
+      @for (pick of examplePicks; track pick.name; let index = $index) {
+        <li class="sample-row">
+          <b class="sample-position">#{{ index + 1 }}</b>
+          <img [src]="'setup-example/' + pick.portrait + '.webp'" alt="" width="38" height="38">
+          <strong>{{ pick.name }}</strong>
+          <span><b>{{ pick.winRate }}</b><small>Win rate</small></span>
+        </li>
+      }
+    </ol>
+    <p>NA, Diamond, last 7 days · Nov 22, 2026 snapshot</p>
   </section>
 </section>

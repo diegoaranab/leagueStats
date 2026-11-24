@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compare LeagueStats visual directions</title>
+  <style>
+    @font-face{font-family:Space;src:url(assets/space.woff2) format("woff2");font-weight:400 700;font-display:swap}
+    *{box-sizing:border-box}
+    body{margin:0;background:#edf0f3;color:#152334;font:400 1rem/1.5 Space,system-ui,sans-serif}
+    main{width:min(calc(100% - 2rem),100rem);margin:auto;padding-block:2rem}
+    h1,h2,p{margin:0}
+    h1{font-size:clamp(1.8rem,4vw,2.75rem);line-height:1.1;letter-spacing:-.05em}
+    header p{color:#475567;margin-top:.5rem}
+    header a{color:inherit}
+    form{display:flex;gap:1rem;flex-wrap:wrap;margin-block:1.5rem}
+    label{display:grid;gap:.25rem;font-weight:600}
+    select{font:inherit;min-height:44px;padding:.35rem .65rem;border:1px solid #748197;border-radius:6px;color:inherit;background:white}
+    section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+    article{min-width:0;background:white;border:1px solid #c7d0db;border-radius:10px;overflow:hidden}
+    .caption{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0 1rem;padding:.55rem .9rem}
+    .caption h2{font-size:1.125rem}
+    .caption a{display:inline-flex;align-items:center;min-height:44px;color:#3e377d;font-weight:600}
+    .capture{display:block;background:#e0e5eb;text-align:center;padding:.65rem}
+    img{display:block;width:100%;height:auto;margin:auto;border:1px solid #737f90}
+    :focus-visible{outline:3px solid #3e377d;outline-offset:2px}
+    @media(max-width:42rem){section{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>LeagueStats visual directions</h1>
+      <p>Same queue, role and production snapshot. <a href="VISUAL_DIRECTION.md">Read the decision and design specifications</a>.</p>
+    </header>
+    <form aria-label="Comparison controls">
+      <label>Screen
+        <select name="screen">
+          <option value="home">Home</option>
+          <option value="solo">Solo Results</option>
+          <option value="team">Flex / Clash Picks</option>
+          <option value="draft">Flex / Clash Draft</option>
+          <option value="lineup">Expanded five-role lineup</option>
+        </select>
+      </label>
+      <label>Viewport
+        <select name="size">
+          <option value="1366x768">1366 × 768</option>
+          <option value="390x844">390 × 844</option>
+          <option value="320x568">320 × 568</option>
+          <option value="1920x1080">1920 × 1080</option>
+        </select>
+      </label>
+    </form>
+    <section aria-label="Rendered prototypes">
+      <article data-direction="a">
+        <div class="caption"><h2>A · Ranked list</h2><a class="interactive">Open prototype</a></div>
+        <a class="capture"><img alt=""></a>
+      </article>
+      <article data-direction="b">
+        <div class="caption"><h2>B · Pick brief</h2><a class="interactive">Open prototype</a></div>
+        <a class="capture"><img alt=""></a>
+      </article>
+    </section>
+  </main>
+  <script>
+    const form = document.querySelector('form');
+    const screen = form.elements.screen;
+    const size = form.elements.size;
+    function render() {
+      const draft = ['draft','lineup'].includes(screen.value);
+      for (const option of size.options) option.disabled = draft && !['1366x768','390x844'].includes(option.value);
+      if (size.selectedOptions[0].disabled) size.value = '1366x768';
+      for (const article of document.querySelectorAll('article')) {
+        const {direction} = article.dataset;
+        const link = article.querySelector('.interactive');
+        const capture = article.querySelector('.capture');
+        const image = capture.querySelector('img');
+        const name = article.querySelector('h2').textContent;
+        const file = 'images/' + [direction,screen.value,size.value].join('-') + '.png';
+        const url = new URLSearchParams({direction,screen:draft ? 'team' : screen.value});
+        if (draft && direction === 'b') url.set('view','draft');
+        const anchor = draft && direction === 'a' ? '#draft-tools' : '';
+        link.href = 'prototype.html?' + url.toString() + anchor;
+        link.setAttribute('aria-label','Open ' + name + ' prototype');
+        capture.href = file;
+        image.src = file;
+        image.alt = name + ', ' + screen.selectedOptions[0].textContent + ', ' + size.selectedOptions[0].textContent + ' screenshot';
+        image.style.maxWidth = size.value.split('x')[0] + 'px';
+      }
+    }
+    form.addEventListener('change',render);
+    render();
+  </script>
+</body>
+</html>

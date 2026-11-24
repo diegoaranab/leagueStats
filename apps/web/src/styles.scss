@@ -1,5 +1,12 @@
 @use '@angular/material' as mat;
 
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('./fonts/space-grotesk.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 html {
   color-scheme: dark;
 
@@ -54,7 +61,7 @@ html {
     surface-tint: #96dfc4,
     scrim: #000000,
     shadow: #000000,
-    corner-small: 10px,
+    corner-small: 8px,
     corner-medium: 16px,
     corner-large: 22px,
     corner-extra-large: 32px,
@@ -78,8 +85,9 @@ html {
   --divider: #344654;
   --control-border: #687f8d;
   --font-body: 'Space Grotesk', 'Segoe UI', sans-serif;
-  --page-max-width: 1380px;
-  --content-max-width: 1200px;
+  --page-max-width: 78rem;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+  --control-radius: 8px;
   --surface-panel: var(--surface-primary);
   --surface-panel-strong: var(--surface-canonical);
   --surface-glass: var(--surface-primary);
@@ -100,10 +108,10 @@ body {
 }
 
 body {
-  font-family: var(--font-body);
-  color: var(--mat-sys-on-surface);
+  font: 400 1rem/1.5 var(--font-body);
+  color: var(--text-primary);
   background: var(--canvas);
-  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
 }
 
 
@@ -131,19 +139,119 @@ h4 {
   margin: 0;
   font-family: var(--font-body);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0;
+  line-height: 1.1;
 }
 
 h1 {
   font-family: var(--font-display);
-  line-height: 1.05;
-  letter-spacing: 0.025em;
+  letter-spacing: -.045em;
 }
 
-p {
-  margin: 0;
+h2 { font-size: 1.375rem; letter-spacing: -.02em; }
+h3 { font-size: 1.1875rem; letter-spacing: -.015em; }
+
+p, dl, dd { margin: 0; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
+
+.ranked-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.field {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: .875rem;
+  font-weight: 500;
+}
+
+.field .mat-mdc-select {
+  display: flex;
+  align-items: stretch;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--canvas);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.field .mat-mdc-select-trigger { gap: 8px; }
+.field .mat-mdc-select-value, .field .mat-mdc-select-value-text, .field .mat-mdc-select-min-line {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.field .mat-mdc-select-arrow {
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-primary);
+}
+
+.field .mat-mdc-select-arrow svg {
+  display: none;
+}
+
+.field .mat-mdc-select-arrow::after {
+  content: '';
+  display: block;
+  width: .34rem;
+  height: .34rem;
+  margin: .21rem auto 0;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+  transform: rotate(45deg);
+}
+
+.field .mat-mdc-select:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.plain-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--action);
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plain-action:hover { text-decoration: underline; text-underline-offset: .22em; }
+
 
 .eyebrow {
   color: var(--mat-sys-secondary);
@@ -221,9 +329,8 @@ p {
 .mat-mdc-menu-panel,
 .mat-mdc-select-panel {
   border: 1px solid var(--border-subtle);
-  border-radius: 18px !important;
-  background: var(--surface-canonical) !important;
-  backdrop-filter: blur(18px);
+  border-radius: var(--control-radius) !important;
+  background: var(--surface-primary) !important;
 }
 
 .mdc-text-field--outlined {

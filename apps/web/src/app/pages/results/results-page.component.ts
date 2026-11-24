@@ -1,25 +1,26 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule, ViewportScroller } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, ChangeDetectionStrategy, afterNextRender, ElementRef, Injector } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationStart, Router, RouterLink, Scroll } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { map, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { ChampionCardComponent } from '../../components/champion-card/champion-card.component';
 import { EasyClashLineupComponent } from '../../components/easy-clash-lineup/easy-clash-lineup.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
+import { RankedIconComponent } from '../../components/ranked-icon/ranked-icon.component';
 import { RecommendedBansComponent } from '../../components/recommended-bans/recommended-bans.component';
 import {
   DEFAULT_RESULTS_QUERY,
   LANE_LABELS,
-  MODE_DETAILS,
   ProductMode,
-  REGION_LABELS,
+  REGION_SHORT_LABELS,
   ResultsQuery,
   TIER_LABELS,
   WINDOW_LABELS,
@@ -49,6 +50,8 @@ import {
     CommonModule,
     RouterLink,
     MatButtonModule,
+    MatSelectModule,
+    RankedIconComponent,
     MatProgressSpinnerModule,
     MatSidenavModule,
     LaneTabsComponent,
@@ -64,9 +67,12 @@ import {
 export class ResultsPageComponent implements OnInit {
   readonly laneOrder: Lane[] = [...LANE_OPTIONS];
   readonly laneLabels = LANE_LABELS;
-  readonly modeDetails = MODE_DETAILS;
-  readonly regionLabels = REGION_LABELS;
-  readonly sortLabels: Record<SortOption, string> = { tier: 'Tier rank', win_rate: 'Win rate', pick_rate: 'Pick rate', difficulty: 'Difficulty', ban_priority: 'Ban priority' };
+  readonly regionLabels = REGION_SHORT_LABELS;
+  readonly sortOptions: Record<SortOption, string> = {
+    tier: 'Pick ranking', win_rate: 'Win rate', pick_rate: 'Pick rate', difficulty: 'Difficulty', ban_priority: 'Ban priority',
+  };
+  readonly sortKeys = Object.keys(this.sortOptions) as SortOption[];
+  readonly difficultyOptions = ['all', 'easy', 'medium', 'hard'] as const;
   readonly tierLabels = TIER_LABELS;
   readonly windowLabels = WINDOW_LABELS;
 
@@ -77,11 +83,6 @@ export class ResultsPageComponent implements OnInit {
   private historyNavigationId: number | null = null;
   private historyPosition: [number, number] | null = null;
   private datasetRendered = false;
-
-  readonly isCompact = toSignal(
-    this.breakpointObserver.observe('(max-width: 1080px)').pipe(map((state) => state.matches)),
-    { initialValue: false },
-  );
 
   requestState: 'loading' | 'success' | 'unavailable' | 'failure' = 'loading';
   showSpinner = false;
@@ -258,12 +259,12 @@ export class ResultsPageComponent implements OnInit {
   }
 
   jumpToCanonical(): void {
-    this.element.nativeElement.querySelector<HTMLElement>('#canonical-pick')?.scrollIntoView({ block: 'center' });
+    this.jumpToTask('canonical-pick', 'center');
   }
 
-  jumpToTask(id: string): void {
+  jumpToTask(id: string, block: ScrollLogicalPosition = 'start'): void {
     const heading = this.element.nativeElement.querySelector<HTMLElement>(`#${id}`);
-    heading?.scrollIntoView({ block: 'start' });
+    heading?.scrollIntoView({ block });
     heading?.focus({ preventScroll: true });
   }
 
@@ -271,16 +272,8 @@ export class ResultsPageComponent implements OnInit {
     return this.banPriorities.get(champion.name) ?? null;
   }
 
-  get currentMode() {
-    return this.modeDetails[this.query.mode];
-  }
-
   get datasetMeta() {
     return this.dataset?.meta ?? null;
-  }
-
-  get laneHeadline(): string {
-    return `${this.laneLabels[this.query.lane]} picks`;
   }
 
   get warnings(): string[] { return this.datasetMeta?.warnings ?? []; }
