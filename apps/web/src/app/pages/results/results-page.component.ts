@@ -263,12 +263,13 @@ export class ResultsPageComponent implements OnInit {
   get failedLanes(): Lane[] { return this.datasetMeta?.failed_lanes ?? []; }
   get missingLanes(): Lane[] { return this.dataset ? this.laneOrder.filter(lane => !Array.isArray(this.dataset?.data[lane])) : []; }
   get hasDatasetWarning(): boolean {
-    return Boolean(this.datasetMeta?.is_partial || this.failedLanes.length ||
+    return Boolean(this.datasetMeta?.is_partial || this.failedLanes.length || this.missingLanes.length ||
       this.warnings.some((warning) => /only had .* patch|datacompleteness|source dataset is partial/i.test(warning)));
   }
   get qualityMessage(): string {
     const notes: string[] = [];
     if (this.failedLanes.length || this.warnings.some(w => /solo source dataset is partial/i.test(w))) notes.push('Ladder coverage is limited.');
+    if (this.missingLanes.length) notes.push('Some lanes are unavailable.');
     if (this.warnings.some(w => /only had .* patch|datacompleteness/i.test(w))) notes.push('Professional coverage is limited.');
     if (!notes.length && this.datasetMeta?.is_partial) notes.push('Some underlying data is partial.');
     return notes.join(' ');
@@ -285,9 +286,23 @@ export class ResultsPageComponent implements OnInit {
   get statusText(): string {
     switch (this.requestState) {
       case 'loading': return 'Loading recommendations';
-      case 'unavailable': return 'The selected dataset is unavailable. Change setup or filters to choose another context.';
-      case 'failure': return 'Recommendations could not be loaded. Try again.';
-      case 'success': return this.hasDatasetWarning ? 'Limited data coverage' : this.warnings.length || this.datasetMeta?.is_partial === undefined ? 'Dataset loaded; see data details' : 'Dataset ready';
+      case 'unavailable': return 'Dataset unavailable';
+      case 'failure': return 'Request failed';
+      case 'success': {
+        if (this.laneAvailability === 'unavailable') return 'Selected lane unavailable';
+        if (this.laneAvailability === 'empty') return 'No picks available in selected lane';
+        if (this.laneAvailability === 'filtered') {
+          return this.failedLanes.includes(this.query.lane)
+            ? 'No matching picks. Selected lane has partial results.'
+            : 'No matching picks';
+        }
+        const count = `${this.champions.length} ${this.champions.length === 1 ? 'pick' : 'picks'} available`;
+        return this.hasDatasetWarning
+          ? `${count}. Limited data coverage.`
+          : this.warnings.length || this.datasetMeta?.is_partial === undefined
+            ? `${count}. Review data details.`
+            : count;
+      }
     }
   }
   retry(event: Event): void {
@@ -382,12 +397,21 @@ export class ResultsPageComponent implements OnInit {
   }
 
   private finishFailure(state: 'unavailable' | 'failure'): void {
-    this.stopRetryFocusTracking();
     clearTimeout(this.spinnerTimer);
     this.showSpinner = false;
     this.requestState = state;
     const requestId = this.requestId;
     const historyNavigationId = this.historyNavigationId;
+    afterNextRender(() => {
+      if (requestId !== this.requestId) return;
+      if (this.retryFocusPending && (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+        const target = state === 'failure'
+          ? this.element.nativeElement.querySelector<HTMLElement>('.recovery-state__action')
+          : this.element.nativeElement.querySelector<HTMLElement>('.recovery-state[tabindex="-1"]');
+        target?.focus({ preventScroll: true });
+      }
+      this.stopRetryFocusTracking();
+    }, { injector: this.injector });
     if (historyNavigationId !== null) {
       afterNextRender(() => {
         if (requestId === this.requestId && historyNavigationId === this.historyNavigationId) {

@@ -56,7 +56,7 @@ def run():
                     route.fulfill(status=state['status'], json=state['payload'])
             page.route('**/data/**/*.json', response)
             page.goto(base + '/results/' + QUERY)
-            expect(page.get_by_role('status')).to_have_text('Dataset ready')
+            expect(page.get_by_role('status')).to_have_text('2 picks available')
             assert not page.evaluate('window.spinnerSeen'), 'Fast load flashed a spinner'
             page.get_by_text('Data details', exact=True).click()
             expect(page.get_by_text('Source: fixture')).to_be_visible()
@@ -67,6 +67,7 @@ def run():
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 page.screenshot(path=f'/tmp/results-data-healthy-solo-{width}.png')
             page.set_viewport_size({'width': 390, 'height': 844})
+            page.screenshot(path='/tmp/results-data-healthy-desktop-390.png')
             page.add_style_tag(content='html { font-size: 200% !important; }')
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             page.screenshot(path='/tmp/results-data-200-root-text.png')
@@ -84,7 +85,7 @@ def run():
             ])
             state['payload'] = limited
             page.goto(base + '/results/' + QUERY.replace('mode=solo', 'mode=teamplay'))
-            expect(page.get_by_role('status')).to_have_text('Limited data coverage')
+            expect(page.get_by_role('status')).to_contain_text('Limited data coverage')
             expect(page.get_by_text('Professional coverage is limited.', exact=False)).to_be_visible()
             expect(page.get_by_text('Cached professional source')).to_be_visible()
             expect(page.locator('.picks-list li').first).to_be_visible()
@@ -93,17 +94,37 @@ def run():
             expect(page.get_by_text('Informational fixture warning')).to_be_visible()
             page.screenshot(path='/tmp/results-data-limited-details.png')
 
+            # Active Teamplay difficulty can empty Picks without changing lane-wide bans or Draft.
+            filtered_team = copy.deepcopy(team)
+            for champion in filtered_team['data']['top']:
+                champion['difficulty'] = 'easy'
+            state['payload'] = filtered_team
+            page.goto(base + '/results/' + QUERY.replace('mode=solo', 'mode=teamplay'))
+            expect(page.get_by_role('status')).to_contain_text('No matching picks')
+            expect(page.get_by_text('Bans cover the whole lane and are not limited by difficulty.')).to_be_visible()
+            expect(page.locator('app-easy-clash-lineup')).to_be_visible()
+            page.get_by_role('button', name='Build an Easy Clash Team').click()
+            expect(page.locator('app-easy-clash-lineup .role-card')).to_have_count(5)
+            page.evaluate('window.scrollTo(0, 0)')
+            page.screenshot(path='/tmp/results-data-filtered-zero-teamplay-bans.png', full_page=True)
+
             empty = copy.deepcopy(solo)
-            empty['data']['top'] = []
+            empty['data']['jungle'] = []
             state['payload'] = empty
             page.goto(base + '/results/' + QUERY)
+            expect(page.get_by_role('status')).to_contain_text('picks available')
+            page.get_by_role('radio', name='Jungle', exact=False).click()
             expect(page.get_by_text('There are no picks in this lane.')).to_be_visible()
+            expect(page.get_by_role('status')).to_have_text('No picks available in selected lane')
+            page.get_by_role('radio', name='Top', exact=False).click()
+            expect(page.get_by_role('status')).to_contain_text('picks available')
 
             no_optional = copy.deepcopy(solo)
             no_optional['meta'] = {}
             state['payload'] = no_optional
             page.reload()
-            expect(page.get_by_role('status')).to_have_text('Dataset loaded; see data details')
+            expect(page.get_by_role('status')).to_contain_text('picks available')
+            expect(page.get_by_role('status')).not_to_have_text('Dataset ready')
             expect(page.locator('.picks-list li').first).to_be_visible()
 
             filtered = copy.deepcopy(solo)
@@ -112,11 +133,13 @@ def run():
             state['payload'] = filtered
             page.reload()
             expect(page.get_by_text('No picks match Hard difficulty.')).to_be_visible()
+            expect(page.get_by_role('status')).to_have_text('No matching picks')
             expect(page.get_by_text('Bans cover the whole lane and are not limited by difficulty.')).to_be_visible()
             page.screenshot(path='/tmp/results-data-filtered.png')
             page.get_by_role('button', name='Clear difficulty').focus()
             page.keyboard.press('Enter')
             expect(page.get_by_text('No picks match Hard difficulty.')).to_have_count(0)
+            expect(page.get_by_role('status')).to_contain_text('picks available')
             expect(page.locator('#picks-heading')).to_be_focused()
             params = parse_qs(urlparse(page.url).query)
             assert params == dict(mode=['solo'], region=['lan'], tier=['gold'], window=['14d'], lane=['top'], sort=['win_rate'], difficulty=['all'])
@@ -125,49 +148,129 @@ def run():
             del missing['data']['top']
             state['payload'] = missing
             page.goto(base + '/results/' + QUERY)
-            expect(page.get_by_text('Data for this lane is unavailable.', exact=False)).to_be_visible()
+            expect(page.get_by_text('No picks are available for this lane.', exact=False)).to_be_visible()
+            expect(page.get_by_role('status')).to_have_text('Selected lane unavailable')
+            expect(page.get_by_text('Some lanes are unavailable.', exact=False)).to_be_visible()
             assert parse_qs(urlparse(page.url).query)['lane'] == ['top']
-            page.screenshot(path='/tmp/results-data-lane-unavailable.png')
+            page.evaluate('window.scrollTo(0, 0)')
+            page.screenshot(path='/tmp/results-data-lane-unavailable.png', full_page=True)
             page.get_by_role('radio', name='Jungle', exact=False).click()
             assert parse_qs(urlparse(page.url).query)['lane'] == ['jungle']
+
+            missing_false_partial = copy.deepcopy(solo)
+            del missing_false_partial['data']['top']
+            missing_false_partial['meta']['is_partial'] = False
+            state['payload'] = missing_false_partial
+            page.goto(base + '/results/' + QUERY)
+            expect(page.get_by_role('status')).to_have_text('Selected lane unavailable')
+            expect(page.get_by_text('Some lanes are unavailable.', exact=False)).to_be_visible()
+            missing_absent_partial = copy.deepcopy(missing_false_partial)
+            missing_absent_partial['meta'].pop('is_partial')
+            state['payload'] = missing_absent_partial
+            page.reload()
+            expect(page.get_by_role('status')).to_have_text('Selected lane unavailable')
+
+            failed_partial = copy.deepcopy(solo)
+            failed_partial['meta'].update(is_partial=False, failed_lanes=['top'])
+            state['payload'] = failed_partial
+            page.goto(base + '/results/' + QUERY)
+            expect(page.get_by_role('status')).to_contain_text('Limited data coverage')
+            expect(page.get_by_text('This lane has partial results.')).to_be_visible()
+            expect(page.locator('.picks-list li')).to_have_count(2)
+            page.evaluate('window.scrollTo(0, 0)')
+            page.screenshot(path='/tmp/results-data-failed-partial-picks.png', full_page=True)
+
+            failed_filtered = copy.deepcopy(failed_partial)
+            for champion in failed_filtered['data']['top']:
+                champion['difficulty'] = 'easy'
+            state['payload'] = failed_filtered
+            page.reload()
+            expect(page.get_by_role('status')).to_have_text('No matching picks. Selected lane has partial results.')
+            expect(page.get_by_text('This lane has partial results.')).to_be_visible()
+            page.evaluate('window.scrollTo(0, 0)')
+            page.screenshot(path='/tmp/results-data-failed-partial-filtered-zero.png', full_page=True)
 
             missing_team = copy.deepcopy(team)
             del missing_team['data']['top']
             state['payload'] = missing_team
             page.goto(base + '/results/' + QUERY.replace('mode=solo', 'mode=teamplay'))
-            expect(page.get_by_text('Data for this lane is unavailable.', exact=False)).to_be_visible()
+            expect(page.get_by_text('No picks are available for this lane.', exact=False)).to_be_visible()
             expect(page.get_by_text('Lineup unavailable because lane data is missing.')).to_be_visible()
             expect(page.get_by_text('No standout bans for this selection.')).to_have_count(0)
 
             state['status'] = 404
             page.goto(base + '/results/' + QUERY)
-            expect(page.get_by_role('status')).to_contain_text('unavailable')
+            expect(page.get_by_role('status')).to_have_text('Dataset unavailable')
+            expect(page.get_by_text('No recommendations were returned for this context.')).to_be_visible()
             page.screenshot(path='/tmp/results-data-dataset-unavailable.png')
             state['status'] = 410
             page.reload()
-            expect(page.get_by_role('status')).to_contain_text('unavailable')
+            expect(page.get_by_role('status')).to_have_text('Dataset unavailable')
             state['status'] = 500
             page.reload()
             expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            expect(page.get_by_role('status')).to_have_text('Request failed')
+            page.screenshot(path='/tmp/results-data-request-failure-390.png')
             page.screenshot(path='/tmp/results-data-failure.png')
-            page.get_by_role('button', name='Retry').click()
+            retry = page.get_by_role('button', name='Retry')
+            retry.focus()
+            page.keyboard.press('Enter')
             expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            expect(page.get_by_role('button', name='Retry')).to_be_focused()
+            page.screenshot(path='/tmp/results-data-repeated-failed-retry-focus.png')
             state['abort'] = True
-            page.get_by_role('button', name='Retry').click()
+            page.keyboard.press('Enter')
             expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            expect(page.get_by_role('button', name='Retry')).to_be_focused()
             state['abort'] = False
             state['malformed'] = True
             page.get_by_role('button', name='Retry').click()
             expect(page.get_by_role('button', name='Retry')).to_be_visible()
             state['malformed'] = False
             state['status'], state['payload'] = 200, {'unexpected': True}
-            page.get_by_role('button', name='Retry').click()
+            page.keyboard.press('Enter')
             expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            expect(page.get_by_role('button', name='Retry')).to_be_focused()
             state['status'], state['payload'] = 200, solo
-            page.get_by_role('button', name='Retry').click()
-            expect(page.get_by_role('status')).to_have_text('Dataset ready')
+            page.keyboard.press('Enter')
+            expect(page.get_by_role('status')).to_contain_text('picks available')
             expect(page.locator('#picks-heading')).to_be_focused()
             page.screenshot(path='/tmp/results-data-recovered.png')
+
+            # A Retry that returns an unavailable response moves keyboard focus to its status heading.
+            state['status'] = 500
+            page.goto(base + '/results/' + QUERY)
+            failed_retry = page.get_by_role('button', name='Retry')
+            failed_retry.focus()
+            page.keyboard.press('Enter')
+            expect(page.get_by_role('status')).to_have_text('Request failed')
+            expect(page.get_by_role('button', name='Retry')).to_be_focused()
+            state['status'] = 404
+            page.keyboard.press('Enter')
+            expect(page.get_by_role('status')).to_have_text('Dataset unavailable')
+            expect(page.locator('.recovery-state[tabindex="-1"]')).to_be_focused()
+
+            # Enlarged text and narrow viewports keep recovery copy and actions readable.
+            state['status'] = 500
+            page.goto(base + '/results/' + QUERY)
+            expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            for width in (320, 390):
+                page.set_viewport_size({'width': width, 'height': 844})
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                page.locator('.recovery-state').scroll_into_view_if_needed()
+                page.screenshot(path=f'/tmp/results-data-recovery-{width}.png')
+            page.add_style_tag(content='html { font-size: 200% !important; }')
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+            expect(page.get_by_role('button', name='Retry')).to_be_visible()
+            page.locator('.recovery-state').scroll_into_view_if_needed()
+            page.screenshot(path='/tmp/results-data-recovery-200-root-text.png')
+            page.set_viewport_size({'width': 1366, 'height': 768})
+            page.screenshot(path='/tmp/results-data-request-failure-1366.png')
+            state['status'], state['payload'] = 200, solo
+            page.goto(base + '/results/' + QUERY)
+            expect(page.get_by_role('status')).to_contain_text('picks available')
+            page.set_viewport_size({'width': 1366, 'height': 768})
+            page.screenshot(path='/tmp/results-data-healthy-1366.png')
             assert not errors, errors
             browser.close()
         asyncio.run(check_loading_and_races(base))
@@ -244,7 +347,7 @@ async def check_loading_and_races(base):
         async def retry_response(route):
             nonlocal retry_count
             retry_count += 1
-            if retry_count == 1:
+            if retry_count in (1, 2):
                 await route.fulfill(status=500, body='fixture failure')
             else:
                 await asyncio.sleep(.5)
@@ -258,9 +361,14 @@ async def check_loading_and_races(base):
         await retry_page.keyboard.press('Enter')
         setup = retry_page.get_by_role('link', name='Change setup')
         await setup.focus()
-        await async_expect(retry_page.get_by_role('status')).to_have_text('Dataset ready')
+        await async_expect(retry_page.get_by_role('status')).to_have_text('Request failed')
         await async_expect(setup).to_be_focused()
         assert retry_page.url == original_url and retry_count == 2
+        await retry_page.get_by_role('button', name='Retry').focus()
+        await retry_page.keyboard.press('Enter')
+        await async_expect(retry_page.get_by_role('status')).to_contain_text('picks available')
+        await async_expect(retry_page.locator('#picks-heading')).to_be_focused()
+        assert retry_page.url == original_url and retry_count == 3
         await browser.close()
 
 

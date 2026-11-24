@@ -112,10 +112,19 @@
     <div class="state"><mat-spinner diameter="42" aria-label="Loading recommendations"></mat-spinner></div>
   }
   @if (requestState === 'unavailable') {
-    <div class="state">The selected dataset is unavailable. Use Change setup or filters to choose another context.</div>
+    <section class="state recovery-state" aria-label="Unavailable dataset guidance" tabindex="-1">
+      <div class="recovery-state__copy">
+        <p>No recommendations were returned for this context. Change setup or filters to choose another one.</p>
+      </div>
+    </section>
   }
   @if (requestState === 'failure') {
-    <div class="state error">Recommendations could not be loaded. <button mat-stroked-button type="button" (click)="retry($event)">Retry</button></div>
+    <section class="state recovery-state error" aria-label="Request recovery">
+      <div class="recovery-state__copy">
+        <p>Recommendations did not load for this context.</p>
+      </div>
+      <button class="recovery-state__action" mat-stroked-button type="button" (click)="retry($event)">Retry</button>
+    </section>
   }
 
   @if (requestState === 'success') {
@@ -131,11 +140,11 @@
         }
       </div>
       @if (laneAvailability === 'filtered') {
-        <p>No picks match {{ query.difficulty | titlecase }} difficulty. <button mat-stroked-button type="button" (click)="clearDifficulty()">Clear difficulty</button></p>
+        <p class="picks-state-note">No picks match {{ query.difficulty | titlecase }} difficulty. @if (failedLanes.includes(query.lane)) { <span class="quality-note">This lane has partial results.</span> } <button class="picks-state-note__action" mat-stroked-button type="button" (click)="clearDifficulty()">Clear difficulty</button></p>
       } @else if (laneAvailability === 'empty') {
         <p>There are no picks in this lane.</p>
       } @else if (laneAvailability === 'unavailable') {
-        <p>Data for this lane is unavailable. @if (availableLanes.length) { Choose another available lane above. } @else { Change setup or filters to choose another context. }</p>
+        <p>No picks are available for this lane. @if (availableLanes.length) { Choose another available lane above. } @else { Change setup or filters to choose another context. }</p>
       } @else if (failedLanes.includes(query.lane)) {
         <p class="quality-note">This lane has partial results.</p>
       }
