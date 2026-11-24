@@ -9,7 +9,7 @@
       <mat-button-toggle [value]="lane">
         <span class="lane-copy">
           <span class="lane-label">{{ laneLabels[lane] }}</span>
-          <small>{{ laneCounts[lane] ?? 0 }} picks</small>
+          @if (laneCounts[lane] !== undefined) { <small>{{ laneCounts[lane] }} picks</small> }
         </span>
       </mat-button-toggle>
     }

@@ -6,7 +6,8 @@ import { ActivatedRoute, NavigationStart, Router, RouterLink, Scroll } from '@an
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { map } from 'rxjs';
+import { map, Subscription } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { ChampionCardComponent } from '../../components/champion-card/champion-card.component';
 import { EasyClashLineupComponent } from '../../components/easy-clash-lineup/easy-clash-lineup.component';
@@ -82,8 +83,14 @@ export class ResultsPageComponent implements OnInit {
     { initialValue: false },
   );
 
-  isLoading = true;
-  errorMessage = '';
+  requestState: 'loading' | 'success' | 'unavailable' | 'failure' = 'loading';
+  showSpinner = false;
+  private request?: Subscription;
+  private requestId = 0;
+  private retryFocusPending = false;
+  private readonly cancelRetryFocus = () => { this.retryFocusPending = false; };
+  private spinnerTimer?: ReturnType<typeof setTimeout>;
+  get isLoading(): boolean { return this.requestState === 'loading'; }
   filtersOpen = false;
   availableLanes: Lane[] = [...LANE_OPTIONS];
   laneCounts: Partial<Record<Lane, number>> = {};
@@ -127,6 +134,12 @@ export class ResultsPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.destroyRef.onDestroy(() => {
+      this.requestId++;
+      this.request?.unsubscribe();
+      clearTimeout(this.spinnerTimer);
+      this.stopRetryFocusTracking();
+    });
     this.breakpointObserver.observe('(max-width: 1080px)')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(({ matches }) => {
@@ -172,6 +185,11 @@ export class ResultsPageComponent implements OnInit {
     if (filter !== null) {
       this.updateQuery({ difficulty: filter });
     }
+  }
+
+  clearDifficulty(): void {
+    this.onDifficultyChange('all');
+    afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#picks-heading')?.focus({ preventScroll: true }), { injector: this.injector });
   }
 
   onModeChange(mode: ProductMode): void {
@@ -241,25 +259,68 @@ export class ResultsPageComponent implements OnInit {
     return `${this.laneLabels[this.query.lane]} picks`;
   }
 
+  get warnings(): string[] { return this.datasetMeta?.warnings ?? []; }
+  get failedLanes(): Lane[] { return this.datasetMeta?.failed_lanes ?? []; }
+  get missingLanes(): Lane[] { return this.dataset ? this.laneOrder.filter(lane => !Array.isArray(this.dataset?.data[lane])) : []; }
   get hasDatasetWarning(): boolean {
-    return Boolean(
-      this.datasetMeta && (this.datasetMeta.is_partial || this.datasetMeta.warnings.length || this.datasetMeta.failed_lanes.length),
-    );
+    return Boolean(this.datasetMeta?.is_partial || this.failedLanes.length || this.missingLanes.length ||
+      this.warnings.some((warning) => /only had .* patch|datacompleteness|source dataset is partial/i.test(warning)));
   }
-
-  get warningMessage(): string {
-    if (!this.datasetMeta) {
-      return '';
+  get qualityMessage(): string {
+    const notes: string[] = [];
+    if (this.failedLanes.length || this.warnings.some(w => /solo source dataset is partial/i.test(w))) notes.push('Ladder coverage is limited.');
+    if (this.missingLanes.length) notes.push('Some lanes are unavailable.');
+    if (this.warnings.some(w => /only had .* patch|datacompleteness/i.test(w))) notes.push('Professional coverage is limited.');
+    if (!notes.length && this.datasetMeta?.is_partial) notes.push('Some underlying data is partial.');
+    return notes.join(' ');
+  }
+  get lineupDataUnavailable(): boolean {
+    return this.missingLanes.length > 0 || this.failedLanes.some(lane => !this.dataset?.data[lane]?.length);
+  }
+  get laneAvailability(): 'eligible' | 'filtered' | 'empty' | 'unavailable' {
+    const lane = this.dataset?.data[this.query.lane];
+    if (!Array.isArray(lane) || (this.failedLanes.includes(this.query.lane) && !lane.length)) return 'unavailable';
+    if (!lane.length) return 'empty';
+    return this.champions.length ? 'eligible' : 'filtered';
+  }
+  get statusText(): string {
+    switch (this.requestState) {
+      case 'loading': return 'Loading recommendations';
+      case 'unavailable': return 'Dataset unavailable';
+      case 'failure': return 'Request failed';
+      case 'success': {
+        if (this.laneAvailability === 'unavailable') return 'Selected lane unavailable';
+        if (this.laneAvailability === 'empty') return 'No picks available in selected lane';
+        if (this.laneAvailability === 'filtered') {
+          return this.failedLanes.includes(this.query.lane)
+            ? 'No matching picks. Selected lane has partial results.'
+            : 'No matching picks';
+        }
+        const count = `${this.champions.length} ${this.champions.length === 1 ? 'pick' : 'picks'} available`;
+        return this.hasDatasetWarning
+          ? `${count}. Limited data coverage.`
+          : this.warnings.length || this.datasetMeta?.is_partial === undefined
+            ? `${count}. Review data details.`
+            : count;
+      }
     }
-
-    const failedLanes = this.datasetMeta.failed_lanes.map((lane) => this.laneLabels[lane]);
-    const failedCopy = failedLanes.length ? `Unavailable lanes: ${failedLanes.join(', ')}.` : '';
-    const warningCopy = this.datasetMeta.warnings[0] ?? 'Some of the underlying data is partial.';
-
-    return `${warningCopy} ${failedCopy}`.trim();
+  }
+  retry(event: Event): void {
+    const ownedFocus = document.activeElement === event.currentTarget;
+    this.loadDataset(this.datasetKey, ownedFocus);
   }
 
-  private loadDataset(nextKey: string): void {
+  private loadDataset(nextKey: string, retryFocus = false): void {
+    this.request?.unsubscribe();
+    this.stopRetryFocusTracking();
+    this.retryFocusPending = retryFocus;
+    if (retryFocus) {
+      document.addEventListener('pointerdown', this.cancelRetryFocus, true);
+      document.addEventListener('keydown', this.cancelRetryFocus, true);
+      document.addEventListener('focusin', this.cancelRetryFocus, true);
+    }
+    clearTimeout(this.spinnerTimer);
+    const requestId = ++this.requestId;
     this.datasetRendered = false;
     this.datasetKey = nextKey;
     this.dataset = null;
@@ -270,63 +331,95 @@ export class ResultsPageComponent implements OnInit {
     this.easyClashLineup = null;
     this.banPriorities.clear();
     this.laneCounts = {};
-    this.errorMessage = '';
-    this.isLoading = true;
-
-    const requestKey = nextKey;
+    this.availableLanes = [...this.laneOrder];
+    this.requestState = 'loading';
+    this.showSpinner = false;
+    this.spinnerTimer = setTimeout(() => { if (requestId === this.requestId) this.showSpinner = true; }, 200);
     const historyNavigationId = this.historyNavigationId;
     const dataset$ = this.query.mode === 'teamplay'
       ? this.tierlistService.getTeamplayDataset(this.query.region, this.query.tier, this.query.window)
       : this.tierlistService.getDataset(this.query.region, this.query.tier, this.query.window);
+    this.request = dataset$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (dataset) => {
+        if (requestId !== this.requestId) return;
+        if (!this.isValidDataset(dataset)) {
+          this.finishFailure('failure');
+          return;
+        }
+        clearTimeout(this.spinnerTimer);
+        this.dataset = dataset;
+        this.easyClashLineup = this.query.mode === 'teamplay' ? buildEasyClashLineup(dataset) : null;
+        this.availableLanes = this.laneOrder.filter(lane => Array.isArray(dataset.data[lane]) && (dataset.data[lane]!.length > 0 || !this.failedLanes.includes(lane)));
+        this.laneCounts = this.laneOrder.reduce<Partial<Record<Lane, number>>>((counts, lane) => {
+          if (Array.isArray(dataset.data[lane])) counts[lane] = dataset.data[lane]!.length;
+          return counts;
+        }, {});
+        this.requestState = 'success';
+        this.refreshView();
+        afterNextRender(() => {
+          if (requestId !== this.requestId) return;
+          if (this.retryFocusPending && (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+            this.element.nativeElement.querySelector<HTMLElement>('#picks-heading')?.focus({ preventScroll: true });
+          }
+          this.stopRetryFocusTracking();
+          if (historyNavigationId !== null && this.historyNavigationId === historyNavigationId) {
+            this.datasetRendered = true;
+            this.restoreHistoryPosition();
+          }
+        }, { injector: this.injector });
+      },
+      error: (error: unknown) => {
+        if (requestId !== this.requestId) return;
+        this.finishFailure(error instanceof HttpErrorResponse && (error.status === 404 || error.status === 410) ? 'unavailable' : 'failure');
+      },
+    });
+  }
 
-    dataset$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (dataset) => {
-          if (this.datasetKey !== requestKey) {
-            return;
-          }
+  private isValidDataset(dataset: TierlistDataset): boolean {
+    if (!dataset || typeof dataset !== 'object' || !dataset.data || typeof dataset.data !== 'object' || Array.isArray(dataset.data) || !dataset.meta || typeof dataset.meta !== 'object' || Array.isArray(dataset.meta)) return false;
+    const meta = dataset.meta;
+    if (meta.generated_at_utc && (typeof meta.generated_at_utc !== 'string' || !Number.isFinite(Date.parse(meta.generated_at_utc)))) return false;
+    if (meta.warnings != null && (!Array.isArray(meta.warnings) || meta.warnings.some(w => typeof w !== 'string'))) return false;
+    if (meta.failed_lanes != null && (!Array.isArray(meta.failed_lanes) || meta.failed_lanes.some(lane => !this.laneOrder.includes(lane)))) return false;
+    if (meta.leagues_used != null && !Array.isArray(meta.leagues_used)) return false;
+    if (meta.patches_used != null && !Array.isArray(meta.patches_used)) return false;
+    return this.laneOrder.every(lane => {
+      const champions = dataset.data[lane];
+      return champions == null || (Array.isArray(champions) && champions.every(champion => champion && typeof champion === 'object' && typeof champion.name === 'string'));
+    });
+  }
 
-          this.dataset = dataset;
-          this.easyClashLineup = this.query.mode === 'teamplay'
-            ? buildEasyClashLineup(dataset)
-            : null;
-          this.availableLanes = this.laneOrder.filter((lane) => Array.isArray(dataset.data[lane]));
-          this.laneCounts = this.laneOrder.reduce<Partial<Record<Lane, number>>>((counts, lane) => {
-            counts[lane] = dataset.data[lane]?.length ?? 0;
-            return counts;
-          }, {});
-          if (!this.availableLanes.length) {
-            this.availableLanes = [...this.laneOrder];
-          }
-          if (!this.availableLanes.includes(this.query.lane)) {
-            this.updateQuery({ lane: this.availableLanes[0] });
-            return;
-          }
-          this.isLoading = false;
-          this.refreshView();
-          if (historyNavigationId !== null) {
-            afterNextRender(() => {
-              if (this.datasetKey !== requestKey || this.historyNavigationId !== historyNavigationId) {
-                return;
-              }
-              this.datasetRendered = true;
-              this.restoreHistoryPosition();
-            }, { injector: this.injector });
-          }
-        },
-        error: () => {
-          if (this.datasetKey !== requestKey) {
-            return;
-          }
+  private stopRetryFocusTracking(): void {
+    document.removeEventListener('pointerdown', this.cancelRetryFocus, true);
+    document.removeEventListener('keydown', this.cancelRetryFocus, true);
+    document.removeEventListener('focusin', this.cancelRetryFocus, true);
+    this.retryFocusPending = false;
+  }
 
-          this.errorMessage =
-            this.query.mode === 'teamplay'
-              ? 'No teamplay dataset is available for this selection yet.'
-              : 'No solo queue dataset is available for this selection yet.';
-          this.isLoading = false;
-        },
-      });
+  private finishFailure(state: 'unavailable' | 'failure'): void {
+    clearTimeout(this.spinnerTimer);
+    this.showSpinner = false;
+    this.requestState = state;
+    const requestId = this.requestId;
+    const historyNavigationId = this.historyNavigationId;
+    afterNextRender(() => {
+      if (requestId !== this.requestId) return;
+      if (this.retryFocusPending && (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+        const target = state === 'failure'
+          ? this.element.nativeElement.querySelector<HTMLElement>('.recovery-state__action')
+          : this.element.nativeElement.querySelector<HTMLElement>('.recovery-state[tabindex="-1"]');
+        target?.focus({ preventScroll: true });
+      }
+      this.stopRetryFocusTracking();
+    }, { injector: this.injector });
+    if (historyNavigationId !== null) {
+      afterNextRender(() => {
+        if (requestId === this.requestId && historyNavigationId === this.historyNavigationId) {
+          this.datasetRendered = true;
+          this.restoreHistoryPosition();
+        }
+      }, { injector: this.injector });
+    }
   }
 
   private refreshView(): void {
