@@ -80,7 +80,9 @@
           <mat-option value="hard">Hard</mat-option>
         </mat-select>
       </mat-form-field>
-      <button type="button" class="difficulty-help" [attr.aria-expanded]="showDifficultyHelp" (click)="showDifficultyHelp = !showDifficultyHelp">About difficulty</button>
+      <button type="button" class="difficulty-help" aria-label="About difficulty" [attr.aria-expanded]="showDifficultyHelp" (click)="showDifficultyHelp = !showDifficultyHelp">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      </button>
       @if (showDifficultyHelp) {
         <p class="difficulty-explanation">Difficulty is relative to the selected mode, rank, region, window, and lane pool.</p>
       }
