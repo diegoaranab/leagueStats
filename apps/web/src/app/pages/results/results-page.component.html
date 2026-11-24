@@ -7,7 +7,7 @@
     [opened]="filtersOpen"
     [autoFocus]="false"
     (opened)="focusFilters()"
-    (closedStart)="filtersOpen = false"
+    (closedStart)="onFiltersClosedStart()"
     (closed)="restoreFilterFocus()"
     >
     <app-filter-bar

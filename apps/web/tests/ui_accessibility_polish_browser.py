@@ -3,6 +3,7 @@ import copy
 import functools
 import http.server
 import os
+import re
 from pathlib import Path
 import tempfile
 import threading
@@ -50,7 +51,8 @@ def run():
                     expect(page.locator('h1')).to_be_focused()
                     cards = page.locator('.picks-list app-champion-card')
                     expect(cards).to_have_count(5)
-                    expect(page.locator('.context-line')).to_contain_text('5 picks')
+                    expect(page.locator('.context-line span').last).to_have_text('5 picks')
+                    expect(page.get_by_role('radio', name='Top', exact=False).locator('small')).to_have_text('5 picks')
                     for card in cards.all()[:2]:
                         name = card.locator('h3').inner_text()
                         button = card.get_by_role('button', name='More details about ' + name, exact=True)
@@ -62,12 +64,12 @@ def run():
                         page.screenshot(path=f'/tmp/ui-polish-{mode}-details.png')
                         page.keyboard.press('Enter'); expect(panel).to_be_hidden()
                     page.get_by_role('radio', name='Jungle', exact=False).click()
-                    expect(page.locator('.context-line')).to_contain_text('1 pick')
-                    expect(page.get_by_role('radio', name='Jungle', exact=False)).to_contain_text('1 pick')
+                    expect(page.locator('.context-line span').last).to_have_text('1 pick')
+                    expect(page.get_by_role('radio', name='Jungle', exact=False).locator('small')).to_have_text('1 pick')
                     page.screenshot(path=f'/tmp/ui-polish-{mode}-one.png')
                     page.goto(base + '/results/?mode=' + mode + '&region=na&tier=gold&window=7d&lane=jungle&sort=tier&difficulty=easy')
-                    expect(page.locator('.context-line')).to_contain_text('0 picks')
-                    expect(page.get_by_role('radio', name='Jungle', exact=False)).to_contain_text('1 pick')
+                    expect(page.locator('.context-line span').last).to_have_text('0 picks')
+                    expect(page.get_by_role('radio', name='Jungle', exact=False).locator('small')).to_have_text('1 pick')
                 for path in ('/', '/results/?mode=solo&' + QUERY, '/results/?mode=teamplay&' + QUERY):
                     page.goto(base + path)
                     if path.startswith('/results'):
@@ -98,19 +100,20 @@ def run():
                     page.route('**/data/**/*.json', lambda route: route.fulfill(json=missing))
                     page.goto(base + '/results/?mode=' + mode + '&' + QUERY)
                     expect(page.get_by_role('status')).to_have_text('Selected lane unavailable')
-                    expect(page.locator('.context-line')).not_to_contain_text('0 picks')
+                    expect(page.locator('.context-line span')).to_have_count(5)
                     expect(page.get_by_role('radio', name='Top', exact=False)).to_have_count(0)
                     page.unroute('**/data/**/*.json')
                     page.route('**/data/**/*.json', lambda route: route.fulfill(status=404))
                     page.reload()
                     expect(page.get_by_role('status')).to_have_text('Dataset unavailable')
-                    expect(page.locator('.context-line')).not_to_contain_text('0 picks')
+                    expect(page.locator('.context-line span')).to_have_count(5)
+                    expect(page.locator('app-lane-tabs small')).to_have_count(0)
                 page.unroute('**/data/**/*.json')
                 pending = []
                 page.route('**/data/**/*.json', lambda route: pending.append(route))
                 page.goto(base + '/results/?mode=solo&' + QUERY)
                 expect(page.get_by_role('status')).to_contain_text('Loading')
-                expect(page.locator('.context-line')).not_to_contain_text('0 picks')
+                expect(page.locator('.context-line span')).to_have_count(5)
                 expect(page.locator('app-lane-tabs small')).to_have_count(0)
                 assert pending
                 pending.pop().fulfill(json=solo)
@@ -135,17 +138,36 @@ def run():
                         assert page.evaluate("document.querySelector('main').getBoundingClientRect().top >= document.querySelector('.topbar').getBoundingClientRect().bottom - 1")
                         page.screenshot(path='/tmp/ui-polish-200-root.png')
                 page.close()
-                page = browser.new_page(viewport={'width': 390, 'height': 844})
-                page.route('**/data/**/*.json', lambda route: route.fulfill(json=team if '/teamplay/' in route.request.url else solo))
-                page.goto(base + '/results/?mode=solo&' + QUERY)
-                expect(page.locator('h1')).to_be_focused()
-                trigger = page.get_by_role('button', name='Filters', exact=True)
-                trigger.click()
-                drawer = page.get_by_role('dialog', name='Refine results')
-                expect(drawer).to_be_visible()
-                expect(drawer.get_by_role('heading', name='Refine results')).to_be_focused()
-                drawer.get_by_role('button', name='Close filters').click()
-                expect(trigger).to_be_focused()
+                for motion in ('reduce', 'no-preference'):
+                    page = browser.new_page(viewport={'width': 390, 'height': 844}, reduced_motion=motion)
+                    page.route('**/data/**/*.json', lambda route: route.fulfill(json=team if '/teamplay/' in route.request.url else solo))
+                    for mode in ('solo', 'teamplay'):
+                        page.goto(base + '/results/?mode=' + mode + '&' + QUERY)
+                        expect(page.locator('h1')).to_be_focused()
+                        trigger = page.get_by_role('button', name='Filters', exact=True)
+                        drawer = page.locator('mat-drawer.results-shell__drawer')
+                        heading = drawer.get_by_role('heading', name='Refine results', exact=True)
+                        for dismissal in ('Escape', 'Close', 'Backdrop', 'Escape'):
+                            print(f'Drawer cycle: {mode}, {motion}, {dismissal}', flush=True)
+                            trigger.focus()
+                            expect(trigger).to_be_focused()
+                            page.keyboard.press('Enter')
+                            expect(drawer).to_have_class(re.compile(r'\bmat-drawer-opened\b'))
+                            expect(drawer).to_be_visible()
+                            expect(heading).to_be_focused()
+                            assert heading.evaluate("e => e.getBoundingClientRect().top >= document.querySelector('.topbar').getBoundingClientRect().bottom - 1")
+                            if dismissal == 'Escape':
+                                page.keyboard.press('Escape')
+                            elif dismissal == 'Close':
+                                drawer.get_by_role('button', name='Close filters').click()
+                            else:
+                                backdrop = page.locator('.mat-drawer-backdrop')
+                                backdrop.click(position={'x': backdrop.bounding_box()['width'] - 5, 'y': 100})
+                            expect(drawer).not_to_have_class(re.compile(r'\bmat-drawer-opened\b'))
+                            expect(drawer).to_be_hidden()
+                            expect(trigger).to_be_focused()
+                        print(f'Drawer checks passed: {mode}, {motion}', flush=True)
+                    page.close()
                 browser.close()
         finally:
             if server:
