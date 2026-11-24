@@ -2,6 +2,24 @@
   min-height: 100vh;
 }
 
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: .5rem;
+  left: .5rem;
+  transform: translateY(-200%);
+  padding: .75rem 1rem;
+  border: 2px solid var(--focus);
+  border-radius: 8px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.skip-link:focus { transform: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+.shell:focus { outline: 2px solid var(--focus); outline-offset: 3px; }
+
 .topbar {
   position: sticky;
   top: 0;
@@ -60,7 +78,8 @@
 }
 
 .toolbar-nav a.is-active {
-  filter: brightness(1.08);
+  box-shadow: inset 0 -3px 0 var(--action);
+  font-weight: 700;
 }
 
 .app-layout {

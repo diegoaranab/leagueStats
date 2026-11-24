@@ -40,7 +40,7 @@
             <span>{{ windowLabels[query.window] }}</span>
             <span>Sort: {{ sortLabels[query.sort] }}</span>
             <span>Difficulty: {{ query.difficulty === 'all' ? 'All levels' : (query.difficulty | titlecase) }}</span>
-            @if (requestState === 'success' && laneAvailability !== 'unavailable') { <span>{{ champions.length }} picks</span> }
+            @if (requestState === 'success' && laneAvailability !== 'unavailable') { <span>{{ champions.length }} {{ champions.length === 1 ? 'pick' : 'picks' }}</span> }
           </p>
         </div>
 

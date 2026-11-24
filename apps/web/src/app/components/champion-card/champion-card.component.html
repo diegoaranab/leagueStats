@@ -95,6 +95,7 @@
   <button
     class="card-details"
     type="button"
+    [attr.aria-label]="'More details about ' + champion.name"
     [attr.aria-expanded]="detailsOpen"
     [attr.aria-controls]="detailsPanelId"
     (click)="detailsOpen = !detailsOpen"
