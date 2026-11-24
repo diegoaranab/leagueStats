@@ -1,4 +1,4 @@
-<div class="mode-selector" [class.mode-selector--compact]="variant === 'compact'">
+<div class="mode-selector" [class.mode-selector--compact]="variant === 'compact'" [class.mode-selector--feature]="variant === 'feature'" role="group" [attr.aria-label]="variant === 'feature' ? 'Queue' : 'Mode'">
   @for (mode of modes; track mode) {
     <button
       type="button"
@@ -8,11 +8,12 @@
       (click)="modeChange.emit(mode)"
       >
       <span class="mode-kicker">{{ modeDetails[mode].kicker }}</span>
+      @if (variant === 'feature') { <span class="selection-mark" aria-hidden="true">{{ mode === selectedMode ? '✓' : '' }}</span> }
       <span class="mode-label">{{ modeDetails[mode].label }}</span>
       <span class="mode-description">
         {{
         variant === 'feature'
-        ? modeDetails[mode].description
+        ? (mode === 'solo' ? 'Based on ranked ladder performance.' : 'Professional draft signals and ladder viability.')
         : (mode === 'solo' ? 'Ranked performance' : 'Draft + pro presence')
         }}
       </span>

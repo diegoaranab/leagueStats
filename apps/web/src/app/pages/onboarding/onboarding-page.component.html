@@ -1,27 +1,14 @@
 <section class="onboarding-page">
-  <div class="hero-copy">
-    <p class="eyebrow">Context-Aware Pick Guidance</p>
-    <h1>Find stronger picks for the way you play.</h1>
-    <p class="hero-description meta-text">
-      Choose your queue and context, then scan recommendations built for your games.
-    </p>
-  </div>
-
-  <section class="setup-card surface-panel" aria-labelledby="setup-title">
-    <header class="setup-card__header">
-      <div>
-        <p class="eyebrow">Choose mode</p>
-        <h2 id="setup-title">Set up your tier list</h2>
-      </div>
-    </header>
-
+  <h1>Set up your picks</h1>
+  <section class="setup" aria-label="Recommendation setup">
+    <h2 id="queue-label">Queue</h2>
     <app-mode-selector
       [selectedMode]="form.controls.mode.value"
       (modeChange)="form.controls.mode.setValue($event)"
     ></app-mode-selector>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="setup-form">
-      <h3>Choose context</h3>
+
       <div class="selector-grid">
         <mat-form-field appearance="outline">
           <mat-label>Region</mat-label>
