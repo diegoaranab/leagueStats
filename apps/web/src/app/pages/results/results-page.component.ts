@@ -201,6 +201,12 @@ export class ResultsPageComponent implements OnInit {
     this.element.nativeElement.querySelector<HTMLElement>('#canonical-pick')?.scrollIntoView({ block: 'center' });
   }
 
+  jumpToTask(id: string): void {
+    const heading = this.element.nativeElement.querySelector<HTMLElement>(`#${id}`);
+    heading?.scrollIntoView({ block: 'start' });
+    heading?.focus({ preventScroll: true });
+  }
+
   banPriorityFor(champion: Champion): number | null {
     return this.banPriorities.get(champion.name) ?? null;
   }

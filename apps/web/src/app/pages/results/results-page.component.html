@@ -130,9 +130,13 @@
   }
 
   @if (!isLoading && !errorMessage) {
+    <div class="results-tasks" [class.results-tasks--teamplay]="query.mode === 'teamplay'">
     <section class="picks" aria-labelledby="picks-heading">
       <div class="picks-heading">
-        <h2 id="picks-heading">Ranked picks</h2>
+        <h2 id="picks-heading" tabindex="-1">Ranked picks</h2>
+        @if (query.mode === 'teamplay') {
+          <button type="button" class="canonical-jump task-jump" (click)="jumpToTask('draft-heading')">Go to Draft</button>
+        }
         @if (spotlightChampion && query.sort !== 'tier') {
           <button type="button" class="canonical-jump" (click)="jumpToCanonical()">Jump to recommended pick</button>
         }
@@ -151,14 +155,26 @@
         }
       </ul>
     </section>
-    <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
-    @if (query.mode === 'teamplay' && easyClashLineup) {
+    @if (query.mode === 'teamplay') {
+      <section class="draft" aria-labelledby="draft-heading">
+        <header class="draft__header">
+          <h2 id="draft-heading" tabindex="-1">Draft</h2>
+          <p>Denial priorities and a five-role lineup for Flex / Clash.</p>
+          <button type="button" class="canonical-jump task-jump" (click)="jumpToTask('picks-heading')">Return to Picks</button>
+        </header>
+        <app-recommended-bans class="teamplay" [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
+        @if (easyClashLineup) {
       <app-easy-clash-lineup
         [lineup]="easyClashLineup"
         [expanded]="easyClashLineupExpanded"
         (expandedChange)="easyClashLineupExpanded = $event"
       ></app-easy-clash-lineup>
+        }
+      </section>
+    } @else {
+      <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
     }
+    </div>
   }
 </mat-drawer-content>
 </mat-drawer-container>

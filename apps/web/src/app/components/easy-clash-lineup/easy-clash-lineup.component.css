@@ -228,3 +228,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+.easy-lineup { padding: 1rem 0 0; border: 0; border-top: 1px solid var(--divider); border-radius: 0; background: transparent; overflow: visible; }
+.easy-lineup__intro { flex-direction: column; align-items: start; }
+.easy-lineup__title-group { align-items: start; }
+.easy-lineup__icon, .easy-lineup__title-group .eyebrow { display: none; }
+.easy-lineup__intro button { min-height: 44px; max-width: 100%; height: auto; white-space: normal; }
+.easy-lineup__grid { grid-template-columns: 1fr; gap: 0; }
+.role-card { grid-template-columns: minmax(65px, .5fr) minmax(0, 1fr); align-items: center; gap: .5rem; padding: .5rem 0; border: 0; border-bottom: 1px solid var(--divider); border-radius: 0; background: transparent; }
+.role-card__lane { color: var(--text-secondary); letter-spacing: normal; text-transform: none; }
+.role-card__champion img { border-radius: 5px; }
+.role-card__champion h3 { overflow: visible; white-space: normal; overflow-wrap: anywhere; }
+.role-card__signals { grid-column: 2; }
+@media (max-width: 390px) { .easy-lineup { padding: 1rem 0 0; } }
