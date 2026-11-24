@@ -38,12 +38,12 @@ def run():
             page = browser.new_page(viewport={'width': 390, 'height': 844})
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
-            page.add_init_script('''() => {
+            page.add_init_script('''(() => {
                 window.spinnerSeen = false;
                 new MutationObserver(() => {
                     if (document.querySelector('[role="progressbar"][aria-label="Loading recommendations"]')) window.spinnerSeen = true;
                 }).observe(document, { childList: true, subtree: true });
-            }''')
+            })();''')
             solo, team = fixture('states')
             solo['meta'].update(source='fixture', generated_at_utc='2026-01-01T00:00:00Z')
             state = {'payload': solo, 'status': 200, 'abort': False, 'malformed': False}
@@ -57,7 +57,7 @@ def run():
             page.route('**/data/**/*.json', response)
             page.goto(base + '/results/' + QUERY)
             expect(page.get_by_role('status')).to_have_text('2 picks available')
-            assert not page.evaluate('window.spinnerSeen'), 'Fast load flashed a spinner'
+            assert page.evaluate('window.spinnerSeen') is False, 'Fast load flashed a spinner or observer was not initialized'
             page.get_by_text('Data details', exact=True).click()
             expect(page.get_by_text('Source: fixture')).to_be_visible()
             page.screenshot(path='/tmp/results-data-healthy-details.png')
@@ -290,6 +290,12 @@ async def check_loading_and_races(base):
         page = await browser.new_page(viewport={'width': 1366, 'height': 768})
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
+        await page.add_init_script('''(() => {
+            window.spinnerSeen = false;
+            new MutationObserver(() => {
+                if (document.querySelector('[role="progressbar"][aria-label="Loading recommendations"]')) window.spinnerSeen = true;
+            }).observe(document, { childList: true, subtree: true });
+        })();''')
 
         async def response(route):
             requests.append(route.request.url)
@@ -311,8 +317,10 @@ async def check_loading_and_races(base):
 
         await page.route('**/data/**/*.json', response)
         await page.goto(base + '/results/' + QUERY, wait_until='domcontentloaded')
+        assert await page.evaluate('window.spinnerSeen') is False, 'Slow-load observer did not initialize to false'
         await async_expect(page.get_by_role('status')).to_have_text('Loading recommendations')
         await async_expect(page.get_by_role('progressbar', name='Loading recommendations')).to_be_visible()
+        await page.wait_for_function('window.spinnerSeen === true')
         await page.screenshot(path='/tmp/results-data-loading.png')
         region = page.get_by_role('combobox', name='Region')
         await region.click()
