@@ -239,3 +239,9 @@
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
+
+.data-details { color: var(--text-secondary); }
+.data-details summary { cursor: pointer; }
+.data-details p, .data-details ul { margin: .4rem 0; overflow-wrap: anywhere; }
+.data-details summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.quality-note { color: #ffc676; margin-top: .5rem; }

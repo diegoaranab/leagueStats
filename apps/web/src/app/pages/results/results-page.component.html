@@ -40,7 +40,7 @@
             <span>{{ windowLabels[query.window] }}</span>
             <span>Sort: {{ sortLabels[query.sort] }}</span>
             <span>Difficulty: {{ query.difficulty === 'all' ? 'All levels' : (query.difficulty | titlecase) }}</span>
-            <span>{{ champions.length }} picks</span>
+            @if (requestState === 'success' && laneAvailability !== 'unavailable') { <span>{{ champions.length }} picks</span> }
           </p>
         </div>
 
@@ -55,42 +55,27 @@
         </div>
       </div>
 
+      <div class="dataset-line" role="status" aria-live="polite" aria-atomic="true">{{ statusText }}</div>
       @if (datasetMeta) {
         <div class="dataset-line">
-          <span class="freshness" [class.freshness--warning]="hasDatasetWarning">
-            <span class="freshness__dot" aria-hidden="true"></span>
-            {{ hasDatasetWarning ? 'Data needs attention' : 'Dataset ready' }}
-          </span>
-          <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span>
-          @if (query.mode === 'teamplay' && datasetMeta.leagues_used?.length) {
-            <span>
-              {{ datasetMeta.leagues_used?.join(' · ') }}
-            </span>
-          }
-          @if (query.mode === 'teamplay' && datasetMeta.patches_used?.length) {
-            <span>
-              Patches {{ datasetMeta.patches_used?.join(', ') }}
-            </span>
-          }
-          @if (query.mode === 'teamplay' && datasetMeta.oracle_last_match_at) {
-            <span>
-              Pro data through {{ datasetMeta.oracle_last_match_at | date: 'mediumDate': 'UTC' }}@if (datasetMeta.oracle_source === 'cache') {
-              &ngsp;· cached source
-            }
-          </span>
-        }
-      </div>
-    }
-
-    @if (datasetMeta && hasDatasetWarning) {
-      <div class="warning-banner">
-        <span class="material-symbols-outlined">warning</span>
-        <div>
-          <strong>Data quality note</strong>
-          <span>{{ warningMessage }}</span>
+          @if (datasetMeta.oracle_source === 'cache') { <span>Cached professional source</span> }
+          @if (datasetMeta.generated_at_utc) { <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span> }
+          <details class="data-details">
+            <summary>Data details</summary>
+            @if (datasetMeta.source) { <p>Source: {{ datasetMeta.source }}</p> }
+            @if (datasetMeta.generated_at_utc) { <p>Generated: {{ datasetMeta.generated_at_utc }}</p> }
+            @if (failedLanes.length) { <p>Affected lanes: {{ failedLanes.join(', ') }}</p> }
+            @if (missingLanes.length) { <p>Unavailable lanes: {{ missingLanes.join(', ') }}</p> }
+            @if (datasetMeta.leagues_used?.length) { <p>Professional leagues: {{ datasetMeta.leagues_used?.join(', ') }}</p> }
+            @if (datasetMeta.patches_used?.length) { <p>Patches: {{ datasetMeta.patches_used?.join(', ') }}</p> }
+            @if (datasetMeta.oracle_last_match_at) { <p>Latest professional match: {{ datasetMeta.oracle_last_match_at }}</p> }
+            @if (datasetMeta.oracle_source) { <p>Oracle source: {{ datasetMeta.oracle_source }}</p> }
+            @if (datasetMeta.oracle_downloaded_at) { <p>Oracle downloaded: {{ datasetMeta.oracle_downloaded_at }}</p> }
+            @if (warnings.length) { <p>Warnings:</p><ul>@for (warning of warnings; track $index) { <li>{{ warning }}</li> }</ul> }
+          </details>
         </div>
-      </div>
-    }
+        @if (hasDatasetWarning) { <p class="quality-note">{{ qualityMessage }} See Data details for the available evidence.</p> }
+      }
   </section>
 
   @if (!isCompact()) {
@@ -123,19 +108,17 @@
     ></app-lane-tabs>
   </section>
 
-  @if (isLoading) {
-    <div class="state">
-      <mat-spinner diameter="42"></mat-spinner>
-    </div>
+  @if (isLoading && showSpinner) {
+    <div class="state"><mat-spinner diameter="42" aria-label="Loading recommendations"></mat-spinner></div>
+  }
+  @if (requestState === 'unavailable') {
+    <div class="state">The selected dataset is unavailable. Use Change setup or filters to choose another context.</div>
+  }
+  @if (requestState === 'failure') {
+    <div class="state error">Recommendations could not be loaded. <button mat-stroked-button type="button" (click)="retry($event)">Retry</button></div>
   }
 
-  @if (!isLoading && errorMessage) {
-    <div class="state error">
-      {{ errorMessage }}
-    </div>
-  }
-
-  @if (!isLoading && !errorMessage) {
+  @if (requestState === 'success') {
     <div class="results-tasks" [class.results-tasks--teamplay]="query.mode === 'teamplay'">
     <section class="picks" aria-labelledby="picks-heading">
       <div class="picks-heading">
@@ -147,6 +130,15 @@
           <button type="button" class="canonical-jump" (click)="jumpToCanonical()">Jump to recommended pick</button>
         }
       </div>
+      @if (laneAvailability === 'filtered') {
+        <p>No picks match {{ query.difficulty | titlecase }} difficulty. <button mat-stroked-button type="button" (click)="clearDifficulty()">Clear difficulty</button></p>
+      } @else if (laneAvailability === 'empty') {
+        <p>There are no picks in this lane.</p>
+      } @else if (laneAvailability === 'unavailable') {
+        <p>Data for this lane is unavailable. @if (availableLanes.length) { Choose another available lane above. } @else { Change setup or filters to choose another context. }</p>
+      } @else if (failedLanes.includes(query.lane)) {
+        <p class="quality-note">This lane has partial results.</p>
+      }
       <ul class="picks-list">
         @for (champion of champions; track trackByChampion($index, champion)) {
           <li>
@@ -168,8 +160,9 @@
           <p>Denial priorities and a five-role lineup for Flex / Clash.</p>
           <button type="button" class="canonical-jump task-jump" (click)="jumpToTask('picks-heading')">Return to Picks</button>
         </header>
-        <app-recommended-bans class="teamplay" [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
-        @if (easyClashLineup) {
+        @if (laneAvailability !== 'unavailable') { <app-recommended-bans class="teamplay" [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans> }
+        @if (lineupDataUnavailable) { <p>Lineup unavailable because lane data is missing.</p> }
+        @if (easyClashLineup && !lineupDataUnavailable) {
       <app-easy-clash-lineup
         [lineup]="easyClashLineup"
         [expanded]="easyClashLineupExpanded"
@@ -178,7 +171,7 @@
         }
       </section>
     } @else {
-      <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans>
+      @if (laneAvailability !== 'unavailable') { <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans> }
     }
     </div>
   }
