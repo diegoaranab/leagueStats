@@ -40,7 +40,7 @@
 
 .control-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(136px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   gap: 0.65rem;
   flex: 1 1 760px;
   min-width: 0;
@@ -71,7 +71,7 @@
 
 @media (max-width: 1420px) {
   .bar:not(.bar--drawer) {
-    align-items: end;
+    align-items: start;
     flex-wrap: wrap;
   }
 
@@ -80,6 +80,19 @@
   }
 
   .bar:not(.bar--drawer) .control-grid {
-    grid-template-columns: repeat(5, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   }
+}
+
+.difficulty-control { min-width: 0; display: grid; align-content: start; }
+.difficulty-help { min-height: 44px; justify-self: start; color: var(--text-primary); background: transparent; border: 0; text-decoration: underline; font: inherit; cursor: pointer; }
+.difficulty-help:focus-visible, .bar__header h2:focus { outline: 2px solid var(--focus); outline-offset: 3px; }
+.difficulty-explanation { color: var(--text-secondary); line-height: 1.4; margin: 0 0 .5rem; }
+.bar__header h2 { scroll-margin-top: 5rem; }
+
+/* Material's single-line value truncation hides long regions at enlarged text sizes. */
+:host ::ng-deep .mat-mdc-select-value,
+:host ::ng-deep .mat-mdc-select-value-text {
+  white-space: normal;
+  overflow: visible;
 }

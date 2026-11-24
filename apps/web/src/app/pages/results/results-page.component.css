@@ -234,3 +234,8 @@
   .results-tasks--teamplay .draft { border-top: 0; border-left: 1px solid var(--divider); padding: 0 0 0 20px; }
   .task-jump { display: none; }
 }
+
+.filters-trigger:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}

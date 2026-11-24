@@ -3,7 +3,7 @@
     <header class="bar__header">
       <div>
         <p class="eyebrow">Filters</p>
-        <h2>Refine results</h2>
+        <h2 tabindex="-1">Refine results</h2>
       </div>
       <button
         mat-icon-button
@@ -70,14 +70,20 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Difficulty</mat-label>
-      <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
-        <mat-option value="all">All levels</mat-option>
-        <mat-option value="easy">Easy</mat-option>
-        <mat-option value="medium">Medium</mat-option>
-        <mat-option value="hard">Hard</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="difficulty-control">
+      <mat-form-field appearance="outline">
+        <mat-label>Difficulty</mat-label>
+        <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
+          <mat-option value="all">All levels</mat-option>
+          <mat-option value="easy">Easy</mat-option>
+          <mat-option value="medium">Medium</mat-option>
+          <mat-option value="hard">Hard</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button type="button" class="difficulty-help" [attr.aria-expanded]="showDifficultyHelp" (click)="showDifficultyHelp = !showDifficultyHelp">About difficulty</button>
+      @if (showDifficultyHelp) {
+        <p class="difficulty-explanation">Difficulty is relative to the selected mode, rank, region, window, and lane pool.</p>
+      }
+    </div>
   </div>
 </section>

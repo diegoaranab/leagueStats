@@ -11,7 +11,6 @@ import { map } from 'rxjs';
 import { ChampionCardComponent } from '../../components/champion-card/champion-card.component';
 import { EasyClashLineupComponent } from '../../components/easy-clash-lineup/easy-clash-lineup.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
-import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 import { LaneTabsComponent } from '../../components/lane-tabs/lane-tabs.component';
 import { RecommendedBansComponent } from '../../components/recommended-bans/recommended-bans.component';
 import {
@@ -19,7 +18,7 @@ import {
   LANE_LABELS,
   MODE_DETAILS,
   ProductMode,
-  REGION_SHORT_LABELS,
+  REGION_LABELS,
   ResultsQuery,
   TIER_LABELS,
   WINDOW_LABELS,
@@ -56,7 +55,6 @@ import {
     ChampionCardComponent,
     EasyClashLineupComponent,
     RecommendedBansComponent,
-    InfoTooltipComponent,
   ],
   templateUrl: './results-page.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -66,7 +64,8 @@ export class ResultsPageComponent implements OnInit {
   readonly laneOrder: Lane[] = [...LANE_OPTIONS];
   readonly laneLabels = LANE_LABELS;
   readonly modeDetails = MODE_DETAILS;
-  readonly regionShortLabels = REGION_SHORT_LABELS;
+  readonly regionLabels = REGION_LABELS;
+  readonly sortLabels: Record<SortOption, string> = { tier: 'Tier rank', win_rate: 'Win rate', pick_rate: 'Pick rate', difficulty: 'Difficulty', ban_priority: 'Ban priority' };
   readonly tierLabels = TIER_LABELS;
   readonly windowLabels = WINDOW_LABELS;
 
@@ -128,6 +127,12 @@ export class ResultsPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.breakpointObserver.observe('(max-width: 1080px)')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ matches }) => {
+        if (!matches && this.filtersOpen) this.closeFilters();
+      });
+
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -191,6 +196,19 @@ export class ResultsPageComponent implements OnInit {
 
   closeFilters(): void {
     this.filtersOpen = false;
+  }
+
+  focusFilters(): void {
+    const heading = this.element.nativeElement.querySelector<HTMLElement>('.results-shell__drawer h2');
+    heading?.scrollIntoView({ block: 'center' });
+    heading?.focus({ preventScroll: true });
+  }
+
+  restoreFilterFocus(): void {
+    if (this.filtersOpen) return;
+    const target = this.element.nativeElement.querySelector<HTMLElement>('.filters-trigger')
+      ?? this.element.nativeElement.querySelector<HTMLElement>('h1');
+    target?.focus();
   }
 
   trackByChampion(_index: number, champion: Champion): string {
@@ -273,7 +291,6 @@ export class ResultsPageComponent implements OnInit {
           this.easyClashLineup = this.query.mode === 'teamplay'
             ? buildEasyClashLineup(dataset)
             : null;
-          this.filtersOpen = false;
           this.availableLanes = this.laneOrder.filter((lane) => Array.isArray(dataset.data[lane]));
           this.laneCounts = this.laneOrder.reduce<Partial<Record<Lane, number>>>((counts, lane) => {
             counts[lane] = dataset.data[lane]?.length ?? 0;

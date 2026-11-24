@@ -1,6 +1,7 @@
 <div class="lane-scroll">
   <mat-button-toggle-group
     class="lane-group"
+    aria-label="Choose a lane"
     [value]="selectedLane"
     (change)="laneChange.emit($event.value)"
     >
