@@ -92,6 +92,7 @@ export class ResultsPageComponent implements OnInit {
   private spinnerTimer?: ReturnType<typeof setTimeout>;
   get isLoading(): boolean { return this.requestState === 'loading'; }
   filtersOpen = false;
+  private filterFocusSequence = 0;
   availableLanes: Lane[] = [...LANE_OPTIONS];
   laneCounts: Partial<Record<Lane, number>> = {};
   champions: Champion[] = [];
@@ -210,16 +211,39 @@ export class ResultsPageComponent implements OnInit {
 
   openFilters(): void {
     this.filtersOpen = true;
+    const sequence = ++this.filterFocusSequence;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      afterNextRender(() => this.focusFiltersWhenVisible(sequence), { injector: this.injector });
+    }
   }
 
   closeFilters(): void {
     this.filtersOpen = false;
+    this.filterFocusSequence++;
   }
 
   focusFilters(): void {
+    if (!this.filtersOpen) return;
     const heading = this.element.nativeElement.querySelector<HTMLElement>('.results-shell__drawer h2');
     heading?.scrollIntoView({ block: 'center' });
     heading?.focus({ preventScroll: true });
+  }
+
+  private focusFiltersWhenVisible(sequence: number): void {
+    if (this.destroyRef.destroyed || !this.filtersOpen || sequence !== this.filterFocusSequence) return;
+    const heading = this.element.nativeElement.querySelector<HTMLElement>('.results-shell__drawer h2');
+    // Material can emit opened before the reduced-motion drawer is focusable.
+    if (heading && getComputedStyle(heading).visibility === 'visible') {
+      this.focusFilters();
+    } else {
+      requestAnimationFrame(() => this.focusFiltersWhenVisible(sequence));
+    }
+  }
+
+  onFiltersClosedStart(): void {
+    this.filtersOpen = false;
+    this.filterFocusSequence++;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.restoreFilterFocus();
   }
 
   restoreFilterFocus(): void {
