@@ -1,136 +1,39 @@
-.mode-selector {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
+.mode-selector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .mode-option {
-  position: relative;
-  display: grid;
-  gap: 0.4rem;
-  min-height: 118px;
-  padding: 0.95rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
-    var(--surface-panel);
-  color: inherit;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--text-primary);
   text-align: left;
   cursor: pointer;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease,
-    box-shadow 180ms ease;
 }
-
-.mode-option::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(150, 223, 196, 0.12), rgba(169, 187, 197, 0));
-  opacity: 0;
-  transition: opacity 180ms ease;
-  pointer-events: none;
-}
-
-.mode-option:hover {
-  transform: translateY(-2px);
-  border-color: rgba(169, 187, 197, 0.35);
-  box-shadow: var(--shadow-soft);
-}
-
-.mode-option:hover::after,
-.mode-option.is-active::after {
-  opacity: 1;
-}
-
-.mode-option.is-active {
-  border-color: rgba(150, 223, 196, 0.48);
-  background:
-    linear-gradient(180deg, rgba(150, 223, 196, 0.12), rgba(255, 255, 255, 0)),
-    var(--surface-panel-strong);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
-}
-
-.mode-kicker {
-  position: relative;
-  z-index: 1;
-  color: var(--mat-sys-secondary);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.mode-label {
-  position: relative;
-  z-index: 1;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.mode-description {
-  position: relative;
-  z-index: 1;
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.94rem;
-  line-height: 1.45;
-}
-
-.mode-selector--compact {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-  gap: 0.5rem;
-}
-
-.mode-selector--compact .mode-option {
-  min-height: 56px;
-  padding: 0.55rem 0.7rem;
-  border-radius: 14px;
-}
-
-.mode-selector--compact .mode-kicker {
-  display: none;
-}
-
-.mode-selector--compact .mode-description {
-  font-size: 0.75rem;
-  line-height: 1.25;
-}
-
-@media (max-width: 360px) {
-  .mode-selector:not(.mode-selector--compact) {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* The setup presentation is deliberately separate from the Results control. */
-.mode-selector--feature { grid-template-columns: 1fr; gap: 0.5rem; }
-.mode-selector--feature .mode-option {
-  display: grid;
-  grid-template-columns: 1.25rem minmax(0, 1fr);
-  gap: 0.15rem 0.75rem;
-  min-height: 0;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--control-border, #687f8d);
-  border-radius: 8px;
-  background: var(--surface-panel);
-  box-shadow: none;
-  transform: none;
-}
-.mode-selector--feature .mode-option::after, .mode-selector--feature .mode-kicker { display: none; }
-.mode-selector--feature .mode-option.is-active { background: #203830; border: 2px solid #96dfc4; padding: calc(0.65rem - 1px) calc(0.75rem - 1px); }
-.mode-selector--feature .selection-mark {
-  grid-row: 1 / 3;
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 1px solid currentColor;
+.mode-option[aria-pressed="true"] { border-color: var(--action); background: var(--selected); }
+.mode-option strong, .mode-option small { display: block; }
+.mode-option small { margin-top: 3px; color: var(--text-secondary); font-size: .875rem; line-height: 1.3; }
+.selection-mark {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 4px;
+  border: 1px solid #898989;
   border-radius: 50%;
-  text-align: center;
-  line-height: 1.1rem;
-  font-weight: 700;
+  background: #3b3b3b;
 }
-.mode-selector--feature .mode-label { font-size: 1rem; }
-.mode-selector--feature .mode-description { font-size: 0.875rem; line-height: 1.35; }
+.mode-option[aria-pressed="true"] .selection-mark {
+  border-color: var(--action);
+  background: radial-gradient(circle, var(--action) 0 4px, transparent 5px);
+}
+@media (max-width: 38rem) {
+  .mode-option { gap: 6px; padding: 8px; }
+  .mode-option strong { line-height: 1.2; }
+  .selection-mark { margin-top: 4px; }
+}
+@media (max-width: 22rem) {
+  .mode-option { padding: 7px; }
+}

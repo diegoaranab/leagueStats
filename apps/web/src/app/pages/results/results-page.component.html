@@ -17,7 +17,6 @@
       [window]="query.window"
       [sort]="query.sort"
       [difficultyFilter]="difficultyFilter"
-      [isCompact]="true"
       (modeChange)="onModeChange($event)"
       (regionChange)="onRegionChange($event)"
       (tierChange)="onTierChange($event)"
@@ -29,76 +28,25 @@
   </mat-drawer>
 
   <mat-drawer-content class="results-shell__content">
-    <section class="results-header surface-panel">
-      <div class="results-header__main">
-        <div class="results-header__copy">
-          <p class="eyebrow">{{ currentMode.shortLabel }} recommendations</p>
-          <h1 tabindex="-1">{{ laneHeadline }}</h1>
-          <p class="context-line">
-            <span>{{ regionLabels[query.region] }}</span>
-            <span>{{ tierLabels[query.tier] }}</span>
-            <span>{{ windowLabels[query.window] }}</span>
-            <span>Sort: {{ sortLabels[query.sort] }}</span>
-            <span>Difficulty: {{ query.difficulty === 'all' ? 'All levels' : (query.difficulty | titlecase) }}</span>
-            @if (requestState === 'success' && laneAvailability !== 'unavailable') { <span>{{ champions.length }} {{ champions.length === 1 ? 'pick' : 'picks' }}</span> }
-          </p>
-        </div>
-
-        <div class="results-header__actions">
-          @if (isCompact()) {
-            <button class="filters-trigger" mat-stroked-button type="button" (click)="openFilters()">
-              <span class="material-symbols-outlined button-icon" aria-hidden="true">tune</span>
-              Filters
-            </button>
-          }
-          <a mat-flat-button color="primary" routerLink="/" [queryParams]="query">Change setup</a>
-        </div>
+    <header class="results-header">
+      <div class="results-title">
+        <h1 tabindex="-1">{{ query.mode === 'teamplay' ? 'Flex / Clash' : 'Solo picks' }}</h1>
+        <button class="plain-action filters-trigger" type="button"
+          aria-haspopup="dialog" [attr.aria-expanded]="filtersOpen" (click)="openFilters()">
+          <app-ranked-icon name="sliders"></app-ranked-icon> Filters
+        </button>
       </div>
-
-      <div class="dataset-line" role="status" aria-live="polite" aria-atomic="true">{{ statusText }}</div>
-      @if (datasetMeta) {
-        <div class="dataset-line">
-          @if (datasetMeta.oracle_source === 'cache') { <span>Cached professional source</span> }
-          @if (datasetMeta.generated_at_utc) { <span>Updated {{ datasetMeta.generated_at_utc | date: 'mediumDate' }}</span> }
-          <details class="data-details">
-            <summary>Data details</summary>
-            @if (datasetMeta.source) { <p>Source: {{ datasetMeta.source }}</p> }
-            @if (datasetMeta.generated_at_utc) { <p>Generated: {{ datasetMeta.generated_at_utc }}</p> }
-            @if (failedLanes.length) { <p>Affected lanes: {{ failedLanes.join(', ') }}</p> }
-            @if (missingLanes.length) { <p>Unavailable lanes: {{ missingLanes.join(', ') }}</p> }
-            @if (datasetMeta.leagues_used?.length) { <p>Professional leagues: {{ datasetMeta.leagues_used?.join(', ') }}</p> }
-            @if (datasetMeta.patches_used?.length) { <p>Patches: {{ datasetMeta.patches_used?.join(', ') }}</p> }
-            @if (datasetMeta.oracle_last_match_at) { <p>Latest professional match: {{ datasetMeta.oracle_last_match_at }}</p> }
-            @if (datasetMeta.oracle_source) { <p>Oracle source: {{ datasetMeta.oracle_source }}</p> }
-            @if (datasetMeta.oracle_downloaded_at) { <p>Oracle downloaded: {{ datasetMeta.oracle_downloaded_at }}</p> }
-            @if (warnings.length) { <p>Warnings:</p><ul>@for (warning of warnings; track $index) { <li>{{ warning }}</li> }</ul> }
-          </details>
-        </div>
-        @if (hasDatasetWarning) { <p class="quality-note">{{ qualityMessage }} See Data details for the available evidence.</p> }
-      }
-  </section>
-
-  @if (!isCompact()) {
-    <app-filter-bar
-      [mode]="query.mode"
-      [region]="query.region"
-      [tier]="query.tier"
-      [window]="query.window"
-      [sort]="query.sort"
-      [difficultyFilter]="difficultyFilter"
-      (modeChange)="onModeChange($event)"
-      (regionChange)="onRegionChange($event)"
-      (tierChange)="onTierChange($event)"
-      (windowChange)="onWindowChange($event)"
-      (sortChange)="onSortChange($event)"
-      (difficultyChange)="onDifficultyChange($event)"
-    ></app-filter-bar>
-  }
-
-  <section class="lane-section" aria-labelledby="lane-heading">
-    <div class="lane-section__header">
-      <h2 id="lane-heading">Choose a lane</h2>
-    </div>
+      <div class="results-context">
+        <p class="context-line" aria-label="Match context">
+          {{ regionLabels[query.region] }} <span aria-hidden="true">/</span>
+          {{ tierLabels[query.tier] }} <span aria-hidden="true">/</span>
+          {{ windowLabels[query.window] }}
+        </p>
+        <a class="plain-action" routerLink="/" [queryParams]="query">
+          Change setup <app-ranked-icon name="chevron"></app-ranked-icon>
+        </a>
+      </div>
+    </header>
 
     <app-lane-tabs
       [lanes]="availableLanes"
@@ -106,83 +54,158 @@
       [laneCounts]="laneCounts"
       (laneChange)="onLaneChange($event)"
     ></app-lane-tabs>
-  </section>
 
-  @if (isLoading && showSpinner) {
-    <div class="state"><mat-spinner diameter="42" aria-label="Loading recommendations"></mat-spinner></div>
-  }
-  @if (requestState === 'unavailable') {
-    <section class="state recovery-state" aria-label="Unavailable dataset guidance" tabindex="-1">
-      <div class="recovery-state__copy">
-        <p>No recommendations were returned for this context. Change setup or filters to choose another one.</p>
-      </div>
-    </section>
-  }
-  @if (requestState === 'failure') {
-    <section class="state recovery-state error" aria-label="Request recovery">
-      <div class="recovery-state__copy">
-        <p>Recommendations did not load for this context.</p>
-      </div>
-      <button class="recovery-state__action" mat-stroked-button type="button" (click)="retry($event)">Retry</button>
-    </section>
-  }
+    <div class="dataset-line" [class.visually-hidden]="requestState === 'success'"
+      role="status" aria-live="polite" aria-atomic="true">{{ statusText }}</div>
 
-  @if (requestState === 'success') {
-    <div class="results-tasks" [class.results-tasks--teamplay]="query.mode === 'teamplay'">
-    <section class="picks" aria-labelledby="picks-heading">
-      <div class="picks-heading">
-        <h2 id="picks-heading" tabindex="-1">Ranked picks</h2>
-        @if (query.mode === 'teamplay') {
-          <button type="button" class="canonical-jump task-jump" (click)="jumpToTask('draft-heading')">Go to Draft</button>
-        }
-        @if (spotlightChampion && query.sort !== 'tier') {
-          <button type="button" class="canonical-jump" (click)="jumpToCanonical()">Jump to recommended pick</button>
-        }
-      </div>
-      @if (laneAvailability === 'filtered') {
-        <p class="picks-state-note">No picks match {{ query.difficulty | titlecase }} difficulty. @if (failedLanes.includes(query.lane)) { <span class="quality-note">This lane has partial results.</span> } <button class="picks-state-note__action" mat-stroked-button type="button" (click)="clearDifficulty()">Clear difficulty</button></p>
-      } @else if (laneAvailability === 'empty') {
-        <p>There are no picks in this lane.</p>
-      } @else if (laneAvailability === 'unavailable') {
-        <p>No picks are available for this lane. @if (availableLanes.length) { Choose another available lane above. } @else { Change setup or filters to choose another context. }</p>
-      } @else if (failedLanes.includes(query.lane)) {
-        <p class="quality-note">This lane has partial results.</p>
-      }
-      <ul class="picks-list">
-        @for (champion of champions; track trackByChampion($index, champion)) {
-          <li>
-            <app-champion-card
-              [champion]="champion"
-              [mode]="query.mode"
-              [sort]="query.sort"
-              [canonical]="champion === spotlightChampion"
-              [banPriority]="banPriorityFor(champion)"
-            ></app-champion-card>
-          </li>
-        }
-      </ul>
-    </section>
-    @if (query.mode === 'teamplay') {
-      <section class="draft" aria-labelledby="draft-heading">
-        <header class="draft__header">
-          <h2 id="draft-heading" tabindex="-1">Draft</h2>
-          <p>Denial priorities and a five-role lineup for Flex / Clash.</p>
-          <button type="button" class="canonical-jump task-jump" (click)="jumpToTask('picks-heading')">Return to Picks</button>
-        </header>
-        @if (laneAvailability !== 'unavailable') { <app-recommended-bans class="teamplay" [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans> }
-        @if (lineupDataUnavailable) { <p>Lineup unavailable because lane data is missing.</p> }
-        @if (easyClashLineup && !lineupDataUnavailable) {
-      <app-easy-clash-lineup
-        [lineup]="easyClashLineup"
-        [expanded]="easyClashLineupExpanded"
-        (expandedChange)="easyClashLineupExpanded = $event"
-      ></app-easy-clash-lineup>
-        }
-      </section>
-    } @else {
-      @if (laneAvailability !== 'unavailable') { <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode"></app-recommended-bans> }
+    @if (isLoading && showSpinner) {
+      <div class="state"><mat-spinner diameter="42" aria-label="Loading recommendations"></mat-spinner></div>
     }
-    </div>
-  }
-</mat-drawer-content>
+    @if (requestState === 'unavailable') {
+      <section class="state recovery-state" aria-label="Unavailable dataset guidance" tabindex="-1">
+        <p>No recommendations were returned for this context. Change setup or filters to choose another one.</p>
+      </section>
+    }
+    @if (requestState === 'failure') {
+      <section class="state recovery-state error" aria-label="Request recovery">
+        <p>Recommendations did not load for this context.</p>
+        <button class="recovery-state__action" mat-stroked-button type="button" (click)="retry($event)">Retry</button>
+      </section>
+    }
+
+    @if (requestState === 'success') {
+      @if (query.mode === 'teamplay' || laneAvailability !== 'unavailable') {
+        <div class="quick-jumps">
+          <button type="button" class="plain-action task-jump"
+            (click)="jumpToTask(query.mode === 'teamplay' ? 'draft-heading' : 'recommended-bans-heading')">
+            {{ query.mode === 'teamplay' ? 'Draft tools (bans & lineup)' : 'Recommended bans' }}
+            <app-ranked-icon name="down"></app-ranked-icon>
+          </button>
+        </div>
+      }
+      <div class="results-tasks">
+        <section class="picks" aria-labelledby="picks-heading">
+          <div class="picks-heading">
+            <div>
+              <h2 id="picks-heading" tabindex="-1">Ranked picks</h2>
+              @if (laneAvailability !== 'unavailable') {
+                <p class="eligible-count">{{ champions.length }} {{ champions.length === 1 ? 'eligible pick' : 'eligible picks' }}</p>
+              }
+            </div>
+            <div class="ranking-filters">
+              <div class="field">
+                <span id="ranking-sort">Sort by</span>
+                <mat-select aria-labelledby="ranking-sort" [value]="query.sort" (valueChange)="onSortChange($event)">
+                  @for (key of sortKeys; track key) {
+                    <mat-option [value]="key">{{ sortOptions[key] }}</mat-option>
+                  }
+                </mat-select>
+              </div>
+              <div class="field">
+                <span id="ranking-difficulty">Difficulty</span>
+                <mat-select aria-labelledby="ranking-difficulty" [value]="difficultyFilter" (valueChange)="onDifficultyChange($event)">
+                  @for (level of difficultyOptions; track level) {
+                    <mat-option [value]="level">{{ level === 'all' ? 'All levels' : (level | titlecase) }}</mat-option>
+                  }
+                </mat-select>
+              </div>
+            </div>
+          </div>
+          @if (query.mode === 'teamplay' || hasDatasetWarning || laneAvailability === 'unavailable') {
+            <ng-container [ngTemplateOutlet]="dataDetails"></ng-container>
+          }
+          @if (spotlightChampion && spotlightChampion !== champions[0]) {
+            <p class="alternate-order">Top recommendation
+              <button type="button" class="plain-action canonical-jump" (click)="jumpToCanonical()">
+                {{ spotlightChampion.name }} (#{{ spotlightRank }})
+                <span class="visually-hidden"> · Jump to recommended pick</span>
+              </button>
+            </p>
+          }
+          @if (laneAvailability === 'filtered') {
+            <p class="picks-state-note">
+              No picks match {{ query.difficulty | titlecase }} difficulty.
+              @if (failedLanes.includes(query.lane)) { <span class="quality-note">This lane has partial results.</span> }
+              <button class="picks-state-note__action" mat-stroked-button type="button" (click)="clearDifficulty()">Clear difficulty</button>
+            </p>
+          } @else if (laneAvailability === 'empty') {
+            <p>There are no picks in this lane.</p>
+          } @else if (laneAvailability === 'unavailable') {
+            <p>No picks are available for this lane. @if (availableLanes.length) { Choose another available lane above. } @else { Change setup or filters to choose another context. }</p>
+          } @else if (failedLanes.includes(query.lane)) {
+            <p class="quality-note">This lane has partial results.</p>
+          }
+          <ol class="picks-list" aria-label="Champions in selected sort order">
+            @for (champion of champions; track trackByChampion($index, champion)) {
+              <li>
+                <app-champion-card
+                  [champion]="champion"
+                  [mode]="query.mode"
+                  [lane]="query.lane"
+                  [sort]="query.sort"
+                  [canonical]="champion === spotlightChampion"
+                  [banPriority]="banPriorityFor(champion)"
+                ></app-champion-card>
+              </li>
+            }
+          </ol>
+        </section>
+
+        @if (query.mode === 'teamplay') {
+          <aside class="draft side-rail" aria-labelledby="draft-heading">
+            <h2 id="draft-heading" tabindex="-1">Draft</h2>
+            @if (laneAvailability !== 'unavailable') {
+              <app-recommended-bans class="teamplay" [champions]="recommendedBans" [mode]="query.mode" [lane]="query.lane" [difficultyFiltered]="difficultyFilter !== 'all'"></app-recommended-bans>
+            }
+            @if (lineupDataUnavailable) { <p>Lineup unavailable because lane data is missing.</p> }
+            @if (easyClashLineup && !lineupDataUnavailable) {
+              <app-easy-clash-lineup
+                [lineup]="easyClashLineup"
+                [expanded]="easyClashLineupExpanded"
+                (expandedChange)="easyClashLineupExpanded = $event"
+              ></app-easy-clash-lineup>
+            }
+            <button type="button" class="plain-action task-return" (click)="jumpToTask('picks-heading')">Return to Picks</button>
+          </aside>
+        } @else if (laneAvailability !== 'unavailable') {
+          <aside class="solo-bans side-rail" aria-labelledby="recommended-bans-heading">
+            <app-recommended-bans [champions]="recommendedBans" [mode]="query.mode" [lane]="query.lane" [difficultyFiltered]="difficultyFilter !== 'all'"></app-recommended-bans>
+            @if (!hasDatasetWarning) { <ng-container [ngTemplateOutlet]="dataDetails"></ng-container> }
+            <button type="button" class="plain-action task-return" (click)="jumpToTask('picks-heading')">Return to Picks</button>
+          </aside>
+        }
+      </div>
+    }
+  </mat-drawer-content>
 </mat-drawer-container>
+
+<ng-template #dataDetails>
+  @if (datasetMeta; as meta) {
+    <details class="data-details" [class.data-details--warning]="hasDatasetWarning">
+      <summary>
+        @if (hasDatasetWarning) {
+          <app-ranked-icon name="warning"></app-ranked-icon> {{ qualityMessage }}
+        } @else if (meta.generated_at_utc && query.mode === 'solo' && meta.is_partial === false && !warnings.length) {
+          <app-ranked-icon name="check"></app-ranked-icon>
+          Ladder data updated {{ meta.generated_at_utc | date: 'MMMM d' : 'UTC' }}
+        } @else {
+          Data details
+        }
+        @if (meta.oracle_source === 'cache') { <span>Cached professional source</span> }
+        <app-ranked-icon name="down" class="data-chevron"></app-ranked-icon>
+      </summary>
+      <div class="dataset-evidence">
+        @if (meta.source) { <p>Source: {{ meta.source }}</p> }
+        @if (meta.generated_at_utc) { <p>Generated: {{ meta.generated_at_utc }}</p> }
+        @if (failedLanes.length) { <p>Affected lanes: {{ failedLanes.join(', ') }}</p> }
+        @if (missingLanes.length) { <p>Unavailable lanes: {{ missingLanes.join(', ') }}</p> }
+        @if (meta.leagues_used?.length) { <p>Professional leagues: {{ meta.leagues_used?.join(', ') }}</p> }
+        @if (meta.patches_used?.length) { <p>Patches: {{ meta.patches_used?.join(', ') }}</p> }
+        @if (meta.oracle_last_match_at) { <p>Latest professional match: {{ meta.oracle_last_match_at }}</p> }
+        @if (meta.oracle_source) { <p>Oracle source: {{ meta.oracle_source }}</p> }
+        @if (meta.oracle_downloaded_at) { <p>Oracle downloaded: {{ meta.oracle_downloaded_at }}</p> }
+        @if (warnings.length) { <p>Warnings:</p><ul>@for (warning of warnings; track $index) { <li>{{ warning }}</li> }</ul> }
+      </div>
+    </details>
+  }
+</ng-template>

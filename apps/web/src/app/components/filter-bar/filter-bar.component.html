@@ -1,20 +1,10 @@
-<section class="bar" [class.bar--drawer]="isCompact" aria-label="Results filters">
-  @if (isCompact) {
-    <header class="bar__header">
-      <div>
-        <p class="eyebrow">Filters</p>
-        <h2 tabindex="-1">Refine results</h2>
-      </div>
-      <button
-        mat-icon-button
-        type="button"
-        aria-label="Close filters"
-        (click)="closeRequested.emit()"
-        >
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </header>
-  }
+<section class="bar" aria-label="Results filters">
+  <header class="bar__header">
+    <h2 tabindex="-1">Refine results</h2>
+    <button class="close-filters" type="button" aria-label="Close filters" (click)="closeRequested.emit()">
+      <app-ranked-icon name="close"></app-ranked-icon>
+    </button>
+  </header>
 
   <div class="filter-group filter-group--mode">
     <span class="filter-label">Mode</span>
@@ -26,62 +16,62 @@
   </div>
 
   <div class="control-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Region</mat-label>
-      <mat-select [value]="region" (valueChange)="regionChange.emit($event)">
+    <div class="field">
+      <span id="filter-region">Region</span>
+      <mat-select aria-labelledby="filter-region" [value]="region" (valueChange)="regionChange.emit($event)">
         @for (option of regionOptions; track option) {
           <mat-option [value]="option">
             {{ regionLabels[option] }}
           </mat-option>
         }
       </mat-select>
-    </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Rank</mat-label>
-      <mat-select [value]="tier" (valueChange)="tierChange.emit($event)">
+    <div class="field">
+      <span id="filter-rank">Rank</span>
+      <mat-select aria-labelledby="filter-rank" [value]="tier" (valueChange)="tierChange.emit($event)">
         @for (option of tierOptions; track option) {
           <mat-option [value]="option">
             {{ tierLabels[option] }}
           </mat-option>
         }
       </mat-select>
-    </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Window</mat-label>
-      <mat-select [value]="window" (valueChange)="windowChange.emit($event)">
+    <div class="field">
+      <span id="filter-window">Window</span>
+      <mat-select aria-labelledby="filter-window" [value]="window" (valueChange)="windowChange.emit($event)">
         @for (option of windowOptions; track option) {
           <mat-option [value]="option">
             {{ windowLabels[option] }}
           </mat-option>
         }
       </mat-select>
-    </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Sort by</mat-label>
-      <mat-select [value]="sort" (valueChange)="sortChange.emit($event)">
-        <mat-option value="tier">Tier rank</mat-option>
+    <div class="field">
+      <span id="filter-sort">Sort by</span>
+      <mat-select aria-labelledby="filter-sort" [value]="sort" (valueChange)="sortChange.emit($event)">
+        <mat-option value="tier">Pick ranking</mat-option>
         <mat-option value="win_rate">Win rate</mat-option>
         <mat-option value="pick_rate">Pick rate</mat-option>
         <mat-option value="difficulty">Difficulty</mat-option>
         <mat-option value="ban_priority">Ban priority</mat-option>
       </mat-select>
-    </mat-form-field>
+    </div>
 
     <div class="difficulty-control">
-      <mat-form-field appearance="outline">
-        <mat-label>Difficulty</mat-label>
-        <mat-select [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
+      <div class="field">
+        <span id="filter-difficulty">Difficulty</span>
+        <mat-select aria-labelledby="filter-difficulty" [value]="difficultyFilter" (valueChange)="difficultyChange.emit($event)">
           <mat-option value="all">All levels</mat-option>
           <mat-option value="easy">Easy</mat-option>
           <mat-option value="medium">Medium</mat-option>
           <mat-option value="hard">Hard</mat-option>
         </mat-select>
-      </mat-form-field>
+      </div>
       <button type="button" class="difficulty-help" aria-label="About difficulty" [attr.aria-expanded]="showDifficultyHelp" (click)="showDifficultyHelp = !showDifficultyHelp">
-        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        <app-ranked-icon name="info"></app-ranked-icon>
       </button>
       @if (showDifficultyHelp) {
         <p class="difficulty-explanation">Difficulty is relative to the selected mode, rank, region, window, and lane pool.</p>

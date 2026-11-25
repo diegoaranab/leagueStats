@@ -1,39 +1,26 @@
 <section class="recommended-bans" aria-labelledby="recommended-bans-heading">
   <header class="recommended-bans__header">
-    <div>
-      <h2 id="recommended-bans-heading">Recommended bans</h2>
-      <p>{{ mode === 'teamplay'
-        ? 'Draft-denial priorities for this Flex / Clash context.'
-      : 'Strong statistical ban options for this exact queue context.' }}</p>
-      <p>Bans cover the whole lane and are not limited by difficulty.</p>
-    </div>
-    <span
-      class="material-symbols-outlined recommended-bans__header-icon"
-      aria-hidden="true"
-    >shield</span>
+    <h2 id="recommended-bans-heading" tabindex="-1">
+      <app-ranked-icon name="ban"></app-ranked-icon>
+      {{ mode === 'teamplay' ? 'Bans to consider' : 'Recommended bans' }}
+    </h2>
+    <p>{{ mode === 'teamplay'
+      ? 'Deny these ' + laneLabels[lane] + ' picks if your team can’t secure them.'
+      : 'Ban priorities for ' + laneLabels[lane] + ' across all difficulty levels.' }}</p>
+    @if (mode === 'teamplay' && difficultyFiltered) { <p>Bans include all difficulty levels.</p> }
   </header>
 
   @if (champions.length) {
-    <div class="recommended-bans__list">
-      @for (champion of champions; track trackByChampion(index, champion); let index = $index) {
-        <article
-          class="ban-item"
-          [class.ban-item--first]="index === 0"
-          >
-          <span class="material-symbols-outlined ban-item__icon" aria-hidden="true">block</span>
-          <strong class="ban-item__priority">#{{ index + 1 }}</strong>
-          <img
-            class="ban-item__portrait"
-            [src]="champion.icon_url || fallbackIcon"
-            [alt]="champion.name + ' portrait'"
-            loading="lazy"
-            >
-          <span class="ban-item__name">{{ champion.name }}</span>
-        </article>
+    <ol class="recommended-bans__list">
+      @for (champion of champions; track champion.name; let index = $index) {
+        <li class="ban-item">
+          <strong class="ban-item__priority">{{ index + 1 }}</strong>
+          <img class="ban-item__portrait" [src]="champion.icon_url || fallbackIcon" alt="" width="34" height="34" loading="lazy">
+          <strong class="ban-item__name">{{ champion.name }}</strong>
+        </li>
       }
-    </div>
+    </ol>
   } @else {
-    <p class="recommended-bans__empty">No standout bans for this selection.</p>
+    <p class="recommended-bans__empty">No standout bans for this selected lane.</p>
   }
-
 </section>

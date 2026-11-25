@@ -1,40 +1,26 @@
 <div class="app-shell">
   <button class="skip-link" type="button" (click)="skipToMain(mainContent)">Skip to main content</button>
-  <mat-toolbar class="topbar">
-    <a class="brand-wrap" routerLink="/">
-      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="brand-copy">
-        <small class="brand-kicker">League of Legends</small>
-        <span class="brand">LeagueStats</span>
-      </span>
-    </a>
-
-    <nav class="toolbar-nav" aria-label="Primary">
-      <a
-        mat-button
-        routerLink="/"
-        routerLinkActive="is-active"
-        [routerLinkActiveOptions]="routeMatchOptions"
-        ariaCurrentWhenActive="page"
-      >
-        Home
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand-wrap" routerLink="/" [queryParams]="resultsContext()"
+        routerLinkActive="current-home" [routerLinkActiveOptions]="routeMatchOptions" ariaCurrentWhenActive="page">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        LeagueStats
       </a>
-      <a
-        mat-button
-        routerLink="/results"
-        routerLinkActive="is-active"
-        [routerLinkActiveOptions]="routeMatchOptions"
-        ariaCurrentWhenActive="page"
-      >
-        Results
-      </a>
-    </nav>
-  </mat-toolbar>
 
-  <div class="app-layout">
-    <main #mainContent class="shell" tabindex="-1">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
-
+      @if (resultsContext(); as query) {
+        <nav class="toolbar-nav" aria-label="Queue">
+          @for (mode of modes; track mode) {
+            <a routerLink="/results" [queryParams]="queueQuery(query, mode)"
+              [attr.aria-current]="query.mode === mode ? 'page' : null">{{ modeDetails[mode].shortLabel }}</a>
+          }
+        </nav>
+      } @else {
+        <span class="header-note">League of Legends</span>
+      }
+    </div>
+  </header>
+  <main #mainContent class="shell" tabindex="-1">
+    <router-outlet></router-outlet>
+  </main>
 </div>

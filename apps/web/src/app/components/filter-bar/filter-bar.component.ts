@@ -1,12 +1,10 @@
 
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
+import { RankedIconComponent } from '../ranked-icon/ranked-icon.component';
 import { ModeSelectorComponent } from '../mode-selector/mode-selector.component';
 import {
-  MODE_DETAILS,
   ProductMode,
   REGION_LABELS,
   TIER_LABELS,
@@ -18,11 +16,10 @@ import { DifficultyFilter, SortOption } from '../../core/models/tierlist.model';
 @Component({
   selector: 'app-filter-bar',
   imports: [
-    MatButtonModule,
-    MatFormFieldModule,
+    RankedIconComponent,
     MatSelectModule,
-    ModeSelectorComponent
-],
+    ModeSelectorComponent,
+  ],
   templateUrl: './filter-bar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './filter-bar.component.css',
@@ -35,7 +32,6 @@ export class FilterBarComponent {
   @Input() window: WindowKey = '7d';
   @Input() sort: SortOption = 'tier';
   @Input() difficultyFilter: DifficultyFilter = 'all';
-  @Input() isCompact = false;
 
   @Output() modeChange = new EventEmitter<ProductMode>();
   @Output() regionChange = new EventEmitter<Region>();
@@ -48,7 +44,6 @@ export class FilterBarComponent {
   readonly regionOptions = REGION_OPTIONS;
   readonly tierOptions = TIER_OPTIONS;
   readonly windowOptions = WINDOW_OPTIONS;
-  readonly modeDetails = MODE_DETAILS;
   readonly regionLabels = REGION_LABELS;
   readonly tierLabels = TIER_LABELS;
   readonly windowLabels = WINDOW_LABELS;

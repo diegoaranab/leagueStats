@@ -58,10 +58,10 @@ def run():
             page.goto(base + '/results/' + QUERY)
             expect(page.get_by_role('status')).to_have_text('2 picks available')
             assert page.evaluate('window.spinnerSeen') is False, 'Fast load flashed a spinner or observer was not initialized'
-            page.get_by_text('Data details', exact=True).click()
+            page.locator('.data-details summary').click()
             expect(page.get_by_text('Source: fixture')).to_be_visible()
             page.screenshot(path='/tmp/results-data-healthy-details.png')
-            page.get_by_text('Data details', exact=True).click()
+            page.locator('.data-details summary').click()
             for width, height in [(320, 568), (390, 844), (1366, 768), (1920, 1080)]:
                 page.set_viewport_size({'width': width, 'height': height})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -90,7 +90,7 @@ def run():
             expect(page.get_by_text('Cached professional source')).to_be_visible()
             expect(page.locator('.picks-list li').first).to_be_visible()
             page.screenshot(path='/tmp/results-data-limited-teamplay.png')
-            page.get_by_text('Data details', exact=True).click()
+            page.locator('.data-details summary').click()
             expect(page.get_by_text('Informational fixture warning')).to_be_visible()
             page.screenshot(path='/tmp/results-data-limited-details.png')
 
@@ -101,9 +101,9 @@ def run():
             state['payload'] = filtered_team
             page.goto(base + '/results/' + QUERY.replace('mode=solo', 'mode=teamplay'))
             expect(page.get_by_role('status')).to_contain_text('No matching picks')
-            expect(page.get_by_text('Bans cover the whole lane and are not limited by difficulty.')).to_be_visible()
+            expect(page.get_by_text('Bans include all difficulty levels.')).to_be_visible()
             expect(page.locator('app-easy-clash-lineup')).to_be_visible()
-            page.get_by_role('button', name='Build an Easy Clash Team').click()
+            page.get_by_role('button', name='Build lineup').click()
             expect(page.locator('app-easy-clash-lineup .role-card')).to_have_count(5)
             page.evaluate('window.scrollTo(0, 0)')
             page.screenshot(path='/tmp/results-data-filtered-zero-teamplay-bans.png', full_page=True)
@@ -134,7 +134,7 @@ def run():
             page.reload()
             expect(page.get_by_text('No picks match Hard difficulty.')).to_be_visible()
             expect(page.get_by_role('status')).to_have_text('No matching picks')
-            expect(page.get_by_text('Bans cover the whole lane and are not limited by difficulty.')).to_be_visible()
+            expect(page.get_by_text('Ban priorities for Top across all difficulty levels.')).to_be_visible()
             page.screenshot(path='/tmp/results-data-filtered.png')
             page.get_by_role('button', name='Clear difficulty').focus()
             page.keyboard.press('Enter')
@@ -322,16 +322,20 @@ async def check_loading_and_races(base):
         await async_expect(page.get_by_role('progressbar', name='Loading recommendations')).to_be_visible()
         await page.wait_for_function('window.spinnerSeen === true')
         await page.screenshot(path='/tmp/results-data-loading.png')
-        region = page.get_by_role('combobox', name='Region')
+        filters = page.get_by_role('button', name='Filters', exact=True)
+        close_filters = page.get_by_role('button', name='Close filters')
+        await filters.click()
+        region = page.get_by_role('dialog').get_by_role('combobox', name='Region')
         await region.click()
         await page.get_by_role('option', name='North America', exact=True).click()
         await region.click()
         await page.get_by_role('option', name='Latin America North', exact=True).click()
-        await async_expect(page.get_by_text('Ahritoprace request3')).to_be_visible()
+        await async_expect(page.get_by_role('heading', name='Ahritoprace request3', exact=True)).to_be_visible()
         await asyncio.sleep(1.1)
-        await async_expect(page.get_by_text('Ahritoprace request3')).to_be_visible()
+        await async_expect(page.get_by_role('heading', name='Ahritoprace request3', exact=True)).to_be_visible()
         assert len(requests) == 3, requests
         # Refinements do not start another dataset request.
+        await close_filters.click()
         await page.get_by_role('radio', name='Jungle', exact=False).click()
         await page.get_by_role('radio', name='Top', exact=False).click()
         sort = page.get_by_role('combobox', name='Sort by')
@@ -341,12 +345,15 @@ async def check_loading_and_races(base):
         await difficulty.click()
         await page.get_by_role('option', name='Easy', exact=True).click()
         assert len(requests) == 3, requests
+        await filters.click()
         await region.click()
         await page.get_by_role('option', name='North America', exact=True).click()
         await async_expect(page.get_by_role('status')).to_have_text('Loading recommendations')
+        await close_filters.click()
         await page.get_by_role('link', name='Change setup').click()
         await asyncio.sleep(1.1)
-        await async_expect(page.get_by_role('heading', name='Top picks')).to_have_count(0)
+        await async_expect(page.get_by_role('heading', name='Know who to lock in.')).to_be_visible()
+        await async_expect(page.get_by_role('heading', name='Solo picks')).to_have_count(0)
         assert not errors, errors
 
         # Retry stays in the current URL and must not steal later focus.

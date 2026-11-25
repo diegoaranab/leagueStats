@@ -76,9 +76,9 @@ export const TIER_LABELS: Record<Tier, string> = {
 };
 
 export const WINDOW_LABELS: Record<WindowKey, string> = {
-  current: 'Current Patch',
-  '7d': 'Last 7 Days',
-  '14d': 'Last 14 Days',
+  current: 'Current patch',
+  '7d': 'Last 7 days',
+  '14d': 'Last 14 days',
 };
 
 export const LANE_LABELS: Record<Lane, string> = {

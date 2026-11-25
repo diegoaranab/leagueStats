@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { RankedIconComponent } from '../ranked-icon/ranked-icon.component';
 
 import { LANE_LABELS } from '../../core/models/selection.model';
 import {
   EasyClashLineupResult,
-  EasyClashLineupSlot,
 } from '../../core/utils/easy-clash-lineup';
 
 @Component({
   selector: 'app-easy-clash-lineup',
-  imports: [CommonModule, MatButtonModule],
+  imports: [CommonModule, RankedIconComponent],
   templateUrl: './easy-clash-lineup.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './easy-clash-lineup.component.css',
@@ -25,10 +24,6 @@ export class EasyClashLineupComponent {
 
   toggleExpanded(): void {
     this.expandedChange.emit(!this.expanded);
-  }
-
-  trackByLane(_index: number, slot: EasyClashLineupSlot): string {
-    return slot.lane;
   }
 
   get unavailableMessage(): string {

@@ -1,157 +1,87 @@
-<article class="champion-card" [class.champion-card--canonical]="canonical" [id]="canonical ? 'canonical-pick' : null">
+<article class="champion-card" [class.champion-card--canonical]="canonical" [id]="canonical ? 'canonical-pick' : null"
+  [attr.tabindex]="canonical ? -1 : null">
   <div class="card-primary">
-  <div class="card-top">
-    <div class="rank">
-      <span>Rank</span>
-      <strong>#{{ primaryRank }}</strong>
-    </div>
-
-    <img
-      class="portrait"
-      [src]="champion.icon_url || fallbackIcon"
-      [alt]="champion.name"
-      loading="lazy"
-      >
-
-    <div class="identity">
-      @if (canonical) { <span class="canonical-label">Recommended pick</span> }
-      <h3>{{ champion.name }}</h3>
-      <div class="headline-tags">
-        <span class="tier-label">Tier {{ champion.tier }}</span>
-        @if (champion.difficulty) {
-          <span
-            class="difficulty-label"
-            >
-            {{ champion.difficulty | titlecase }}
-          </span>
-        }
+    <div class="card-top">
+      <strong class="rank" [attr.aria-label]="'Recommendation rank ' + primaryRank">#{{ primaryRank }}</strong>
+      <img class="portrait" [src]="champion.icon_url || fallbackIcon" alt="" width="46" height="46" loading="lazy">
+      <div class="identity">
+        <h3>{{ champion.name }}</h3>
+        <p>{{ champion.difficulty ? (champion.difficulty | titlecase) + ' difficulty' : 'Difficulty unavailable' }}</p>
       </div>
     </div>
-  </div>
 
-  @if (mode === 'solo') {
-    <div class="stat-grid">
-      <div class="stat" [class.stat--active]="sort === 'win_rate'">
-        <span>Win rate</span>
-        <strong>{{ formatPercent(champion.win_rate) }}</strong>
-      </div>
-      <div class="stat" [class.stat--active]="sort === 'pick_rate'">
-        <span>Pick rate</span>
-        <strong>{{ formatPercent(champion.pick_rate) }}</strong>
-      </div>
-      <div class="stat">
-        <span>Best win est.</span>
-        <strong>{{ formatPercent(champion.best_win_est) }}</strong>
-      </div>
-    </div>
-  } @else {
-    <div class="stat-grid">
-      <div class="stat">
-        <span>Draft score</span>
-        <strong>
-          {{
-          champion.flex_clash_score === null || champion.flex_clash_score === undefined
-          ? '--'
-          : ((champion.flex_clash_score * 100) | number: '1.0-0')
-          }}
-        </strong>
-      </div>
-      <div class="stat">
-        <span>Pro picks</span>
-        <strong>{{ champion.pro_pick_count ?? '--' }}</strong>
-      </div>
-      <div class="stat">
-        <span>Pro bans</span>
-        <strong>{{ champion.pro_ban_count ?? '--' }}</strong>
-      </div>
-    </div>
-  }
+    @if (canonical) {
+      <span class="canonical-label"><app-ranked-icon name="check"></app-ranked-icon> Top recommendation</span>
+    }
 
-
-  @if (sort === 'ban_priority') {
-    <div class="sort-evidence"><span>Ban priority</span> <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong></div>
-  }
-  @if (mode === 'teamplay' && (sort === 'win_rate' || sort === 'pick_rate')) {
-    <div class="sort-evidence">
-      <span>{{ sort === 'win_rate' ? 'Win rate' : 'Pick rate' }}</span>
-      <strong>{{ formatPercent(sort === 'win_rate' ? champion.win_rate : champion.pick_rate) }}</strong>
-    </div>
-  }
-
-  @if (mode === 'teamplay' && visibleBadges.length) {
-    <div class="badge-row">
-      @for (badge of visibleBadges; track badge) {
-        <span
-          class="signal-badge"
-          [class.signal-badge--gold]="isGoldBadge(badge)"
-          [class.signal-badge--blue]="isBlueBadge(badge)"
-          >
-          {{ badge }}
-        </span>
+    <dl class="stat-grid">
+      @if (mode === 'solo') {
+        <div class="stat" [class.stat--active]="sort === 'win_rate'"><dt>Win rate</dt><dd>{{ formatPercent(champion.win_rate) }}</dd></div>
+      } @else {
+        <div class="stat"><dt>Draft score</dt><dd>{{ champion.flex_clash_score == null ? '—' : (champion.flex_clash_score * 100 | number: '1.0-0') }}</dd></div>
       }
-    </div>
-  }
 
-  <button
-    class="card-details"
-    type="button"
-    [attr.aria-label]="'More details about ' + champion.name"
-    [attr.aria-expanded]="detailsOpen"
-    [attr.aria-controls]="detailsPanelId"
-    (click)="detailsOpen = !detailsOpen"
-  >
-    More details
-    <span aria-hidden="true">{{ detailsOpen ? '−' : '+' }}</span>
-  </button>
+      @if (sort === 'ban_priority') {
+        <div class="stat stat--active sort-evidence"><dt>Ban priority</dt><dd>{{ banPriority === null ? '—' : '#' + banPriority }}</dd></div>
+      } @else if (mode === 'teamplay' && (sort === 'win_rate' || sort === 'pick_rate')) {
+        <div class="stat stat--active sort-evidence">
+          <dt>{{ sort === 'win_rate' ? 'Win rate' : 'Pick rate' }}</dt>
+          <dd>{{ formatPercent(sort === 'win_rate' ? champion.win_rate : champion.pick_rate) }}</dd>
+        </div>
+      } @else if (mode === 'solo') {
+        <div class="stat" [class.stat--active]="sort === 'pick_rate'"><dt>Pick rate</dt><dd>{{ formatPercent(champion.pick_rate) }}</dd></div>
+      } @else {
+        <div class="stat"><dt>Pro picks</dt><dd>{{ champion.pro_pick_count ?? '—' }}</dd></div>
+      }
+
+      @if (mode === 'solo') {
+        <div class="stat"><dt>Best win est.</dt><dd>{{ formatPercent(champion.best_win_est) }}</dd></div>
+      } @else {
+        <div class="stat"><dt>Pro bans</dt><dd>{{ champion.pro_ban_count ?? '—' }}</dd></div>
+      }
+    </dl>
+
+    @if (canonical) {
+      <p class="row-reason">
+        @if (mode === 'teamplay') {
+          Highest-ranked eligible {{ laneLabels[lane] }} pick.
+          @if (champion.flex_clash_score != null) { Draft score weighs pro presence and ladder strength. }
+        } @else if (champion.tier) {
+          Rated {{ champion.tier }} for {{ laneLabels[lane] }} in this ladder snapshot.
+        }
+      </p>
+    }
+
+    <button class="card-details" type="button" [attr.aria-label]="'More details about ' + champion.name"
+      [attr.aria-expanded]="detailsOpen" [attr.aria-controls]="detailsPanelId" (click)="detailsOpen = !detailsOpen">
+      <app-ranked-icon name="down"></app-ranked-icon>
+    </button>
   </div>
 
   <div class="details-panel" [id]="detailsPanelId" [hidden]="!detailsOpen">
-    @if (mode === 'solo') {
-      <div class="secondary-row">
-        <div>
-          <span>Ban priority</span>
-          <strong>{{ banPriority === null ? '--' : '#' + banPriority }}</strong>
-        </div>
-        <div>
-          <span>Mastery gap</span>
-          <strong>{{ formatPercent(champion.mastery_gap_pct) }}</strong>
-        </div>
-        <div>
-          <span>Lane delta</span>
-          <strong>{{ formatNumber(champion.delta) }}</strong>
-        </div>
-      </div>
-    } @else {
-      <div class="secondary-row">
-        <div>
-          <span>Ban priority</span>
-          <strong>{{ champion.teamplay_ban_rank == null ? '--' : '#' + champion.teamplay_ban_rank }}</strong>
-        </div>
-        <div>
-          <span>Solo rank</span>
-          <strong>#{{ champion.filtered_rank ?? champion.rank ?? '--' }}</strong>
-        </div>
-        <div>
-          <span>Flex roles</span>
-          <strong>{{ champion.pro_flex_roles ?? '--' }}</strong>
-        </div>
-        <div>
-          <span>Solo win rate</span>
-          <strong>{{ formatPercent(champion.win_rate) }}</strong>
-        </div>
-      </div>
+    <dl class="secondary-row">
+      <div><dt>Tier</dt><dd>{{ champion.tier ?? '—' }}</dd></div>
+      <div><dt>Ban priority</dt><dd>{{ banPriority === null ? '—' : '#' + banPriority }}</dd></div>
+      @if (mode === 'solo') {
+        @if (sort === 'ban_priority') { <div><dt>Pick rate</dt><dd>{{ formatPercent(champion.pick_rate) }}</dd></div> }
+        <div><dt>Mastery gap</dt><dd>{{ formatPercent(champion.mastery_gap_pct) }}</dd></div>
+        <div><dt>Lane delta</dt><dd>{{ formatNumber(champion.delta) }}</dd></div>
+      } @else {
+        @if (sort === 'ban_priority' || sort === 'win_rate' || sort === 'pick_rate') {
+          <div><dt>Pro picks</dt><dd>{{ champion.pro_pick_count ?? '—' }}</dd></div>
+        }
+        <div><dt>Solo rank</dt><dd>#{{ champion.filtered_rank ?? champion.rank ?? '—' }}</dd></div>
+        <div><dt>Flex roles</dt><dd>{{ champion.pro_flex_roles ?? '—' }}</dd></div>
+        <div><dt>Solo win rate</dt><dd>{{ formatPercent(champion.win_rate) }}</dd></div>
+      }
+    </dl>
+
+    @if (mode === 'teamplay' && visibleBadges.length) {
+      <p class="badge-row">{{ visibleBadges.join(' · ') }}</p>
     }
-
-
     @if (champion.champion_url) {
-      <a
-        mat-stroked-button
-        color="primary"
-        [href]="champion.champion_url"
-        target="_blank"
-        rel="noopener noreferrer"
-        >
-        View source build
+      <a class="plain-action" [href]="champion.champion_url" target="_blank" rel="noopener noreferrer">
+        View source build <app-ranked-icon name="chevron"></app-ranked-icon>
       </a>
     }
   </div>

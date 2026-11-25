@@ -39,19 +39,19 @@ def run():
                 solo['data']['jungle'] = solo['data']['jungle'][:1]
                 team['data']['jungle'] = team['data']['jungle'][:1]
                 page.route('**/data/**/*.json', lambda route: route.fulfill(json=team if '/teamplay/' in route.request.url else solo))
-                for label, path, current in [('home', '/', 'Home'), ('home-query', '/?mode=solo&' + QUERY, 'Home'), ('results', '/results/?mode=solo&' + QUERY, 'Results')]:
+                for label, path, current in [('home', '/', 'LeagueStats'), ('home-query', '/?mode=solo&' + QUERY, 'LeagueStats'), ('results', '/results/?mode=solo&' + QUERY, 'Solo'), ('team', '/results/?mode=teamplay&' + QUERY, 'Flex / Clash')]:
                     page.goto(base + path)
-                    expect(page.locator('.toolbar-nav [aria-current="page"]')).to_have_count(1)
-                    expect(page.locator('.toolbar-nav [aria-current="page"]')).to_have_text(current)
+                    expect(page.locator('.topbar [aria-current="page"]')).to_have_count(1)
+                    expect(page.locator('.topbar [aria-current="page"]')).to_have_text(current)
                     if label == 'home':
-                        print('Navigation computed colors:', page.locator('.toolbar-nav .is-active').evaluate("e => { const s = getComputedStyle(e), t = getComputedStyle(document.querySelector('.topbar')); return {text: s.color, background: t.backgroundColor, indicator: s.boxShadow}; }"), flush=True)
+                        print('Navigation computed colors:', page.locator('.brand-wrap[aria-current]').evaluate("e => { const s = getComputedStyle(e), t = getComputedStyle(document.querySelector('.topbar')); return {text: s.color, background: t.backgroundColor, indicator: s.boxShadow}; }"), flush=True)
                     page.screenshot(path=f'/tmp/ui-polish-after-{label}.png')
                 for mode in ('solo', 'teamplay'):
                     page.goto(base + '/results/?mode=' + mode + '&' + QUERY)
                     expect(page.locator('h1')).to_be_focused()
                     cards = page.locator('.picks-list app-champion-card')
                     expect(cards).to_have_count(5)
-                    expect(page.locator('.context-line span').last).to_have_text('5 picks')
+                    expect(page.locator('.eligible-count')).to_have_text('5 eligible picks')
                     expect(page.get_by_role('radio', name='Top', exact=False).locator('small')).to_have_text('5 picks')
                     for card in cards.all()[:2]:
                         name = card.locator('h3').inner_text()
@@ -64,11 +64,11 @@ def run():
                         page.screenshot(path=f'/tmp/ui-polish-{mode}-details.png')
                         page.keyboard.press('Enter'); expect(panel).to_be_hidden()
                     page.get_by_role('radio', name='Jungle', exact=False).click()
-                    expect(page.locator('.context-line span').last).to_have_text('1 pick')
+                    expect(page.locator('.eligible-count')).to_have_text('1 eligible pick')
                     expect(page.get_by_role('radio', name='Jungle', exact=False).locator('small')).to_have_text('1 pick')
                     page.screenshot(path=f'/tmp/ui-polish-{mode}-one.png')
                     page.goto(base + '/results/?mode=' + mode + '&region=na&tier=gold&window=7d&lane=jungle&sort=tier&difficulty=easy')
-                    expect(page.locator('.context-line span').last).to_have_text('0 picks')
+                    expect(page.locator('.eligible-count')).to_have_text('0 eligible picks')
                     expect(page.get_by_role('radio', name='Jungle', exact=False).locator('small')).to_have_text('1 pick')
                 for path in ('/', '/results/?mode=solo&' + QUERY, '/results/?mode=teamplay&' + QUERY):
                     page.goto(base + path)
@@ -100,20 +100,20 @@ def run():
                     page.route('**/data/**/*.json', lambda route: route.fulfill(json=missing))
                     page.goto(base + '/results/?mode=' + mode + '&' + QUERY)
                     expect(page.get_by_role('status')).to_have_text('Selected lane unavailable')
-                    expect(page.locator('.context-line span')).to_have_count(5)
+                    expect(page.locator('.eligible-count')).to_have_count(0)
                     expect(page.get_by_role('radio', name='Top', exact=False)).to_have_count(0)
                     page.unroute('**/data/**/*.json')
                     page.route('**/data/**/*.json', lambda route: route.fulfill(status=404))
                     page.reload()
                     expect(page.get_by_role('status')).to_have_text('Dataset unavailable')
-                    expect(page.locator('.context-line span')).to_have_count(5)
+                    expect(page.locator('.eligible-count')).to_have_count(0)
                     expect(page.locator('app-lane-tabs small')).to_have_count(0)
                 page.unroute('**/data/**/*.json')
                 pending = []
                 page.route('**/data/**/*.json', lambda route: pending.append(route))
                 page.goto(base + '/results/?mode=solo&' + QUERY)
                 expect(page.get_by_role('status')).to_contain_text('Loading')
-                expect(page.locator('.context-line span')).to_have_count(5)
+                expect(page.locator('.eligible-count')).to_have_count(0)
                 expect(page.locator('app-lane-tabs small')).to_have_count(0)
                 assert pending
                 pending.pop().fulfill(json=solo)

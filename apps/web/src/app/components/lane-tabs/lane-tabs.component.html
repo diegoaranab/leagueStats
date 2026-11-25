@@ -1,17 +1,14 @@
-<div class="lane-scroll">
-  <mat-button-toggle-group
-    class="lane-group"
-    aria-label="Choose a lane"
-    [value]="selectedLane"
-    (change)="laneChange.emit($event.value)"
-    >
-    @for (lane of lanes; track lane) {
-      <mat-button-toggle [value]="lane">
-        <span class="lane-copy">
-          <span class="lane-label">{{ laneLabels[lane] }}</span>
-          @if (laneCounts[lane] !== undefined) { <small>{{ laneCounts[lane] }} {{ laneCounts[lane] === 1 ? 'pick' : 'picks' }}</small> }
-        </span>
-      </mat-button-toggle>
-    }
-  </mat-button-toggle-group>
-</div>
+<mat-button-toggle-group class="lane-group" [hideSingleSelectionIndicator]="true" aria-label="Choose a lane"
+  [value]="selectedLane" (change)="laneChange.emit($event.value)">
+  @for (lane of lanes; track lane) {
+    <mat-button-toggle [value]="lane">
+      <span class="lane-copy">
+        <app-ranked-icon [name]="lane"></app-ranked-icon>
+        <span class="lane-label">{{ laneLabels[lane] }}</span>
+        @if (laneCounts[lane] !== undefined) {
+          <small class="visually-hidden">{{ laneCounts[lane] }} {{ laneCounts[lane] === 1 ? 'pick' : 'picks' }}</small>
+        }
+      </span>
+    </mat-button-toggle>
+  }
+</mat-button-toggle-group>

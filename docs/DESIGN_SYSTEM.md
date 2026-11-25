@@ -2,9 +2,9 @@
 
 ## 1. Purpose and authority
 
-This document is the current approved LeagueStats product-design contract. Future UI work should use it without needing prototype bundles, old chat history, or issue threads. GitHub issues retain decision rationale and historical evidence; this file records the current system.
+This document and the versioned [Prototype A reference](references/prototype-a/REFERENCE_README.md) form the approved LeagueStats product-design contract. The reference holds the exact archived HTML, CSS, JavaScript, screenshots, fixture data, integrity hashes and decision provenance. Use its captures and measurements to judge visual fidelity. The prototype and historical datasets live outside the deployed Angular application.
 
-The approved direction is **A · Ranked list**, with one targeted interaction adaptation from B: explicit compact/mobile Flex / Clash Draft discovery. A and B are not competing current options; B is historical evidence for that discovery improvement.
+The approved direction is **A · Ranked list** with one targeted interaction from B for explicit compact Flex / Clash Draft discovery and return. [Approval decision on #39](https://github.com/diegoaranab/leagueStats/issues/39#issuecomment-7093873994)
 
 ## 2. Decision states
 
@@ -25,7 +25,8 @@ The approved direction is **A · Ranked list**, with one targeted interaction ad
 - **LOCKED:** LeagueStats' repeated visual grammar is **rank → portrait → difficulty/evidence**. Ranking sequence is the primary visual structure.
 - **LOCKED:** The canonical recommendation is one highlighted row inside the same ranking, not a duplicated standalone full Spotlight card.
 - **LOCKED:** Build identity from ranking, portraits, evidence, and decision hierarchy rather than generic fantasy UI, esports ornamentation, or gaming chrome. Do not imitate the Riot client or proprietary Riot/League visual language.
-- **LOCKED:** Three descending horizontal bars may participate in wordmark/ranking geometry. The prototype used approximately 26px beside the mixed-case wordmark. Keep the motif contextual to wordmark, ranking, or canonical-row geometry.
+- **LOCKED** The compact mixed-case LeagueStats wordmark uses Space Grotesk 700 with tight tracking. Pair it with the mint 26px mark of three left-aligned horizontal bars at 25, 17 and 9px.
+- **LOCKED** Align the toolbar and page to a shared 78rem maximum and responsive `clamp(1rem, 4vw, 3rem)` gutters. The toolbar uses the page surface and one hairline, with 68px desktop and 56px compact minimum height. Show the League of Legends context on Home and the two queue destinations on Results.
 - **OPEN:** Standalone three-bar app/icon treatment. In isolation, the bars can read as sort, filter, or menu/data controls; they are not an approved standalone app icon.
 
 ## 5. Color system
@@ -70,7 +71,9 @@ Semantic meaning and accessible contrast take precedence over mechanically reusi
 
 - Flat ranked rows: `0px` radius.
 - Champion portraits: approximately `5px` radius.
-- Controls and forms: approximately `8px` radius.
+- Controls and forms use approximately `8px` radius. Use external labels, clear control outlines and a rectangular mint Home action.
+- Wide Results uses one open title and context line, underlined role navigation, and sort and difficulty attached to the ranking heading. Keep full context editing in the Filters drawer.
+- Show three comparable values per default row, with a compact chevron disclosure for other evidence. The canonical row uses a mint left rule and a written explanation inside the tinted row.
 - Preferred spacing rhythm: `4 / 8px`.
 - Item/row insets: approximately `8–12px`.
 - Grouping: approximately `16–24px`.
@@ -89,7 +92,8 @@ Adapt these values when text reflow, touch targets, or actual layout evidence re
 
 ## 9. Solo Queue pattern
 
-- **LOCKED:** Picks are primary. Recommended bans stay nearby, are scoped to the selected role, and remain subordinate to champion selection.
+- **LOCKED** Picks are primary. On wide layouts, put the Recommended bans rail immediately beside the ranked list with the first ban rows visible in the initial viewport, including with a long list.
+- **LOCKED** On compact layouts, provide the named Recommended bans action next to role navigation. Focus the destination heading on activation and provide a return to the Ranked picks heading. Bans use the selected role's full pool across all difficulties.
 - **LOCKED:** Do not duplicate the canonical champion in a separate full Spotlight surface.
 - **GUIDELINE:** Difficulty may refine eligible picks without changing the semantic meaning of recommendation rank.
 - **LOCKED:** Preserve current ranking and ban algorithms.
@@ -97,7 +101,7 @@ Adapt these values when text reflow, touch targets, or actual layout evidence re
 ## 10. Flex / Clash pattern
 
 - **LOCKED:** Picks are the landing/default task. Treat **Picks**, **Draft / denial**, and **five-role lineup** as distinct user jobs.
-- **GUIDELINE:** On wide layouts, the Draft rail may sit adjacent to Picks when content fits.
+- **LOCKED** On wide layouts, align the unboxed Draft rail alongside the ranked list. Group Bans to consider and the Five-role lineup in that rail. Present professional coverage by the evidence it qualifies.
 - **LOCKED:** On compact/mobile layouts, provide an explicit named Draft destination/jump and a predictable return to Picks.
 - **GUIDELINE:** Group lane-scoped denial and the five-role lineup in Draft. Place coverage/uncertainty messaging near the evidence it qualifies.
 - **LOCKED:** A champion may validly be both a recommended pick and a ban/denial candidate when underlying semantics support both. Wording and context must explain the distinction.
@@ -105,8 +109,9 @@ Adapt these values when text reflow, touch targets, or actual layout evidence re
 
 ## 11. Home / setup pattern
 
-- **LOCKED:** Home is setup, not a marketing landing page. Its key job is to configure recommendation context and enter Results quickly.
-- **LOCKED:** Make both queue choices readily discoverable. Preserve editable Region, Rank, and Window controls and an explicit **View recommendations** action.
+- **LOCKED** Home opens with “Know who to lock in.” and one supporting sentence. On wide layouts the introduction and example ranking form the left column, with the outlined setup form on the right. On compact layouts render the introduction, setup form and example in that order.
+- **LOCKED** Preserve the approved example rankings as part of setup. The example shows Darius, Akali and Irelia from the documented NA Diamond Top snapshot, labelled with its context and date. Its fixed sample does not drive recommendations for a selected context.
+- **LOCKED** Show two compact queue choices side by side, external Region, Rank and Window labels and a full-width **View recommendations** action.
 - **GUIDELINE:** Avoid large explanatory content that pushes the first user decision or action unnecessarily far down the page.
 - **LOCKED:** Preserve the durable URL/context contract delivered by #40.
 
@@ -157,7 +162,7 @@ Representative `390×844` measurements:
 - Solo canonical: approximately `384px`; two complete alternatives visible.
 - Flex / Clash canonical: approximately `428px`; two complete alternatives visible.
 
-These are **design-density evidence**, not exact production pixel acceptance criteria.
+Use these measurements alongside the full authoritative viewport captures. Start with `a-home-*`, `a-solo-*` and `a-team-*` at 1366×768, 1920×1080, 390×844 and 320×568. The `a-solo-bans-390x844`, `a-draft-*` and `a-lineup-*` captures show the secondary destinations. [Original screenshot index](references/prototype-a/VISUAL_DIRECTION.md#screenshot-index)
 
 ## 16. Open design questions
 
@@ -174,13 +179,16 @@ A future implementation PR must not silently diverge from this canonical documen
 
 ## 18. UI PR preflight checklist
 
+Visual acceptance requires a direct comparison with Prototype A at corresponding viewports, zoom, data context and interaction states. Save actual viewport captures, geometry and an assessment of meaningful differences. Record accessibility and live-data adaptations with the requirement they serve. Resolve material departures or obtain explicit approval before human visual acceptance. Functional tests and builds remain separate gates.
+
 - [ ] Did this PR read `docs/DESIGN_SYSTEM.md`?
 - [ ] Does it conflict with a **LOCKED** rule? If so, where is the approved superseding decision or same-PR document update?
 - [ ] Where relevant, does hierarchy remain rank → portrait → evidence?
 - [ ] Is the canonical recommendation duplicated outside the ranking?
 - [ ] Is the active sort metric visible, with a clear path back to the canonical recommendation?
 - [ ] Are focus, semantic labels, and keyboard behavior preserved?
-- [ ] Does mobile preserve product meaning and provide compact Flex / Clash Draft discovery?
+- [ ] Are desktop Solo bans visible alongside the first ranked rows with a long list?
+- [ ] Can compact users reach Recommended bans and Draft next to the roles and return to Picks?
 - [ ] Were long labels and 200% text/zoom behavior considered?
 - [ ] Are warning, error, healthy, and other status meanings readable without color alone?
 - [ ] Were existing ranking, ban, and lineup semantics preserved?

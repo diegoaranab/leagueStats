@@ -4,8 +4,6 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { readResultsQuery } from '../../core/models/results-query';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
 import { ModeSelectorComponent } from '../../components/mode-selector/mode-selector.component';
@@ -29,16 +27,20 @@ import {
   selector: 'app-onboarding-page',
   imports: [
     ReactiveFormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
     MatSelectModule,
-    ModeSelectorComponent
-],
+    ModeSelectorComponent,
+  ],
   templateUrl: './onboarding-page.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './onboarding-page.component.css',
 })
 export class OnboardingPageComponent {
+  // Illustrative LoLalytics snapshot, November 22, 2026. Results always load the selected dataset.
+  readonly examplePicks = [
+    { name: 'Darius', portrait: 'darius', winRate: '52.8%' },
+    { name: 'Akali', portrait: 'akali', winRate: '52.3%' },
+    { name: 'Irelia', portrait: 'irelia', winRate: '53.4%' },
+  ];
   readonly regionOptions = REGION_OPTIONS;
   readonly tierOptions = TIER_OPTIONS;
   readonly windowOptions = WINDOW_OPTIONS;
